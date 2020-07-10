@@ -16,8 +16,8 @@ class square{
   }
 
   init(){
-    this.const.offset = createVector( cellSize * 2, cellSize * 2 )
     this.initCells();
+    this.initPenta();
   }
 
   initCells(){
@@ -32,12 +32,38 @@ class square{
           this.array.cell[i].push( new cell( index, vec, grid, this.const.a ) );
       }
     }
-    this.array.cell[0][0].setStatus( 1 );
+  }
+
+  initPenta(){
+    this.penta = new pentamino();
+
+    for( let i = 0; i < this.penta.array.mask.length; i++ ){
+      let grid = this.convertIndex( this.penta.array.mask[i] );
+      this.array.cell[grid.y][grid.x].setStatus( 1 );
+    }
+  }
+
+  //find the grid coordinates by index
+  convertIndex( index ){
+    if( index == undefined )
+      return null;
+
+    let i = Math.floor( index / this.const.n );
+    let j = index % this.const.n;
+    return createVector( j, i );
+  }
+
+  //find the index coordinates by grid coordinates
+  convertGrid( vec ){
+    if( vec == undefined )
+      return null;
+
+    return vec.y * this.const.n + vec.x;
   }
 
   draw(){
-    for( let i = 0; i < this.const.n; i++ )
-      for( let j = 0; j < this.const.n; j++ )
+    for( let i = 0; i < this.array.cell.length; i++ )
+      for( let j = 0; j < this.array.cell[i].length; j++ )
         this.array.cell[i][j].draw();
   }
 }
