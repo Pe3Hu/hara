@@ -49,5 +49,10 @@ class cell {
       this.const.center.y - this.const.a / 2,
       this.const.a, this.const.a
     );
+
+     stroke( 0 );
+     fill( 0 );
+     let txt = this.const.index;
+     text( txt, this.const.center.x, this.const.center.y + fontSize / 3 );
   }
 }

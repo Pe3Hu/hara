@@ -4,9 +4,10 @@ class board {
     this.offset = offset;
     this.const = {
       a: cellSize,
+      menuButtons: 10,
       grid: {
         x: null,
-        y: null
+        y: null,
       }
     }
     this.var = {
@@ -37,7 +38,7 @@ class board {
 
   initLayers(){
     this.array.layer.push( new settlement( 4 ) );
-    this.array.layer.push( new square() );
+    this.array.layer.push( new square( 4 ) );
   }
 
   initBorders(){
@@ -85,10 +86,21 @@ class board {
 
     //set layer change buttons
     layer = 99;
-    name = 'switchToCraft';
+    name = 'switchToExpansion';
     type = 0;
     vec = createVector( cellSize * ( canvasGrid.x - 1.5 ), cellSize * 1.5 );
     this.addButton( layer, name, type, vec.copy() );
+    name = 'switchToPolimino';
+    type++;
+    vec = createVector( cellSize * ( canvasGrid.x - 1.5 ), cellSize * 2.5 );
+    this.addButton( layer, name, type, vec.copy() );
+
+
+    layer = 1;
+    type = this.const.menuButtons;
+    vec = createVector( cellSize * 20.5, cellSize * 2 );
+    this.addButton( layer, name, type, vec.copy() );
+
 
     for ( let i = 0; i < this.array.button.length; i++ )
       if( this.array.button[i].layer == 99 )
@@ -103,7 +115,7 @@ class board {
   }
 
   cleanButtons(){
-    for ( let i = 20; i < this.array.button.length; i++ )
+    for ( let i = this.const.menuButtons; i < this.array.button.length; i++ )
         this.array.button[i].onScreen = false;
   }
 
@@ -115,6 +127,10 @@ class board {
 
     switch ( this.var.layer ) {
       case 0:
+          break;
+      case 1:
+          offsetID = 2;
+          this.array.button[offsetID].onScreen = true;
           break;
       }
   }
@@ -140,24 +156,17 @@ class board {
         return;
 
     //change board layer
-    if( buttonID >= 0 && buttonID < 20 )
+    if( buttonID >= 0 && buttonID < 2 )
       this.switchLayer( buttonID );
+
+    if( buttonID == 2 )
+      this.array.layer[this.var.layer].nextCell();
 
     this.update();
   }
 
-  plantClickCheck(){
-    if( this.var.layer != 1 )
-      return;
-
-    let editedID = this.array.layer[this.var.layer].var.firstShift;
-    let editedPlant = this.array.layer[this.var.layer].array.plant[editedID];
-    editedPlant.check();
-  }
-
   click(){
     this.buttonClickCheck();
-    this.plantClickCheck();
   }
 
   switchLayer( buttonID ){

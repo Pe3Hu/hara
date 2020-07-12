@@ -47,7 +47,7 @@ class button {
       let d = null;
 
       //draw layer change buttons
-      if ( this.type > -1 && this.type < 5 ){
+      if ( this.type > -1 && this.type < 10 ){
         noStroke();
         switch ( this.type ) {
           case 0:
@@ -73,6 +73,7 @@ class button {
         );
       }
 
+      /*
       //draw shift buttons
       if ( this.type > 9 && this.type < 14 ){
         noStroke();
@@ -133,21 +134,12 @@ class button {
           this.array.vertex[d][3].x, this.array.vertex[d][3].y,
           this.array.vertex[d][4].x, this.array.vertex[d][4].y );
       }
+      */
 
-      //draw edit mode change buttons
-      if ( this.type == 18 ){
+      //
+      if ( this.type == 10 ){
         noStroke();
         fill('purple');
-        rect(
-          this.center.x - this.const.a / 2,
-          this.center.y - this.const.a / 2,
-          this.const.a, this.const.a
-        );
-      }
-
-      if ( this.type == 19 ){
-        noStroke();
-        fill('blue');
         rect(
           this.center.x - this.const.a / 2,
           this.center.y - this.const.a / 2,
