@@ -11,6 +11,7 @@ class cell {
     this.array = {
     };
     this.var = {
+      card: null
     };
 
     this.init();
@@ -41,18 +42,24 @@ class cell {
     }
   }
 
-  draw(){
-    stroke( 0 );
-    fill( this.var.hue, this.var.saturation, this.var.lightness );
-    rect(
-      this.const.center.x - this.const.a / 2,
-      this.const.center.y - this.const.a / 2,
-      this.const.a, this.const.a
-    );
+  setCard( card ){
+    this.var.card = card;
+  }
 
-     stroke( 0 );
-     fill( 0 );
-     let txt = this.const.index;
-     text( txt, this.const.center.x, this.const.center.y + fontSize / 3 );
+  draw(){
+    if( this.var.card == null ){
+      stroke( 0 );
+      fill( this.var.hue, this.var.saturation, this.var.lightness );
+      rect(
+        this.const.center.x - this.const.a / 2,
+        this.const.center.y - this.const.a / 2,
+        this.const.a, this.const.a
+      );
+
+      stroke( 0 );
+      fill( 0 );
+      let txt = this.const.index;
+      text( txt, this.const.center.x, this.const.center.y + fontSize / 3 );
+    }
   }
 }

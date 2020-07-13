@@ -8,11 +8,12 @@ class square{
       size: size
     };
     this.var = {
-      distributionLength: 0
+      distributionLength: 0,
+      currentCard: null
     }
     this.array = {
       distribution: [],
-      hand: [],
+      card: [],
       cell: []
     }
 
@@ -25,7 +26,7 @@ class square{
     this.initDistribution();
     //this.nextCell();
     //this.initPenta();
-    this.initHand();
+    this.initCards();
   }
 
   initNeighbors(){
@@ -60,8 +61,21 @@ class square{
     }
   }
 
-  initHand(){
-    this.array.hand = [];
+  initCards(){
+    this.array.card = [];
+    let offset = createVector( 2.1 * this.const.a, 0.9 * this.const.a );
+    let center = offset.copy();
+    let caste;
+    let sin;
+    let grade = 0;
+
+    let n = 7;
+    for ( let i = 0; i < n; i++) {
+      caste = i;
+      sin = i;
+      this.array.card.push( new card( i, center.copy(), this.const.a, caste, grade, sin ) );
+      center.x += 1.1 * this.const.a;
+    }
   }
 
   initDistribution(){
@@ -283,11 +297,55 @@ class square{
     line( vertex[9].x, vertex[9].y, vertex[8].x, vertex[8].y );
   }
 
+  detectGrid(){
+    let x = mouseX + this.const.a / 2;
+    let y = mouseY + this.const.a / 2;
+    let mouse = createVector( x, y );
+    mouse.sub( this.const.offset );
+
+    let grid = createVector(
+      Math.floor( mouse.x / this.const.a ),
+      Math.floor( mouse.y / this.const.a )
+    );
+
+    if( !this.checkGrid( grid ) || this.var.currentCard == null )
+      return;
+
+    console.log( this.var.currentCard )
+    this.array.cell[grid.y][grid.x].setCard( this.array.card[this.var.currentCard] );
+    this.array.card[this.var.currentCard].setCell( this.array.cell[grid.y][grid.x] );
+    this.var.currentCard = null;
+  }
+
+  detectCard(){
+    let x = mouseX;
+    let y = mouseY;
+    let mouse = createVector( x, y );
+
+    for( let i = 0; i < this.array.card.length; i++ ){
+      let vec = mouse.copy();
+      vec.sub( this.array.card[i].const.center )
+      if( vec.x > -0.5 * this.const.a && vec.x < 0.5 * this.const.a &&
+          vec.y > -0.5 * this.const.a && vec.y < 0.5 * this.const.a ){
+            this.var.currentCard = i;
+            return;
+          }
+    }
+  }
+
+  click(){
+    this.detectCard();
+    this.detectGrid();
+  }
+
   draw(){
     for( let i = 0; i < this.array.cell.length; i++ )
       for( let j = 0; j < this.array.cell[i].length; j++ )
-        this.array.cell[i][j].draw()
+        this.array.cell[i][j].draw();
 
-    this.lips();
+
+    for( let i = 0; i < this.array.card.length; i++ )
+      this.array.card[i].draw();
+    //this.lips();
   }
 }

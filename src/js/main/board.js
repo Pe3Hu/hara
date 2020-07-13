@@ -167,6 +167,8 @@ class board {
 
   click(){
     this.buttonClickCheck();
+    if( this.var.layer == 1 )
+      this.array.layer[this.var.layer].click();
   }
 
   switchLayer( buttonID ){
