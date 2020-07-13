@@ -12,6 +12,7 @@ class square{
     }
     this.array = {
       distribution: [],
+      hand: [],
       cell: []
     }
 
@@ -22,8 +23,9 @@ class square{
     this.initNeighbors();
     this.initCells();
     this.initDistribution();
-    this.nextCell();
+    //this.nextCell();
     //this.initPenta();
+    this.initHand();
   }
 
   initNeighbors(){
@@ -56,6 +58,10 @@ class square{
       let grid = this.convertIndex( this.penta.array.mask[i] );
       this.array.cell[grid.y][grid.x].setStatus( 1 );
     }
+  }
+
+  initHand(){
+    this.array.hand = [];
   }
 
   initDistribution(){
