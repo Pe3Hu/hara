@@ -2,18 +2,29 @@
 class square{
   constructor( size ){
     this.const = {
-      offset: createVector( cellSize * 4, cellSize * 4 ),
       a: cellSize * 2,
       n: size * 2 + 1,
       size: size
     };
     this.var = {
       distributionLength: 0,
-      currentCard: null
+      handSize: 4,
+      currentCard: null,
+      previousCard: null
     }
     this.array = {
+      //
       distribution: [],
+      offset: [],
       card: [],
+      cardIndex: [
+        //notTaken cards
+        [],
+        //waiting cards
+        [],
+        //involved cards
+        []
+      ],
       cell: []
     }
 
@@ -21,12 +32,30 @@ class square{
   }
 
   init(){
+    this.initOffsets();
     this.initNeighbors();
     this.initCells();
     this.initDistribution();
     //this.nextCell();
     //this.initPenta();
-    this.initCards();
+    this.initPlayerCards();
+  }
+
+  initOffsets(){
+  //indent for the grid
+    let offsets = [];
+    let vec = createVector( this.const.a * 1, this.const.a * 1 )
+    offsets.push( vec.copy() );
+    this.array.offset.push( offsets );
+
+    //indent for the grid
+    offsets = [];
+    vec.add( createVector( 0.5 * this.const.a, this.const.a * ( this.const.n + 0.5 ) ) );
+    for ( let i = 0; i < this.var.handSize; i++){
+      offsets.push( vec.copy() );
+      vec.x += 1.5 * this.const.a;
+    }
+    this.array.offset.push( offsets );
   }
 
   initNeighbors(){
@@ -43,7 +72,7 @@ class square{
       this.array.cell.push( [] );
       for( let j = 0; j < this.const.n; j++ ){
           let index = i * this.const.n + j;
-          let vec = createVector( this.const.offset.x, this.const.offset.y );
+          let vec = this.array.offset[0][0].copy();
           let grid = createVector( j, i );
           vec.x += this.const.a * j;
           vec.y += this.const.a * i;
@@ -61,21 +90,35 @@ class square{
     }
   }
 
-  initCards(){
+  initPlayerCards(){
     this.array.card = [];
-    let offset = createVector( 2.1 * this.const.a, 0.9 * this.const.a );
+    let offset = this.array.offset[1][0];
     let center = offset.copy();
     let caste;
     let sin;
+    let utensils = 1;
     let grade = 0;
+    center.y += this.const.a * 1.5;
 
     let n = 7;
-    for ( let i = 0; i < n; i++) {
+    for ( let i = 0; i < n; i++){
       caste = i;
       sin = i;
-      this.array.card.push( new card( i, center.copy(), this.const.a, caste, grade, sin ) );
-      center.x += 1.1 * this.const.a;
+      this.array.card.push( new card( i, this.const.a, caste, grade, sin, utensils ) );
+      this.array.cardIndex[0].push( i );
     }
+
+    let size = this.var.handSize;
+    if( this.array.cardIndex[0].length < this.var.handSize )
+      size = this.array.cardIndex[0].length;
+
+    for ( let i = size - 1; i >= 0; i-- ){
+      let index = this.array.cardIndex[0][i];
+      this.array.cardIndex[1].push( index );
+      this.array.cardIndex[0].splice( i, 1 );
+    }
+
+    this.updateWaitingCards();
   }
 
   initDistribution(){
@@ -186,6 +229,46 @@ class square{
     /*  console.log( rand, l, id, count, index, grid )
       console.log( this.var.distributionLength );
       console.log( this.array.distribution );*/
+  }
+
+  playCardFromHand( grid ){
+    this.array.cell[grid.y][grid.x].setStatus( 1, this.array.card[this.var.currentCard] );
+    this.array.card[this.var.currentCard].setStatus( 2, null, this.array.cell[grid.y][grid.x] );
+    let index =  this.array.cardIndex[1].indexOf( this.var.currentCard );
+    this.array.cardIndex[1].splice( index, 1 );
+    this.array.cardIndex[2].push( this.var.currentCard );
+    this.var.previousCard = this.array.card[this.var.currentCard];
+    this.var.currentCard = null;
+
+    this.updateWaitingCards();
+  }
+
+  returnCard(){
+    if( this.var.previousCard == null )
+      return;
+
+    let index = this.array.cardIndex[2].pop();
+    let center = this.array.offset[1][this.array.cardIndex[1].length];
+    let cell = this.var.previousCard.var.cell;
+    this.array.cardIndex[1].push( index );
+
+    for( let i = 0; i < this.array.card.length; i++ )
+      if( this.array.card[i].const.index == index )
+        this.array.card[i].setStatus( 1, center );
+
+    this.var.previousCard = null;
+
+  }
+
+  updateWaitingCards(){
+    console.log( this.array.cardIndex[1].length )
+    for( let i = 0; i < this.array.cardIndex[1].length; i++ ){
+      let index = this.array.cardIndex[1][i];
+      for( let j = 0; j < this.array.card.length; j++ )
+        if( this.array.card[j].const.index == index ){
+          this.array.card[j].setStatus( 1, this.array.offset[1][i] );
+        }
+    }
   }
 
   //find the grid coordinates by index
@@ -301,8 +384,7 @@ class square{
     let x = mouseX + this.const.a / 2;
     let y = mouseY + this.const.a / 2;
     let mouse = createVector( x, y );
-    mouse.sub( this.const.offset );
-
+    mouse.sub( this.array.offset[0][0] );
     let grid = createVector(
       Math.floor( mouse.x / this.const.a ),
       Math.floor( mouse.y / this.const.a )
@@ -311,10 +393,7 @@ class square{
     if( !this.checkGrid( grid ) || this.var.currentCard == null )
       return;
 
-    console.log( this.var.currentCard )
-    this.array.cell[grid.y][grid.x].setCard( this.array.card[this.var.currentCard] );
-    this.array.card[this.var.currentCard].setCell( this.array.cell[grid.y][grid.x] );
-    this.var.currentCard = null;
+    this.playCardFromHand( grid );
   }
 
   detectCard(){
@@ -324,7 +403,7 @@ class square{
 
     for( let i = 0; i < this.array.card.length; i++ ){
       let vec = mouse.copy();
-      vec.sub( this.array.card[i].const.center )
+      vec.sub( this.array.card[i].const.center );
       if( vec.x > -0.5 * this.const.a && vec.x < 0.5 * this.const.a &&
           vec.y > -0.5 * this.const.a && vec.y < 0.5 * this.const.a ){
             this.var.currentCard = i;
@@ -342,7 +421,6 @@ class square{
     for( let i = 0; i < this.array.cell.length; i++ )
       for( let j = 0; j < this.array.cell[i].length; j++ )
         this.array.cell[i][j].draw();
-
 
     for( let i = 0; i < this.array.card.length; i++ )
       this.array.card[i].draw();

@@ -101,6 +101,10 @@ class board {
     vec = createVector( cellSize * 20.5, cellSize * 2 );
     this.addButton( layer, name, type, vec.copy() );
 
+    layer = 1;
+    type++;
+    vec = createVector( cellSize * 20.5, cellSize * 4 );
+    this.addButton( layer, name, type, vec.copy() );
 
     for ( let i = 0; i < this.array.button.length; i++ )
       if( this.array.button[i].layer == 99 )
@@ -131,6 +135,7 @@ class board {
       case 1:
           offsetID = 2;
           this.array.button[offsetID].onScreen = true;
+          this.array.button[offsetID + 1].onScreen = true;
           break;
       }
   }
@@ -162,11 +167,15 @@ class board {
     if( buttonID == 2 )
       this.array.layer[this.var.layer].nextCell();
 
+    if( buttonID == 3 )
+      this.array.layer[this.var.layer].returnCard();
+
     this.update();
   }
 
   click(){
     this.buttonClickCheck();
+
     if( this.var.layer == 1 )
       this.array.layer[this.var.layer].click();
   }

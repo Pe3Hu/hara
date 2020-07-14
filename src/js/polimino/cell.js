@@ -21,7 +21,8 @@ class cell {
     this.setStatus( 0 );
   }
 
-  setStatus( status ){
+  setStatus( status, card ){
+    this.var.card = card;
     switch ( status ) {
       //show free
       case 0:
@@ -40,10 +41,6 @@ class cell {
         this.var.lightness = colorMax * 0.5;
         break;
     }
-  }
-
-  setCard( card ){
-    this.var.card = card;
   }
 
   draw(){

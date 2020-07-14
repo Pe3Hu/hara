@@ -1,14 +1,18 @@
 //
 class card {
-  constructor ( index, center, a, caste, grade, sin ){
+  constructor ( index, a, caste, grade, sin, utensils ){
     this.const = {
       index: index,
-      center: center,
+      center: null,
       a: a
     };
     this.array = {
     };
     this.var = {
+      utensils: {
+        id: null,
+        name: null
+      },
       caste: {
         id: null,
         name: null
@@ -23,17 +27,20 @@ class card {
         lear: null
       },
       selected: false,
+      onBoard: false,
       cell: null
     };
 
-    this.init( caste, grade, sin );
+    this.init( caste, grade, sin, utensils );
   }
 
-  init( caste, grade, sin ){
+  init( caste, grade, sin, utensils ){
     this.initColor();
     this.setCaste( caste );
     this.setGrade( grade );
     this.setSin( sin );
+    this.setUtensils( utensils );
+    this.setStatus( 0 );
   }
 
   initColor(){
@@ -148,12 +155,44 @@ class card {
     }
   }
 
-  setCell( cell ){
-    this.var.cell = cell;
-    this.const.center = cell.const.center;
+  setUtensils( utensils ){
+    this.var.utensils.id = utensils;
+    switch ( utensils ) {
+      case 0:
+        this.var.utensils.name = 'neutral';
+        break;
+      case 1:
+        this.var.utensils.name = 'private';
+        break;
+    }
+  }
+
+  setStatus( status, center, cell ){
+    switch ( status ) {
+      case 0:
+        this.var.status = 'notTaken';
+        this.var.onBoard = false;
+        this.var.cell = null;
+        this.const.center = null;
+        break;
+      case 1:
+        this.var.status = 'wait';
+        this.var.onBoard = true;
+        this.var.cell = null;
+        this.const.center = center.copy();
+        break;
+      case 2:
+        this.var.status = 'involved';
+        this.var.onBoard = true;
+        this.var.cell = cell;
+        this.const.center = cell.const.center.copy();
+        break;
+    }
   }
 
   draw( offset ){
+    if( !this.var.onBoard )
+      return;
     stroke( 0 );
     fill( this.var.hue, this.var.saturation, this.var.lightness );
     rect(
@@ -162,37 +201,38 @@ class card {
       this.const.a, this.const.a
     );
 
-    stroke( 0 );
-    fill( 0 );
-    let casteVec = this.const.center.copy();
-    let caste = this.var.caste.name.charAt(0).toUpperCase() + this.var.caste.id;
-    let rectSize = createVector( 0.5 * this.const.a, 0.5 * this.const.a );
-    let rectVec = this.const.center.copy();
-    rectVec.x -= 0.5 * this.const.a;
-    rectVec.y -= 0.5 * this.const.a;
+    if( this.var.utensils.name == 'private' ){
+      fill( 0 );
+      let casteVec = this.const.center.copy();
+      let caste = this.var.caste.name.charAt(0).toUpperCase() + this.var.caste.id;
+      let rectSize = createVector( 0.5 * this.const.a, 0.5 * this.const.a );
+      let rectVec = this.const.center.copy();
+      rectVec.x -= 0.5 * this.const.a;
+      rectVec.y -= 0.5 * this.const.a;
 
-    switch ( this.var.sin.lear ) {
-      case 0:
-        casteVec.x -= 0.25 * this.const.a;
-        rectVec.x += 0.5 * this.const.a;
-        rectSize.y += 0.5 * this.const.a;
-        break;
-      case 1:
-        casteVec.y += 0.25 * this.const.a;
-        rectSize.x += 0.5 * this.const.a;
-        break;
-      case 2:
-        casteVec.y -= 0.25 * this.const.a;
-        rectVec.y += 0.5 * this.const.a;
-        rectSize.x += 0.5 * this.const.a;
-        break;
-      case 3:
-        casteVec.x += 0.25 * this.const.a;
-        rectSize.y += 0.5 * this.const.a;
-        break;
+      switch ( this.var.sin.lear ) {
+        case 0:
+          casteVec.x -= 0.25 * this.const.a;
+          rectVec.x += 0.5 * this.const.a;
+          rectSize.y += 0.5 * this.const.a;
+          break;
+        case 1:
+          casteVec.y += 0.25 * this.const.a;
+          rectSize.x += 0.5 * this.const.a;
+          break;
+        case 2:
+          casteVec.y -= 0.25 * this.const.a;
+          rectVec.y += 0.5 * this.const.a;
+          rectSize.x += 0.5 * this.const.a;
+          break;
+        case 3:
+          casteVec.x += 0.25 * this.const.a;
+          rectSize.y += 0.5 * this.const.a;
+          break;
+      }
+      text( caste, casteVec.x, casteVec.y + fontSize / 3 );
+      fill( this.var.sin.id * colorMax / 7, colorMax * 1, colorMax * 0.5 )
+      rect( rectVec.x, rectVec.y, rectSize.x, rectSize.y );
     }
-    text( caste, casteVec.x, casteVec.y + fontSize / 3 );
-    fill( this.var.sin.id * colorMax / 7, colorMax * 1, colorMax * 0.5 )
-    rect( rectVec.x, rectVec.y, rectSize.x, rectSize.y );
   }
 }

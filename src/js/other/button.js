@@ -146,6 +146,16 @@ class button {
           this.const.a, this.const.a
         );
       }
+
+      if ( this.type == 11 ){
+        noStroke();
+        fill('blue');
+        rect(
+          this.center.x - this.const.a / 2,
+          this.center.y - this.const.a / 2,
+          this.const.a, this.const.a
+        );
+      }
     }
   }
 }
