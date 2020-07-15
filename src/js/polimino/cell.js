@@ -22,7 +22,6 @@ class cell {
   }
 
   setStatus( status, card ){
-    this.var.card = card;
     switch ( status ) {
       //show free
       case 0:
@@ -31,6 +30,7 @@ class cell {
         this.var.hue = 60;
         this.var.saturation = colorMax;
         this.var.lightness = colorMax * 0.75;
+        this.var.card = null;
         break;
       //show taken
       case 1:
@@ -39,6 +39,7 @@ class cell {
         this.var.hue = 210;
         this.var.saturation = colorMax;
         this.var.lightness = colorMax * 0.5;
+        this.var.card = card;
         break;
     }
   }

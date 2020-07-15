@@ -38,7 +38,7 @@ class board {
 
   initLayers(){
     this.array.layer.push( new settlement( 4 ) );
-    this.array.layer.push( new square( 4 ) );
+    this.array.layer.push( new square( 2 ) );
   }
 
   initBorders(){

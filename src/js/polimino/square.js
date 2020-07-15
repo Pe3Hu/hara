@@ -9,7 +9,7 @@ class square{
     this.var = {
       distributionLength: 0,
       handSize: 4,
-      currentCard: null,
+      currentPrivateCard: null,
       previousCard: null
     }
     this.array = {
@@ -17,10 +17,16 @@ class square{
       distribution: [],
       offset: [],
       card: [],
-      cardIndex: [
+      privateCardIndex: [
         //notTaken cards
         [],
         //waiting cards
+        [],
+        //involved cards
+        []
+      ],
+      neutralCardIndex: [
+        //notTaken cards
         [],
         //involved cards
         []
@@ -36,9 +42,9 @@ class square{
     this.initNeighbors();
     this.initCells();
     this.initDistribution();
-    //this.nextCell();
+    this.initCards();
+    this.nextCell();
     //this.initPenta();
-    this.initPlayerCards();
   }
 
   initOffsets(){
@@ -90,32 +96,99 @@ class square{
     }
   }
 
-  initPlayerCards(){
+  initCards(){
     this.array.card = [];
-    let offset = this.array.offset[1][0];
-    let center = offset.copy();
+    this.initNeutralCards();
+    this.initPlayerCards();
+  }
+
+  initNeutralCards(){
+    this.array.card.push( [] );
+    let predisposition;
+    let utensils = 0;
+    let sin = null;
+    let grade = null;
+    let n = 12;
+    let bigIncrease = 3;
+    let smallIncrease = 1;
+
+    for( let i = 0; i < n; i++ ){
+      predisposition = [];
+      let distributionSmall = [];
+      let distributionBig = [];
+      let caste = Math.floor( Math.random() * 13 );
+
+      //distribution algorithm for predisposition
+      for( let j = 0; j < 7; j++ ){
+        //base value
+        predisposition.push( 1 );
+        //possible increase
+        distributionSmall.push( j );
+        distributionBig.push( j );
+      }
+
+      let rand = Math.floor( Math.random() * distributionBig.length );
+      let value = distributionBig[rand];
+      let index = distributionSmall.indexOf( value );
+      predisposition[value] += bigIncrease;
+      distributionSmall.splice( index, 1 );
+
+      rand = Math.floor( Math.random() * distributionSmall.length );
+      value = distributionSmall[rand];
+      index = distributionSmall.indexOf( value );
+      predisposition[value] += smallIncrease;
+      distributionSmall.splice( index, 1 );
+
+      rand = Math.floor( Math.random() * distributionSmall.length );
+      value = distributionSmall[rand];
+      predisposition[value] += smallIncrease;
+
+      this.array.card[0].push( new card( i, this.const.a, utensils, caste, sin, grade, predisposition ) );
+      this.array.neutralCardIndex[0].push( i );
+    }
+
+/*
+    let n = 4;
+    for ( let i = 0; i < n; i++){
+      caste = i;
+      predisposition = [];
+
+      for ( let j = 0; i < 7; j++){
+        let rand = j;
+        predisposition.push( rand );
+      }
+
+      this.array.card[0].push( new card( i, this.const.a, utensils, caste, null, null, predisposition ) );
+    }*/
+  }
+
+  initPlayerCards(){
+    this.array.card.push( [] );
+    let index;
     let caste;
     let sin;
     let utensils = 1;
     let grade = 0;
-    center.y += this.const.a * 1.5;
+    let predisposition = null;
+    let a = this.const.a;
 
     let n = 7;
     for ( let i = 0; i < n; i++){
+      index = i;
       caste = i;
       sin = i;
-      this.array.card.push( new card( i, this.const.a, caste, grade, sin, utensils ) );
-      this.array.cardIndex[0].push( i );
+      this.array.card[1].push( new card( index, a, utensils, caste, sin, grade, predisposition ) );
+      this.array.privateCardIndex[0].push( i );
     }
 
     let size = this.var.handSize;
-    if( this.array.cardIndex[0].length < this.var.handSize )
-      size = this.array.cardIndex[0].length;
+    if( this.array.privateCardIndex[0].length < this.var.handSize )
+      size = this.array.privateCardIndex[0].length;
 
     for ( let i = size - 1; i >= 0; i-- ){
-      let index = this.array.cardIndex[0][i];
-      this.array.cardIndex[1].push( index );
-      this.array.cardIndex[0].splice( i, 1 );
+      let index = this.array.privateCardIndex[0][i];
+      this.array.privateCardIndex[1].push( index );
+      this.array.privateCardIndex[0].splice( i, 1 );
     }
 
     this.updateWaitingCards();
@@ -195,6 +268,9 @@ class square{
   }
 
   nextCell( round ){
+    if( this.array.neutralCardIndex[0].length == 0 )
+      return;
+
     if( this.var.distributionLength == 0 )
       return;
 
@@ -225,20 +301,21 @@ class square{
       }
     }
 
-    this.array.cell[grid.y][grid.x].setStatus( 1 );
-    /*  console.log( rand, l, id, count, index, grid )
-      console.log( this.var.distributionLength );
-      console.log( this.array.distribution );*/
+    let currentNeutralCard = this.array.neutralCardIndex[0].pop();
+    let card = this.array.card[0][currentNeutralCard];
+    this.array.cell[grid.y][grid.x].setStatus( 2, card );
+    this.array.card[0][currentNeutralCard].setStatus( 2, null, this.array.cell[grid.y][grid.x] );
+    this.array.neutralCardIndex[1].push( currentNeutralCard );
   }
 
   playCardFromHand( grid ){
-    this.array.cell[grid.y][grid.x].setStatus( 1, this.array.card[this.var.currentCard] );
-    this.array.card[this.var.currentCard].setStatus( 2, null, this.array.cell[grid.y][grid.x] );
-    let index =  this.array.cardIndex[1].indexOf( this.var.currentCard );
-    this.array.cardIndex[1].splice( index, 1 );
-    this.array.cardIndex[2].push( this.var.currentCard );
-    this.var.previousCard = this.array.card[this.var.currentCard];
-    this.var.currentCard = null;
+    this.array.cell[grid.y][grid.x].setStatus( 1, this.array.card[1][this.var.currentPrivateCard] );
+    this.array.card[1][this.var.currentPrivateCard].setStatus( 2, null, this.array.cell[grid.y][grid.x] );
+    let index =  this.array.privateCardIndex[1].indexOf( this.var.currentPrivateCard );
+    this.array.privateCardIndex[1].splice( index, 1 );
+    this.array.privateCardIndex[2].push( this.var.currentPrivateCard );
+    this.var.previousCard = this.array.card[1][this.var.currentPrivateCard];
+    this.var.currentPrivateCard = null;
 
     this.updateWaitingCards();
   }
@@ -247,26 +324,28 @@ class square{
     if( this.var.previousCard == null )
       return;
 
-    let index = this.array.cardIndex[2].pop();
-    let center = this.array.offset[1][this.array.cardIndex[1].length];
+    let index = this.array.privateCardIndex[2].pop();
+    let center = this.array.offset[1][this.array.privateCardIndex[1].length];
     let cell = this.var.previousCard.var.cell;
-    this.array.cardIndex[1].push( index );
+    this.array.privateCardIndex[1].push( index );
 
-    for( let i = 0; i < this.array.card.length; i++ )
-      if( this.array.card[i].const.index == index )
-        this.array.card[i].setStatus( 1, center );
+    for( let i = 0; i < this.array.card[1].length; i++ )
+      if( this.array.card[1][i].const.index == index ){
+        this.array.card[1][i].setStatus( 1, center );
+        break;
+      }
 
+    cell.setStatus( 0 );
     this.var.previousCard = null;
 
   }
 
   updateWaitingCards(){
-    console.log( this.array.cardIndex[1].length )
-    for( let i = 0; i < this.array.cardIndex[1].length; i++ ){
-      let index = this.array.cardIndex[1][i];
-      for( let j = 0; j < this.array.card.length; j++ )
-        if( this.array.card[j].const.index == index ){
-          this.array.card[j].setStatus( 1, this.array.offset[1][i] );
+    for( let i = 0; i < this.array.privateCardIndex[1].length; i++ ){
+      let index = this.array.privateCardIndex[1][i];
+      for( let j = 0; j < this.array.card[1].length; j++ )
+        if( this.array.card[1][j].const.index == index ){
+          this.array.card[1][j].setStatus( 1, this.array.offset[1][i] );
         }
     }
   }
@@ -390,7 +469,7 @@ class square{
       Math.floor( mouse.y / this.const.a )
     );
 
-    if( !this.checkGrid( grid ) || this.var.currentCard == null )
+    if( !this.checkGrid( grid ) || this.var.currentPrivateCard == null )
       return;
 
     this.playCardFromHand( grid );
@@ -401,12 +480,12 @@ class square{
     let y = mouseY;
     let mouse = createVector( x, y );
 
-    for( let i = 0; i < this.array.card.length; i++ ){
+    for( let i = 0; i < this.array.card[1].length; i++ ){
       let vec = mouse.copy();
-      vec.sub( this.array.card[i].const.center );
+      vec.sub( this.array.card[1][i].const.center );
       if( vec.x > -0.5 * this.const.a && vec.x < 0.5 * this.const.a &&
           vec.y > -0.5 * this.const.a && vec.y < 0.5 * this.const.a ){
-            this.var.currentCard = i;
+            this.var.currentPrivateCard = i;
             return;
           }
     }
@@ -423,7 +502,8 @@ class square{
         this.array.cell[i][j].draw();
 
     for( let i = 0; i < this.array.card.length; i++ )
-      this.array.card[i].draw();
+      for( let j = 0; j < this.array.card[i].length; j++ )
+        this.array.card[i][j].draw();
     //this.lips();
   }
 }
