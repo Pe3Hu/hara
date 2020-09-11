@@ -1,4 +1,4 @@
-let cellSize = 24;
+let cellSize = 48;
 let daoNum = 9;
 let colorMax = 360;
 let colorBG = colorMax * 2 / 3;
@@ -6,7 +6,7 @@ let colorButton = colorMax / 2;
 let infinity = 999999999;
 let fr = 60;
 let font;
-let fontSize = 12;//18
+let fontSize = 15;//18//12
 let canvasSize;
 let canvasGrid;
 let interfaceBoundaries;
