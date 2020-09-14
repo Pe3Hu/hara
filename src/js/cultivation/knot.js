@@ -115,27 +115,7 @@ class knot {
     }
   }
 
-  setAsParent( child ){
-    child.var.parent = this.const.index;
-    this.var.child = child.const.index;
-  }
-
-  setAsChild( parent ){
-    this.var.parent = parent.const.index;
-    parent.var.child = this.const.index;
-  }
-
-  duplicate( target ){
-    this.var.parent = target.var.parent;
-    this.var.child = target.var.child;
-    /*this.var.status = target.var.status;
-    this.var.free = target.var.status;
-    this.var.hue = target.var.status;
-    this.var.saturation = target.var.status;
-    this.var.lightness = target.var.status;*/
-  }
-
-  draw( gap ){
+  draw( offset ){
     if( this.var.visiable ){
       noStroke();
       //stroke( this.var.hue, this.var.saturation, this.var.lightness );
@@ -143,15 +123,15 @@ class knot {
 
       for( let i = 0; i < this.array.vertex.length; i++ ){
         let ii = ( i + 1 ) % this.array.vertex.length;
-        triangle( this.var.center.x, this.var.center.y,
-                  this.array.vertex[i].x, this.array.vertex[i].y,
-                  this.array.vertex[ii].x, this.array.vertex[ii].y );
+        triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
+                  this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
+                  this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
        }
 
        stroke( 0 );
        fill( 0 );
-       this.var.txt = this.const.index +':'+this.var.label;//
-       text( this.var.txt, this.var.center.x, this.var.center.y + fontSize / 3 );
+       this.var.txt = this.const.index;// +':'+this.var.label;//
+       text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
     }
   }
 }
