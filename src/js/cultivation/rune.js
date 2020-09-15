@@ -1,6 +1,6 @@
 //
 class rune{
-  constructor( index ){
+  constructor( index, moves ){
     this.const = {
       index: index,
       size: 5,
@@ -19,6 +19,7 @@ class rune{
       option: [],
       trace: [],
       move: [],
+      way: [],
       hue: []
     };
     this.table = {
@@ -27,7 +28,7 @@ class rune{
       ramification: []
     }
 
-    this.init();
+    this.init( moves );
   }
 
   initNeighbors(){
@@ -109,7 +110,7 @@ class rune{
     ];
   }
 
-  init(){
+  init( moves ){
     this.const.r = this.const.a / ( Math.tan( Math.PI / 6 ) * 2 );
 
     this.initHues();
@@ -117,37 +118,82 @@ class rune{
     this.initRotates();
     this.initFlips();
     this.initKnots();
-    this.designRune();
-    this.normalizeRune();
+    this.designRune( moves );
+    //this.normalizeRune();
     this.updateTotem();
   }
 
   updateTotem(){
     console.log( this.array.move )
-    let ancestor;
+    let notation = this.array.neighbor[0].length;
+    let code = this.encode( this.array.move, notation );
 
-    switch ( this.array.move.length ) {
-      case 0:
-        ancestor = 'o'
+    switch ( code ) {
+      case 266:
+        this.var.totem = 'A';
         break;
-      case 1:
-        ancestor = this.table.ramification[ancestor][0];
+      case 267:
+        this.var.totem = 'J';
         break;
-      case 2:
-        switch ( this.array.move[this.array.move.length - 1] ) {
-          case 1:
-            ancestor = 'I'
-            break;
-          case 2:
-            ancestor = 'I'
-            break;
-          case 3:
-            ancestor = 'I'
-            break;
-        }
+      case 268:
+        this.var.totem = 'B';
+        break;
+      case 272:
+        this.var.totem = 'D';
+        break;
+      case 273:
+        this.var.totem = 'V';
+        break;
+      case 296:
+        this.var.totem = 'M';
+        break;
+      case 297:
+        this.var.totem = 'Q';
+        break;
+      case 301:
+        this.var.totem = 'N';
+        break;
+      case 302:
+        this.var.totem = 'L';
+        break;
+      case 303:
+        this.var.totem = 'C';
+        break;
+      case 304:
+        this.var.totem = 'E';
+        break;
+      case 307:
+        this.var.totem = 'R';
+        break;
+      case 310:
+        this.var.totem = 'U';
+        break;
+      case 343:
+        this.var.totem = 'Z';
+        break;
+      case 482:
+        this.var.totem = 'Y';
+        break;
+      case 483:
+        this.var.totem = 'S';
+        break;
+      case 488:
+        this.var.totem = 'K';
+        break;
+      case 490:
+        this.var.totem = 'F';
+        break;
+      case 513:
+        this.var.totem = 'P';
+        break;
+      case 518:
+        this.var.totem = 'I';
         break;
     }
 
+    console.log( code, this.var.totem  )
+    let array = this.decode( code, notation );
+    console.log( array  )
   }
 
   setCurrentKnot( index ){
@@ -200,6 +246,7 @@ class rune{
   setOptionsAroundCurrentKnot(){
     this.cleanKnots( 0 );
     this.array.option = [];
+    this.array.ways = [];
     let grid = this.convertIndex( this.var.knot.current );
     let parity = ( grid.y % 2 );
 
@@ -210,6 +257,7 @@ class rune{
         let addIndex = this.convertGrid( grid );
           if( !this.array.option.includes( addIndex ) && this.checkKnot( grid ) ){
             this.array.option.push( addIndex );
+            this.array.way.push( l );
             this.array.knot[grid.y][grid.x].setStatus( 1 );
           }
       }
@@ -255,10 +303,10 @@ class rune{
     return;
   }
 
-  designRune(){
-    let way = 2;
-    this.moveInChosenDirection(way, null);
-    this.moveInChosenDirection(way, null);
+  designRune( ways ){
+    for( let i = 0; i < ways.length; i++ )
+      this.moveInChosenDirection( ways[i], null);
+    //this.moveInChosenDirection(way, null);
     //this.moveInChosenDirection(way, null);
     //this.moveInChosenDirection(way, null);
     /*while( this.array.trace.length < this.const.size )
@@ -318,7 +366,7 @@ class rune{
     let firstMove = moves[0];
     let allPossibilitys = [];
     let result = null;
-    console.log( moves );
+    //console.log( 'moves', moves );
 
     for( let i = 1; i < firstMove; i++ ){
       let indexs = [ 1 ];
@@ -454,7 +502,36 @@ class rune{
     return flag;
   }
 
+  encode( array, notation ){
+    let code = 0;
+    let division = Math.pow( notation, array.length - 1 );
+
+    for( let i = 0; i < array.length; i++ ){
+      code += array[i] * division;
+      division /= notation;
+    }
+
+    return code;
+  }
+
+  decode( value, notation ){
+    let code = value;
+    let array = [];
+    let division = Math.pow( notation, this.array.move.length - 1 );
+
+    while ( division >= 1 ){
+      let move = Math.floor( code / division );
+      array.push( move )
+      code = code % division;
+      division /= notation;
+    }
+
+
+    return array;
+  }
+
   draw( offset ){
+    //return;
     if( offset == null )
       offset = createVector();
 

@@ -1,4 +1,4 @@
-let cellSize = 24;
+let cellSize = 12;
 let daoNum = 9;
 let colorMax = 360;
 let colorBG = colorMax * 2 / 3;

@@ -131,7 +131,7 @@ class knot {
        stroke( 0 );
        fill( 0 );
        this.var.txt = this.const.index;// +':'+this.var.label;//
-       text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
+       //text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
     }
   }
 }
