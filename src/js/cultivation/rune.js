@@ -1,17 +1,22 @@
 //
 class rune{
-  constructor( index, moves ){
+  constructor( index, a, totem ){
     this.const = {
       index: index,
       size: 5,
-      a: cellSize * 0.5
+      a: a
     };
     this.var = {
       knot: {
         current: null,
         grid: null
       },
-      totem: null
+      totem: null,
+      display: {
+        mode: null,
+        description: null
+      },
+      begin: createVector()
     };
     this.array = {
       windRose: [ 'NNE', 'E', 'SSE', 'SSW', 'W', 'NNW' ],
@@ -24,11 +29,10 @@ class rune{
     };
     this.table = {
       rotate: [],
-      flip: [],
-      ramification: []
-    }
+      flip: []
+    };
 
-    this.init( moves );
+    this.init( totem );
   }
 
   initNeighbors(){
@@ -63,22 +67,6 @@ class rune{
     this.table.flip.push( [ 1, 5, 10, 2, 6, 11, 15, 3, 7, 12, 16, 21, 8, 13, 17, 22, 14, 18, 23 ] );
   }
 
-  initRamification(){
-    this.table.ramification = {
-      'o': [ 'i' ],
-      'i': [ 'I', 'u', 'v' ],
-      'I': [ 'f', 'p', 'l' ],
-      'u': [ 'p', 'D', 'c', 'l', 'z' ],
-      'v': [ 'n', 'p', 'D' ],
-      'f': [ 'F', 'd', 'm', 'L' ],
-      'p': [ 'm', 'b', 'V', 'w', 'q', 'x', 'R', 'S', 'a', 'r', 'd' ],
-      'l': [ 'L', 'C', 'R', 'b', 'd', 'j', 'Z', 'a', 'q', 'N', 'L' ],
-      'D': [ 'w', 'b', 'S' ],
-      'c': [ 'R', 's', 'j', 'G' ],
-      'z': [ 's', 'Z', 'W', 'X', 'b' ]
-    };
-  }
-
   initKnots(){
     for( let i = 0; i < this.const.size; i++ ){
       this.array.knot.push( [] );
@@ -110,7 +98,23 @@ class rune{
     ];
   }
 
-  init( moves ){
+  updateDisplay( mode ){
+    this.var.display.mode = mode;
+
+    switch ( mode ) {
+      case 0:
+        this.var.display.description = 'all visible knots';
+        break;
+      case 1:
+        this.var.display.description = 'all visible & option knots';
+        break;
+      case 2:
+        this.var.display.description = 'only involved knots';
+        break;
+    }
+  }
+
+  init( totem ){
     this.const.r = this.const.a / ( Math.tan( Math.PI / 6 ) * 2 );
 
     this.initHues();
@@ -118,16 +122,15 @@ class rune{
     this.initRotates();
     this.initFlips();
     this.initKnots();
-    this.designRune( moves );
+    this.getTotem( totem );
+    //this.rotate( 0, -1 );
     //this.normalizeRune();
-    this.updateTotem();
+    this.alignHorizontally();
+    this.setParents();
+    this.updateDisplay( 2 );
   }
 
-  updateTotem(){
-    console.log( this.array.move )
-    let notation = this.array.neighbor[0].length;
-    let code = this.encode( this.array.move, notation );
-
+  setTotem( code ){
     switch ( code ) {
       case 266:
         this.var.totem = 'A';
@@ -144,11 +147,20 @@ class rune{
       case 273:
         this.var.totem = 'V';
         break;
+      case 274:
+        this.var.totem = 'O';
+        break;
+      case 290:
+        this.var.totem = 'F';
+        break;
       case 296:
         this.var.totem = 'M';
         break;
       case 297:
         this.var.totem = 'Q';
+        break;
+      case 300:
+        this.var.totem = 'G';
         break;
       case 301:
         this.var.totem = 'N';
@@ -168,8 +180,14 @@ class rune{
       case 310:
         this.var.totem = 'U';
         break;
+      case 340:
+        this.var.totem = 'X';
+        break;
       case 343:
         this.var.totem = 'Z';
+        break;
+      case 444:
+        this.var.totem = 'W';
         break;
       case 482:
         this.var.totem = 'Y';
@@ -181,19 +199,109 @@ class rune{
         this.var.totem = 'K';
         break;
       case 490:
-        this.var.totem = 'F';
+        this.var.totem = 'T';
         break;
       case 513:
         this.var.totem = 'P';
+        break;
+      case 516:
+        this.var.totem = 'H';
         break;
       case 518:
         this.var.totem = 'I';
         break;
     }
 
-    console.log( code, this.var.totem  )
-    let array = this.decode( code, notation );
-    console.log( array  )
+    this.getTotem( this.var.totem );
+  }
+
+  getTotem( totem ){
+    let code = null;
+
+    switch ( totem ) {
+      case 'A':
+        code = 266;
+        break;
+      case 'J':
+        code = 267;
+        break;
+      case 'B':
+        code = 268;
+        break;
+      case 'D':
+        code = 272;
+        break;
+      case 'V':
+        code = 273;
+        break;
+      case 'O':
+        code = 274;
+        break;
+      case 'F':
+        code = 290;
+        break;
+      case 'M':
+        code = 296;
+        break;
+      case 'Q':
+        code = 297;
+        break;
+      case 'G':
+        code = 300;
+        break;
+      case 'N':
+        code = 301;
+        break;
+      case 'L':
+        code = 302;
+        break;
+      case 'C':
+        code = 303;
+        break;
+      case 'E':
+        code = 304;
+        break;
+      case 'R':
+        code = 307;
+        break;
+      case 'U':
+        code = 310;
+        break;
+      case 'X':
+        code = 340;
+        break;
+      case 'Z':
+        code = 343;
+        break;
+      case 'W':
+        code = 444;
+        break;
+      case 'Y':
+        code = 482;
+        break;
+      case 'S':
+        code = 483;
+        break;
+      case 'K':
+        code = 488;
+        break;
+      case 'T':
+        code = 490;
+        break;
+      case 'P':
+        code = 513;
+        break;
+      case 'H':
+        code = 516;
+        break;
+      case 'I':
+        code = 518;
+        break;
+    }
+
+    let notation = this.array.neighbor[0].length;
+    let moves = this.decode( code, notation );
+    this.designRune( moves );
   }
 
   setCurrentKnot( index ){
@@ -244,7 +352,6 @@ class rune{
   }
 
   setOptionsAroundCurrentKnot(){
-    this.cleanKnots( 0 );
     this.array.option = [];
     this.array.ways = [];
     let grid = this.convertIndex( this.var.knot.current );
@@ -316,25 +423,29 @@ class rune{
 
   rotate( n, clockwise ){
     let trace = [];
+    let centerLabel = 10;
     n = n % this.table.rotate[0].length;
 
     for( let i = 0; i <  this.array.trace.length ; i++ ){
       let gridP = this.convertIndex( this.array.trace[i] );
       let index = -1;
 
-      for( let j = 0; j < this.table.rotate.length; j++ ){
-        index = this.table.rotate[j].indexOf( this.array.knot[gridP.y][gridP.x].var.label );
-        if( index != -1 ){
-          index = ( index + n * clockwise + this.table.rotate[j].length ) % this.table.rotate[j].length;
-          let label = this.table.rotate[j][index];
-          let next = this.convertLabel( label );
-          trace.push( next );
-          let gridN = this.convertIndex( next );
-          //console.log( gridN.y, gridN.x, this.array.knot[gridN.y][gridN.x].const.index )
-          //console.log( 'previous', this.array.trace[i], 'three', j,index, 'label', label, gridP.y, 'next', next )
-          this.array.knot[gridP.y][gridP.x].setStatus( 0 );
-        }
+      if( this.array.knot[gridP.y][gridP.x].var.label == centerLabel ){
+        let next = this.convertLabel( centerLabel );
+        trace.push( next );
       }
+      else
+        for( let j = 0; j < this.table.rotate.length; j++ ){
+          index = this.table.rotate[j].indexOf( this.array.knot[gridP.y][gridP.x].var.label );
+          if( index != -1 ){
+            index = ( index + n * clockwise + this.table.rotate[j].length ) % this.table.rotate[j].length;
+            let label = this.table.rotate[j][index];
+            let next = this.convertLabel( label );
+            trace.push( next );
+            this.array.knot[gridP.y][gridP.x].setStatus( 0 );
+            break;
+          }
+        }
     }
 
     this.array.trace = [];
@@ -407,6 +518,52 @@ class rune{
     else
       this.updateKnotsByTrace( result );
     return;
+  }
+
+  alignHorizontally(){
+    for( let i = 0; i < this.array.trace.length; i++ )
+      if( this.array.trace[i] > 14 ){
+        this.rotate( 1, -1 );
+        this.pressToTop();
+        return;
+      }
+
+    let index = this.array.trace[0];
+    let grid = this.convertIndex( index );
+    this.var.begin = this.array.knot[grid.y][grid.x].var.center;
+  }
+
+  pressToTop(){
+    let way = 0;
+    let flag = true;
+    let trace = [];
+
+    for( let i = 0; i < this.array.trace.length; i++ ){
+      let grid = this.convertIndex( this.array.trace[i] );
+      let neighbor = this.array.neighbor[grid.y % 2][way];
+      grid.add( neighbor );
+      if( this.checkBorder( grid ) )
+        flag = this.array.knot[grid.y][grid.x].var.visiable;
+
+      trace.push( this.array.knot[grid.y][grid.x].const.index )
+    }
+
+    if( flag ){
+       this.updateKnotsByTrace( trace );
+    }
+    return;
+  }
+
+  setParents(){
+    for( let i = 0; i < this.array.move.length; i++ ){
+      let indexP = this.array.trace[i];
+      let gridP = this.convertIndex( indexP );
+      let parent = this.array.knot[gridP.y][gridP.x];
+      let indexC = this.array.trace[i + 1];
+      let gridC = this.convertIndex( indexC );
+      let child = this.array.knot[gridC.y][gridC.x];
+      parent.setAsParent( child,  this.array.move[i] );
+    }
   }
 
   updateKnotsByTrace( trace ){
@@ -517,7 +674,8 @@ class rune{
   decode( value, notation ){
     let code = value;
     let array = [];
-    let division = Math.pow( notation, this.array.move.length - 1 );
+    let grade = 3; //4 moves - 1
+    let division = Math.pow( notation, grade );
 
     while ( division >= 1 ){
       let move = Math.floor( code / division );
@@ -526,18 +684,26 @@ class rune{
       division /= notation;
     }
 
-
     return array;
   }
 
-  draw( offset ){
-    //return;
-    if( offset == null )
-      offset = createVector();
+  draw( vec ){
+    if( vec == null )
+      vec = createVector();
 
-    //this.cleanKnots( 0 );
+
     for( let i = 0; i < this.array.knot.length; i++ )
-      for( let j = 0; j < this.array.knot[i].length; j++ )
-        this.array.knot[i][j].draw( offset );
+      for( let j = 0; j < this.array.knot[i].length; j++ ){
+        let flag = true;
+
+        switch ( this.var.display.mode ) {
+          case 2:
+            flag = ( this.array.knot[i][j].var.status.id == 2 );
+            break;
+        }
+
+        if( flag )
+          this.array.knot[i][j].draw( vec );
+      }
   }
 }

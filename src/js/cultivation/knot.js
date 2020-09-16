@@ -13,13 +13,14 @@ class knot {
       dot: []
     };
     this.var = {
-      lightness: colorMax * 0.75,
       center: center.copy(),
+      status: {},
+      color: {},
       type: null,
       visiable: false,
-      child: null,
+      label: null,
       parent: null,
-      label: null
+      child: null
     };
 
     this.init();
@@ -87,45 +88,66 @@ class knot {
   }
 
   setStatus( status ){
+    this.var.status.id = status;
+
     switch ( status ) {
       //display as a knot that cannot be reached
       case 0:
-        this.var.status = 'far';
+        this.var.status.name = 'far';
         this.var.free = true;
-        this.var.hue = 0;
-        this.var.saturation = 0;
-        this.var.lightness = colorMax * 0.75;
+        this.var.color.hue = 0;
+        this.var.color.saturation = 0;
+        this.var.color.lightness = colorMax * 0.75;
         break;
       //display as a considered option
       case 1:
-        this.var.status = 'option';
+        this.var.status.name = 'option';
         this.var.free = true;
-        this.var.hue = 120;
-        this.var.saturation = colorMax * 1;
-        this.var.lightness = colorMax * 0.5;
+        this.var.color.hue = 120;
+        this.var.color.saturation = colorMax * 1;
+        this.var.color.lightness = colorMax * 0.5;
         break;
       //display as an involved knot
       case 2:
-        this.var.status = 'involved';
+        this.var.status.name = 'involved';
         this.var.free = false;
-        this.var.hue = 60;
-        this.var.saturation = colorMax * 1;
-        this.var.lightness = colorMax * 0.5;
+        this.var.color.hue = 60;
+        this.var.color.saturation = colorMax * 1;
+        this.var.color.lightness = colorMax * 0.5;
         break;
     }
   }
 
+  setAsParent( child, way ){
+  child.var.parent = ( this.const.n / 2 + way ) % this.const.n;
+  this.var.child = way;
+}
+
   draw( offset ){
     if( this.var.visiable ){
-      noStroke();
-      //stroke( this.var.hue, this.var.saturation, this.var.lightness );
-      fill( this.var.hue, this.var.saturation, this.var.lightness );
+      //stroke( this.var.color.hue, this.var.color.saturation, this.var.color.lightness );
 
       for( let i = 0; i < this.array.vertex.length; i++ ){
         let ii = ( i + 1 ) % this.array.vertex.length;
+        noStroke();
+        fill( this.var.color.hue, this.var.color.saturation, this.var.color.lightness );
+
+        /*if( this.var.child == i )
+          fill( colorMax - this.var.color.hue, this.var.color.saturation, this.var.color.lightness );
+        if( this.var.parent == i )
+          fill( ( colorMax - this.var.color.hue ) / 2, this.var.color.saturation, this.var.color.lightness );*/
+
         triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
                   this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
                   this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
+
+
+        stroke( 0 );
+        strokeWeight( 0.9 )
+        if( this.var.child != i && this.var.parent != i  )
+          line( this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
+                this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
+        noStroke();
        }
 
        stroke( 0 );
