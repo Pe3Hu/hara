@@ -20,7 +20,8 @@ class knot {
       visiable: false,
       label: null,
       parent: null,
-      child: null
+      child: null,
+      sleeve: 0
     };
 
     this.init();
@@ -52,10 +53,22 @@ class knot {
     this.var.label = this.const.index + shift;
   }
 
+  initHues(){
+    this.array.hue = [
+      52,
+      122,
+      192,
+      262,
+      297,
+      332
+    ];
+  }
+
   init(){
     this.const.r =  this.const.a / ( Math.tan( Math.PI / 6 ) * 2 );
     this.initVertexs();
     this.initLabel();
+    this.initHues();
     this.setStatus( 0 );
   }
 
@@ -87,7 +100,7 @@ class knot {
     }
   }
 
-  setStatus( status ){
+  setStatus( status, sleeve ){
     this.var.status.id = status;
 
     switch ( status ) {
@@ -98,6 +111,7 @@ class knot {
         this.var.color.hue = 0;
         this.var.color.saturation = 0;
         this.var.color.lightness = colorMax * 0.75;
+        this.var.sleeve = 0;
         break;
       //display as a considered option
       case 1:
@@ -106,12 +120,40 @@ class knot {
         this.var.color.hue = 120;
         this.var.color.saturation = colorMax * 1;
         this.var.color.lightness = colorMax * 0.5;
+        this.var.sleeve = 0;
         break;
       //display as an involved knot
       case 2:
         this.var.status.name = 'involved';
         this.var.free = false;
+        this.var.covered = false;
         this.var.color.hue = 60;
+        this.var.color.saturation = colorMax * 1;
+        this.var.color.lightness = colorMax * 0.5;
+        if( sleeve != undefined  )
+          this.var.sleeve = sleeve;
+        break;
+      //display as an a pivot point knot
+      case 3:
+        this.var.status.name = 'pivot point';
+        this.var.covered = true;
+        this.var.color.hue = 90;
+        this.var.color.saturation = colorMax * 1;
+        this.var.color.lightness = colorMax * 0.5;
+        break;
+      //display as an attached knot
+      case 4:
+        this.var.status.name = 'attached';
+        this.var.covered = true;
+        this.var.color.hue = 150;
+        this.var.color.saturation = colorMax * 1;
+        this.var.color.lightness = colorMax * 0.5;
+        break;
+      //display as an fixed knot
+      case 5:
+        this.var.status.name = 'fixed';
+        this.var.covered = true;
+        this.var.color.hue = 180;
         this.var.color.saturation = colorMax * 1;
         this.var.color.lightness = colorMax * 0.5;
         break;
@@ -119,31 +161,55 @@ class knot {
   }
 
   setAsParent( child, way ){
-  child.var.parent = ( this.const.n / 2 + way ) % this.const.n;
-  this.var.child = way;
+    child.var.parent = ( this.const.n / 2 + way ) % this.const.n;
+    this.var.child = way;
 }
 
-  draw( offset ){
+  draw( offset, flag ){
     if( this.var.visiable ){
       //stroke( this.var.color.hue, this.var.color.saturation, this.var.color.lightness );
 
       for( let i = 0; i < this.array.vertex.length; i++ ){
         let ii = ( i + 1 ) % this.array.vertex.length;
-        noStroke();
+        strokeWeight( this.const.a / 12 )
+        stroke( this.var.color.hue, this.var.color.saturation, this.var.color.lightness );
         fill( this.var.color.hue, this.var.color.saturation, this.var.color.lightness );
 
-        /*if( this.var.child == i )
-          fill( colorMax - this.var.color.hue, this.var.color.saturation, this.var.color.lightness );
-        if( this.var.parent == i )
-          fill( ( colorMax - this.var.color.hue ) / 2, this.var.color.saturation, this.var.color.lightness );*/
+        if( this.var.sleeve != -1 ){
+          let hue;
+          switch ( this.var.sleeve ) {
+            case 0:
+            case 3:
+              hue = this.array.hue[ this.var.sleeve];
+              break;
+            case 1:
+              hue = this.array.hue[2];
+              break;
+            case 2:
+              hue = this.array.hue[4];
+              break;
+            case 4:
+              hue = this.array.hue[3];
+              break;
+          }
 
+          if( this.var.child == i ){
+            stroke( hue, this.var.color.saturation, this.var.color.lightness * 0.5 );
+            fill( hue, this.var.color.saturation, this.var.color.lightness * 0.5 );
+          }
+          if( this.var.parent == i ){
+            stroke( hue, this.var.color.saturation, this.var.color.lightness );
+            fill( hue, this.var.color.saturation, this.var.color.lightness );
+          }
+        }
+
+        noStroke();
         triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
                   this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
                   this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
 
 
         stroke( 0 );
-        strokeWeight( 0.9 )
         if( this.var.child != i && this.var.parent != i  )
           line( this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
                 this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
@@ -151,9 +217,11 @@ class knot {
        }
 
        stroke( 0 );
+       strokeWeight( 1 )
        fill( 0 );
        this.var.txt = this.const.index;// +':'+this.var.label;//
-       //text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
+       if( flag )
+        text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
     }
   }
 }

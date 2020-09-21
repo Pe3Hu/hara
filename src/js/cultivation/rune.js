@@ -19,7 +19,6 @@ class rune{
       begin: createVector()
     };
     this.array = {
-      windRose: [ 'NNE', 'E', 'SSE', 'SSW', 'W', 'NNW' ],
       knot: [],
       option: [],
       trace: [],

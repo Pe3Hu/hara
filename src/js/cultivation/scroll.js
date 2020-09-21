@@ -76,7 +76,41 @@ class scroll {
     this.var.index++;
   }
 
+  tryToAttach(){
+    let ism = this.var.ism;
+    let rune = this.array.rune[0][0];
+    let aPoint = ism.var.aPoint;
+    let moves = rune.array.move;
+    let trace = [ aPoint.index ];
+      console.log( moves )
+
+    for( let i = 0; i < moves.length; i++ ){
+      let last = trace[trace.length - 1];
+      let grid = ism.convertIndex( last );
+      grid.add( moves[i] );
+      if( ism.checkBorder( grid ) ){
+        let index = ism.convertGrid( grid );
+        trace.push( index );
+      }
+      else
+        break;
+    }
+
+    console.log( trace )
+  }
+
+  click(){
+    this.var.ism.click( this.table.markup[1][0].copy() );
+  }
+
+  update(){
+    if( this.var.ism.var.aPoint.index != null )
+      this.tryToAttach();
+  }
+
   draw(){
+    this.update();
+
     for( let i = 0; i < this.array.rune.length; i++ )
       for( let j = 0; j < this.array.rune[i].length; j++ ){
         let index = this.array.rune[i][j].const.index;
