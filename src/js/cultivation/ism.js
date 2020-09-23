@@ -7,10 +7,7 @@ class ism{
     };
     this.var = {
       center: createVector(),
-      aPoint: {
-        index: null,
-        status: null
-      }
+      ligature: null
     };
     this.array = {
       knot: [],
@@ -18,8 +15,13 @@ class ism{
       hue: [],
       sleeve: [],
       move: [],
-      chain: []
+      chain: [],
+      ligature: []
     };
+    this.flag = {
+      runeAttached: false,
+      fillInk: false
+    }
 
     this.init();
   }
@@ -77,6 +79,7 @@ class ism{
     this.finishSleeves();
     this.setParents();
     this.mergerSleeves();
+    this.setFirstLigatures();
   }
 
   mergerSleeves(){
@@ -125,8 +128,9 @@ class ism{
           grid = this.convertIndex( indexs[j] );
           grid.add( this.array.neighbor[parity][l] );
           let addIndex = this.convertGrid( grid );
-            if( !indexs.includes( addIndex ) && this.checkBorder( grid ) )
-                indexs.push( addIndex );
+
+          if( !indexs.includes( addIndex ) && this.checkBorder( grid ) )
+              indexs.push( addIndex );
         }
       }
 
@@ -145,7 +149,7 @@ class ism{
     let option = [];
     let half = ( this.const.size - 1 ) / 2;
     let head = this.array.knot[half][half];
-    head.setStatus( 2, 4 );
+    head.setStatus( 1, 4 );
     let parity = half % 2;
     let index = this.array.knot[half][half].const.index;
     this.array.sleeve[0].push( index );
@@ -164,7 +168,7 @@ class ism{
     let firstRand = Math.floor( Math.random() * option.length );
     index = option[firstRand];
     grid = this.convertIndex( index );
-    this.array.knot[grid.y][grid.x].setStatus( 2, sleeve + 1 );
+    this.array.knot[grid.y][grid.x].setStatus( 1, sleeve + 1 );
     this.array.sleeve[sleeve].push( index );
     this.array.move[sleeve].push( firstRand );
     parity = grid.y % 2;
@@ -172,7 +176,7 @@ class ism{
       grid = this.convertIndex( index );
       grid.add( this.array.neighbor[parity][i] );
       addIndex = this.convertGrid( grid );
-      if( this.checkKnot( grid ) ){
+      if( this.checkGutter( grid ) ){
         this.array.option[sleeve][0].push( addIndex );
         this.array.option[sleeve][1].push( i );
       }
@@ -192,7 +196,7 @@ class ism{
 
     grid = this.convertIndex( index );
     sleeve++;
-    this.array.knot[grid.y][grid.x].setStatus( 2, sleeve + 1 );
+    this.array.knot[grid.y][grid.x].setStatus( 1, sleeve + 1 );
     this.array.sleeve[sleeve].push( index );
     this.array.move[sleeve].push( secondRand );
     parity = grid.y % 2;
@@ -201,7 +205,7 @@ class ism{
       grid = this.convertIndex( index );
       grid.add( this.array.neighbor[parity][i] );
       addIndex = this.convertGrid( grid );
-      if( this.checkKnot( grid ) ){
+      if( this.checkGutter( grid ) ){
         this.array.option[sleeve][0].push( addIndex );
         this.array.option[sleeve][1].push( i );
       }
@@ -214,7 +218,7 @@ class ism{
 
   finishSleeves(){
     let options = Math.max( this.array.option[0][0].length, this.array.option[1][0].length );
-    let counter = 0, stoper = 3;//61
+    let counter = 0, stoper = 33;//61
     while( options > 0 && counter < stoper ){
       let rands = [];
       for( let i = 0; i < this.array.option.length; i++ ){
@@ -235,14 +239,14 @@ class ism{
           this.array.option[i] = [ [], [] ];
 
           let grid = this.convertIndex( index );
-          this.array.knot[grid.y][grid.x].setStatus( 2, i + 1 );
+          this.array.knot[grid.y][grid.x].setStatus( 1, i + 1 );
           let parity = grid.y % 2;
 
           for( let j = 0; j < this.array.neighbor[parity].length; j++ ){
             let addGrid = this.convertIndex( index );
             addGrid.add( this.array.neighbor[parity][j] );
             let addIndex = this.convertGrid( addGrid );
-            if( this.checkKnot( addGrid ) ){
+            if( this.checkGutter( addGrid ) ){
               this.array.option[i][0].push( addIndex );
               this.array.option[i][1].push( j );
             }
@@ -304,16 +308,82 @@ class ism{
     return flag;
   }
 
-  checkKnot( grid ){
+  checkGutter( grid ){
     let flag = this.checkBorder( grid );
 
     if( flag )
       flag = this.array.knot[grid.y][grid.x].var.visiable;
 
     if( flag )
-      flag = this.array.knot[grid.y][grid.x].var.free;
+      flag = !this.array.knot[grid.y][grid.x].var.gutter;
 
     return flag;
+  }
+
+  checkInk( grid ){
+    let flag = this.checkBorder( grid );
+
+    if( flag )
+      flag = this.array.knot[grid.y][grid.x].var.visiable;
+
+    if( flag )
+      flag = !this.array.knot[grid.y][grid.x].var.ink;
+    return flag;
+  }
+
+  setFirstLigatures(){
+    for( let i = 0; i < this.array.sleeve[2].length; i++ ){
+      let grid = this.convertIndex( this.array.sleeve[2][i] );
+      this.array.ligature.push( this.array.sleeve[2][i] );
+      this.array.knot[grid.y][grid.x].setLigature( 1 );
+    }
+  }
+
+  setNextLigatures( ink ){
+    for( let i = 0; i < this.array.ligature.length; i++ ){
+      let grid = this.convertIndex( this.array.ligature[i] );
+      this.array.knot[grid.y][grid.x].setLigature( 0 );
+    }
+
+    this.array.ligature = [];
+
+    for( let i = 0; i < ink.length; i++ )
+      for( let j = 0; j < ink[i].trace.length; j++ ){
+      let grid = this.convertIndex( ink[i].trace[j] );
+      let parity = ( grid.y % 2 );
+
+      for( let l = 0; l < this.array.neighbor[parity].length; l++ ){
+        grid = this.convertIndex( ink[i].trace[j] );
+        grid.add( this.array.neighbor[parity][l] );
+
+        if( this.checkInk( grid ) ){
+          let addIndex = this.convertGrid( grid );
+          this.array.ligature.push( addIndex );
+        }
+      }
+    }
+
+    //console.log( this.array.ligature )
+    for( let i = 0; i < this.array.ligature.length; i++ ){
+      let grid = this.convertIndex( this.array.ligature[i] );
+      this.array.knot[grid.y][grid.x].setLigature( 1 );
+    }
+  }
+
+  setCurrentLigature( index ){
+    let grid;
+
+    if( this.var.ligature != null ){
+      grid = this.convertIndex( this.var.ligature );
+      this.array.knot[grid.y][grid.x].switchOptionLigature();
+
+      if( this.var.ligature == this.array.ligature[index] && this.flag.runeAttached )
+        this.flag.fillInk = true;
+    }
+
+    this.var.ligature = this.array.ligature[index];
+    grid = this.convertIndex( this.var.ligature );
+    this.array.knot[grid.y][grid.x].switchOptionLigature();
   }
 
   click( offset ){
@@ -323,8 +393,8 @@ class ism{
       mouseX + this.var.center.x - offset.x,
       mouseY + this.var.center.y - offset.y );
 
-    for( let i = 0; i < this.array.sleeve[2].length; i++ ){
-      let grid = this.convertIndex( this.array.sleeve[2][i] );
+    for( let i = 0; i < this.array.ligature.length; i++ ){
+      let grid = this.convertIndex( this.array.ligature[i] );
       let center = this.array.knot[grid.y][grid.x].var.center.copy();
       let d = dist( mouse.x, mouse.y, center.x, center.y );
       if( d < min ){
@@ -333,18 +403,8 @@ class ism{
       }
     }
 
-    let grid;
-    if( min < this.const.r ){
-      console.log( index )
-      if( this.var.aPoint.index != null ){
-        grid = this.convertIndex( this.var.aPoint.index );
-        this.array.knot[grid.y][grid.x].setStatus( this.var.aPoint.status );
-      }
-      this.var.aPoint.index = this.array.sleeve[2][index];
-      grid = this.convertIndex( this.var.aPoint.index );
-      this.var.aPoint.status = this.array.knot[grid.y][grid.x].var.status.id;
-      this.array.knot[grid.y][grid.x].setStatus( 3 );
-    }
+    if( min < this.const.r )
+      this.setCurrentLigature( index );
   }
 
   draw( vec ){

@@ -169,11 +169,15 @@ class board {
     if( buttonID >= 0 && buttonID < 3 )
       this.switchLayer( buttonID );
 
-    if( buttonID == 4 )
-      this.array.layer[this.var.layer].nextCell();
-
-    if( buttonID == 5 )
-      this.array.layer[this.var.layer].returnCard();
+    if( this.var.layer == 1 )
+      switch ( buttonID ) {
+        case 4:
+          this.array.layer[this.var.layer].nextCell();
+          break;
+        case 5:
+          this.array.layer[this.var.layer].returnCard();
+          break;          
+      }
 
     this.update();
   }

@@ -122,11 +122,10 @@ class rune{
     this.initFlips();
     this.initKnots();
     this.getTotem( totem );
-    //this.rotate( 0, -1 );
-    //this.normalizeRune();
     this.alignHorizontally();
     this.setParents();
     this.updateDisplay( 2 );
+    this.flip();
   }
 
   setTotem( code ){
@@ -306,7 +305,7 @@ class rune{
   setCurrentKnot( index ){
     this.var.knot.current = index;
     this.var.knot.grid = this.convertIndex( index );
-    this.array.knot[this.var.knot.grid.y][this.var.knot.grid.x].setStatus( 2 );
+    this.array.knot[this.var.knot.grid.y][this.var.knot.grid.x].setStatus( 1 );
   }
 
   //0 - only free
@@ -316,7 +315,7 @@ class rune{
       for( let j = 0; j < this.array.knot[i].length; j++ )
         switch ( mode ) {
           case 0:
-            if( this.array.knot[i][j].var.free )
+            if( !this.array.knot[i][j].var.gutter )
               this.array.knot[i][j].setStatus( 0 );
             break;
           case 1:
@@ -352,19 +351,18 @@ class rune{
 
   setOptionsAroundCurrentKnot(){
     this.array.option = [];
-    this.array.ways = [];
+    this.array.way = [];
     let grid = this.convertIndex( this.var.knot.current );
     let parity = ( grid.y % 2 );
 
-    if( !this.checkKnot( grid ) )
+    if( !this.checkGutter( grid ) )
       for( let l = 0; l < this.array.neighbor[parity].length; l++ ){
         grid = this.convertIndex( this.var.knot.current );
         grid.add( this.array.neighbor[parity][l] );
         let addIndex = this.convertGrid( grid );
-          if( !this.array.option.includes( addIndex ) && this.checkKnot( grid ) ){
+          if( !this.array.option.includes( addIndex ) && this.checkGutter( grid ) ){
             this.array.option.push( addIndex );
             this.array.way.push( l );
-            this.array.knot[grid.y][grid.x].setStatus( 1 );
           }
       }
   }
@@ -393,7 +391,7 @@ class rune{
 
     let neighbor = this.array.neighbor[begin.y % 2][way];
     let grid = createVector( neighbor.x + begin.x, neighbor.y + begin.y );
-    if(  this.checkKnot( grid ) )
+    if(  this.checkGutter( grid ) )
       if( flag ){
         let index = this.convertGrid( grid );
         this.array.trace.push( index );
@@ -409,18 +407,30 @@ class rune{
     return;
   }
 
+  resultOfMove( way, begin ){
+    let grid = this.convertIndex( begin );
+    let parity = grid.y % 2;
+    let neighbor = this.array.neighbor[parity][way];
+    grid = createVector( neighbor.x + grid.x, neighbor.y + grid.y );
+    if( this.checkGutter( grid ) )
+      return -1;
+    else
+      return this.convertGrid( grid );
+
+  }
+
   designRune( ways ){
     for( let i = 0; i < ways.length; i++ )
       this.moveInChosenDirection( ways[i], null);
-    //this.moveInChosenDirection(way, null);
-    //this.moveInChosenDirection(way, null);
-    //this.moveInChosenDirection(way, null);
-    /*while( this.array.trace.length < this.const.size )
-      this.engageNextKnot();*/
     this.cleanKnots( 0 );
   }
 
   rotate( n, clockwise ){
+    if( n == undefined )
+      n = 1;
+    if( clockwise == undefined )
+      clockwise = 1;
+
     let trace = [];
     let centerLabel = 10;
     n = n % this.table.rotate[0].length;
@@ -442,6 +452,7 @@ class rune{
             let next = this.convertLabel( label );
             trace.push( next );
             this.array.knot[gridP.y][gridP.x].setStatus( 0 );
+            this.array.knot[gridP.y][gridP.x].setAsParent();
             break;
           }
         }
@@ -451,72 +462,49 @@ class rune{
     this.array.move = this.findMovesByTrace( trace );
     for( let i = 0; i < trace.length; i++ ){
       let grid = this.convertIndex( trace[i] );
-      this.array.knot[grid.y][grid.x].setStatus( 2 );
+      this.array.knot[grid.y][grid.x].setStatus( 1 );
       this.array.trace.push( trace[i] );
     }
-  }
 
-  findFliped(){
-    let fliped = []
-    for( let i = 0; i < this.array.trace.length; i++ ){
-      let index = this.table.flip[0].indexOf( this.array.trace[i] );
-      fliped.push( this.table.flip[1][index] );
-    }
-
-    return fliped;
+    this.setParents();
   }
 
   flip(){
-    let fliped = this.findFliped();
-    this.updateKnotsByTrace( fliped );
-  }
+    let moves = [];
+    for( let i = this.array.move.length - 1; i > -1 ; i-- ){
+      let move = this.array.move[i];
+      let result, firstAdd, scale;
 
-  normalizeRune(){
-    let moves = this.findMovesByTrace( this.array.trace );
-    let firstMove = moves[0];
-    let allPossibilitys = [];
-    let result = null;
-    //console.log( 'moves', moves );
-
-    for( let i = 1; i < firstMove; i++ ){
-      let indexs = [ 1 ];
-      let cranked = [];
-
-      for( let j = 0; j < moves.length; j++ ){
-        let crankedMove = ( moves[j] - i + this.array.neighbor[0].length ) % this.array.neighbor[0].length;
-        cranked.push( crankedMove );
+      if( move == 0 || move == 5 ){
+        firstAdd = 0;
+        scale = 5;
+      }
+      if( move == 1 || move == 4 ){
+        firstAdd = 1;
+        scale = 3;
+      }
+      if( move == 2 || move == 3 ){
+        firstAdd = 2;
+        scale = 1;
       }
 
-      for( let j = 0; j < cranked.length; j++ ){
-        let index = this.moveInChosenDirection( cranked[j], indexs[indexs.length - 1] );
-        indexs.push( index );
-      }
-
-      allPossibilitys.push( indexs );
+      let secondAdd = ( move - firstAdd + scale ) % ( scale * 2 );
+      result = firstAdd + secondAdd;
+      moves.push( result );
     }
 
-    for( let i = allPossibilitys.length - 1; i > -1; i-- ){
-      let flag = true;
-      for( let j = 0; j < allPossibilitys[i].length; j++ )
-        if( allPossibilitys[i][j] == null )
-          flag = false;
+    let begin = this.array.trace[this.array.trace.length];
+    let trace = this.findTraceByMoves( moves, begin );
 
-      if( flag )
-        result = allPossibilitys[i];
-    }
-
-    if( result == null ){
-      let fliped = this.findFliped();
-
-      for( let i = 0; i < this.array.trace.length; i++ )
-        if( fliped[i] < this.array.trace[i] ){
-          this.updateKnotsByTrace( fliped );
-          return;
+    if( trace.length > 0  ){
+      for( let i = 0; i < this.array.trace.length; i++ ){
+          let grid = this.convertIndex( this.array.trace[i] );
+          this.array.knot[grid.y][grid.x].setAsParent();
         }
+        
+      this.updateKnotsByTrace( trace );
+      this.setParents();
     }
-    else
-      this.updateKnotsByTrace( result );
-    return;
   }
 
   alignHorizontally(){
@@ -539,6 +527,7 @@ class rune{
 
     for( let i = 0; i < this.array.trace.length; i++ ){
       let grid = this.convertIndex( this.array.trace[i] );
+      this.array.knot[grid.y][grid.x].setAsParent();
       let neighbor = this.array.neighbor[grid.y % 2][way];
       grid.add( neighbor );
       if( this.checkBorder( grid ) )
@@ -573,7 +562,7 @@ class rune{
     for( let i = 0; i < trace.length; i++ ){
         let grid = this.convertIndex( trace[i] );
         this.array.trace.push( trace[i] );
-        this.array.knot[grid.y][grid.x].setStatus( 2 );
+        this.array.knot[grid.y][grid.x].setStatus( 1 );
       }
   }
 
@@ -598,11 +587,13 @@ class rune{
     if( begin == null ){
       begin = 1;
     }
+    let flag = true;
 
     let trace = [ begin ]
     for( let j = 0; j < moves.length; j++ ){
-      console.log( moves[j] )
-      let index = this.moveInChosenDirection( moves[j], trace[trace.length - 1] );
+      let index = this.resultOfMove( moves[j], trace[trace.length - 1] );
+      if( index < 0 )
+        return [];
       trace.push( index );
     }
 
@@ -614,7 +605,6 @@ class rune{
     for( let i = 0; i < this.array.knot.length; i++ )
       for( let j = 0; j < this.array.knot[i].length; j++ )
         if( this.array.knot[i][j].var.label == label && this.array.knot[i][j].var.visiable )
-          //console.log( i, j, this.array.knot[i][j].const.index, this.array.knot[i][j].var.label, label )
           return this.array.knot[i][j].const.index;
   }
 
@@ -646,14 +636,14 @@ class rune{
     return flag;
   }
 
-  checkKnot( grid ){
+  checkGutter( grid ){
     let flag = this.checkBorder( grid );
 
     if( flag )
       flag = this.array.knot[grid.y][grid.x].var.visiable;
 
     if( flag )
-      flag = this.array.knot[grid.y][grid.x].var.free;
+      flag = !this.array.knot[grid.y][grid.x].var.gutter;
 
     return flag;
   }
@@ -697,7 +687,7 @@ class rune{
 
         switch ( this.var.display.mode ) {
           case 2:
-            flag = ( this.array.knot[i][j].var.status.id == 2 );
+            flag = ( this.array.knot[i][j].var.status.id == 1 );
             break;
         }
 
