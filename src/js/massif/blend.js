@@ -5,7 +5,7 @@ class blend {
       a: cellSize * 2,
       field:{
         count: 3,
-        size: 2,
+        size: 4,
       }
     };
     this.array = {
@@ -123,6 +123,11 @@ class blend {
               for( let g = 0; g < groups[i - 1][j].length; g++ )
                 groups[i][j].push( groups[i - 1][j][g] )
               flag = false;
+
+              if( j == charges[i].length - 1 )
+                if( charges[i][j] == charges[i][0] )
+                  for( let g = 0; g < groups[i][0].length; g++ )
+                    groups[i][j].push( groups[i][0][g] );
             }
 
           if( j > 0 )
@@ -139,7 +144,9 @@ class blend {
         }
       }
 
+
     let result = this.unification( groups );
+    console.log( result )
     let extent = [];
     group = -1;
 
@@ -156,7 +163,7 @@ class blend {
   }
 
   sortGroupsByExtent( groups, extent ){
-    console.log( groups, extent )
+    console.log( groups[0], groups[1], extent )
     let longest = {
       group: null,
       extent: 0,
@@ -232,7 +239,6 @@ class blend {
   unification( array ){
     let result = [];
 
-
     for( let i = 0; i < array.length; i++ )
       for( let j = 0; j < array[i].length; j++ )
         if( array[i][j].length > 1 ){
@@ -240,9 +246,11 @@ class blend {
             let group = array[i][j][g];
             for( let ii = 0; ii < array.length; ii++ )
               for( let jj = 0; jj < array[ii].length; jj++ )
-                for( let gg = 0; gg < array[ii][jj].length; gg++ )
-                  if( array[ii][jj][gg] == group )
-                    array[ii][jj].splice( gg, 1, array[i][j][0] );
+                for( let gg = 1; gg < array[ii][jj].length; gg++ )
+                  if( array[ii][jj][gg] == group ){
+                    array[ii][jj].splice( gg, 1 );
+                    array[ii][jj].push( array[i][j][0] );
+                  }
           }
         }
 
@@ -250,7 +258,8 @@ class blend {
       result.push( [] );
       for( let j = 0; j < array[i].length; j++ )
         result[i].push( array[i][j][0] );
-      }
+
+    }
 
     return result;
   }
