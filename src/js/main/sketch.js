@@ -42,3 +42,7 @@ function draw() {
 function mouseClicked() {
   gameBoard.click();
 }
+
+function keyPressed() {
+  gameBoard.key();
+}

@@ -162,6 +162,16 @@ class scroll {
     this.update();
   }
 
+  key(){
+    let rune = this.array.rune[0][this.var.currentRune];
+
+    switch ( key ) {
+      case ' ':
+        rune.flip();
+        break;
+    }
+  }
+
   cleanAttached(){
     this.var.ism.flag.runeAttached = false;
     this.var.attached = {

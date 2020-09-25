@@ -109,8 +109,6 @@ class ism{
     this.initNeighbors();
     this.initKnots();
     this.initSleeves();
-    console.log( this.array.sleeve )
-    console.log( this.array.move )
   }
 
   prepareKnotsAroundCenter(){
@@ -218,7 +216,7 @@ class ism{
 
   finishSleeves(){
     let options = Math.max( this.array.option[0][0].length, this.array.option[1][0].length );
-    let counter = 0, stoper = 33;//61
+    let counter = 0, stoper = 60;//61
     while( options > 0 && counter < stoper ){
       let rands = [];
       for( let i = 0; i < this.array.option.length; i++ ){

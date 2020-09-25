@@ -65,7 +65,6 @@ class knot {
   }
 
   init(){
-    this.const.r =  this.const.a / ( Math.tan( Math.PI / 6 ) * 2 );
     this.initVertexs();
     this.initLabel();
     this.initHues();

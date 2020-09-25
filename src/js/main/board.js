@@ -11,7 +11,7 @@ class board {
       }
     }
     this.var = {
-      layer: 2,
+      layer: 3,
       buttonID: 0,
       borderID: 0
     }
@@ -40,6 +40,7 @@ class board {
     this.array.layer.push( new settlement( 4 ) );
     this.array.layer.push( new square( 2 ) );
     this.array.layer.push( new scroll() );
+    this.array.layer.push( new blend() );
   }
 
   initBorders(){
@@ -48,7 +49,7 @@ class board {
     let layer = 99;
     let name = 'layerMenu';
     let offset = createVector( cellSize * ( canvasGrid.x - 2.5 ), cellSize * 0.5 );
-    let size = createVector( cellSize * 2, cellSize * 4 );
+    let size = createVector( cellSize * 2, cellSize * 5 );
     this.addBorder( layer, name, offset, size );
 
     this.updateBorders();
@@ -91,14 +92,22 @@ class board {
     type = 0;
     vec = createVector( cellSize * ( canvasGrid.x - 1.5 ), cellSize * 1.5 );
     this.addButton( layer, name, type, vec.copy() );
+
     name = 'switchToPolimino';
     type++;
     vec = createVector( cellSize * ( canvasGrid.x - 1.5 ), cellSize * 2.5 );
     this.addButton( layer, name, type, vec.copy() );
+
     name = 'switchToScroll';
     type++;
     vec = createVector( cellSize * ( canvasGrid.x - 1.5 ), cellSize * 3.5 );
     this.addButton( layer, name, type, vec.copy() );
+
+    name = 'switchToBlend';
+    type++;
+    vec = createVector( cellSize * ( canvasGrid.x - 1.5 ), cellSize * 4.5 );
+    this.addButton( layer, name, type, vec.copy() );
+
 
 
     layer = 1;
@@ -166,7 +175,7 @@ class board {
         return;
 
     //change board layer
-    if( buttonID >= 0 && buttonID < 3 )
+    if( buttonID >= 0 && buttonID < 4 )
       this.switchLayer( buttonID );
 
     if( this.var.layer == 1 )
@@ -176,7 +185,7 @@ class board {
           break;
         case 5:
           this.array.layer[this.var.layer].returnCard();
-          break;          
+          break;
       }
 
     this.update();
@@ -186,6 +195,10 @@ class board {
     this.buttonClickCheck();
 
     this.array.layer[this.var.layer].click();
+  }
+
+  key(){
+    this.array.layer[this.var.layer].key();
   }
 
   switchLayer( buttonID ){

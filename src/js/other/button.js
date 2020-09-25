@@ -73,69 +73,6 @@ class button {
         );
       }
 
-      /*
-      //draw shift buttons
-      if ( this.type > 9 && this.type < 14 ){
-        noStroke();
-        fill( this.color );
-        ellipse( this.center.x, this.center.y, this.const.d, this.const.d );
-
-        d = ( this.type - 10 ) * 2;
-
-        fill( 'red' );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][1].x, this.array.vertex[d][1].y,
-          this.array.vertex[d][2].x, this.array.vertex[d][2].y );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][3].x, this.array.vertex[d][3].y,
-          this.array.vertex[d][2].x, this.array.vertex[d][2].y );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][3].x, this.array.vertex[d][3].y,
-          this.array.vertex[d][4].x, this.array.vertex[d][4].y );
-      }
-
-      //draw rotate buttons
-      if ( this.type > 13 && this.type < 16 ){
-        noStroke();
-        fill( this.color );
-        ellipse( this.center.x, this.center.y, this.const.d, this.const.d );
-
-        d = 5 - ( this.type - 14 ) * 2;
-
-        fill( 'blue' );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][1].x, this.array.vertex[d][1].y,
-          this.array.vertex[d][2].x, this.array.vertex[d][2].y );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][3].x, this.array.vertex[d][3].y,
-          this.array.vertex[d][2].x, this.array.vertex[d][2].y );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][3].x, this.array.vertex[d][3].y,
-          this.array.vertex[d][4].x, this.array.vertex[d][4].y );
-      }
-
-      //draw scroll buttons
-      if ( this.type > 15 && this.type < 18 ){
-        noStroke();
-        fill( this.color );
-        ellipse( this.center.x, this.center.y, this.const.d, this.const.d );
-
-
-        d = ( this.type - 16 ) * 4;
-
-        fill( 'green' );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][1].x, this.array.vertex[d][1].y,
-          this.array.vertex[d][2].x, this.array.vertex[d][2].y );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][3].x, this.array.vertex[d][3].y,
-          this.array.vertex[d][2].x, this.array.vertex[d][2].y );
-        triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
-          this.array.vertex[d][3].x, this.array.vertex[d][3].y,
-          this.array.vertex[d][4].x, this.array.vertex[d][4].y );
-      }
-      */
-
       //
       if ( this.type == 10 ){
         noStroke();
