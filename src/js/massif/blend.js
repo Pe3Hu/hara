@@ -5,7 +5,7 @@ class blend {
       a: cellSize * 2,
       field:{
         count: 3,
-        size: 4,
+        size: 3,
       }
     };
     this.array = {
@@ -14,7 +14,8 @@ class blend {
       value: []
     };
     this.var = {
-      shred: 0
+      shred: 0,
+      kind: 0
     };
     this.table = {
       shred: []
@@ -80,10 +81,10 @@ class blend {
       for( let i = 0; i < this.const.field.size; i++ ){
         this.array.shred[field].push( [] );
         for( let j = 0; j < this.const.field.size; j++ ){
-          //let rand = Math.floor( Math.random() * this.table.shred[this.var.shred].length );
-          //let value =  this.table.shred[this.var.shred][rand];
-          let value = this.array.value.pop();
-          let kind = 0;
+          let rand = Math.floor( Math.random() * this.array.value.length );
+          let value =  this.array.value[rand];
+          this.array.value.splice( rand, 1 );
+          let kind = this.var.kind;
           let grid = createVector( j, i );
           let vec = createVector( this.const.a * ( j + 0.5 + field * ( this.const.field.size + 1 ) ), this.const.a * ( i + 0.5 ) );
           this.array.shred[field][i].push( new shred( index, value, kind, vec, grid,  a ) );
