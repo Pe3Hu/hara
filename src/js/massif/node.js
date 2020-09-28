@@ -35,7 +35,7 @@ class node {
   }
 
   draw( offset ){
-   fill( 210, colorMax * 0.75, colorMax * 0.5 );
+   fill( 120, colorMax * 0.75, colorMax * 0.5 );
    noStroke();
 
    for( let i = 0; i < this.array.vertex.length; i++ ){
@@ -45,7 +45,6 @@ class node {
                this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
                this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
    }
-
 
     strokeWeight( 1 );
     fill( 0 );

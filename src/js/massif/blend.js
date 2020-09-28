@@ -19,6 +19,9 @@ class blend {
     };
     this.table = {
       shred: []
+    };
+    this.obj = {
+      laws: null
     }
 
     this.init();
@@ -76,13 +79,18 @@ class blend {
     let a = this.const.a / 2;
     let index = 0;
 
+    let exmaple = [ 10, 5, 5, 5, 5, 5, 15, 15, 5, 5, 5, 15 ];
+    let count = 0;
+
+
     for( let field = 0; field < this.const.field.count; field++ ){
       this.array.shred.push( [] );
       for( let i = 0; i < this.const.field.size; i++ ){
         this.array.shred[field].push( [] );
         for( let j = 0; j < this.const.field.size; j++ ){
           let rand = Math.floor( Math.random() * this.array.value.length );
-          let value =  this.array.value[rand];
+          let value = this.array.value[rand];// exmaple[count];//this.table.shred[0][field%2]//
+          count++;
           this.array.value.splice( rand, 1 );
           let kind = this.var.kind;
           let grid = createVector( j, i );
@@ -124,17 +132,15 @@ class blend {
               for( let g = 0; g < groups[i - 1][j].length; g++ )
                 groups[i][j].push( groups[i - 1][j][g] )
               flag = false;
-
-              if( j == charges[i].length - 1 )
-                if( charges[i][j] == charges[i][0] )
-                  for( let g = 0; g < groups[i][0].length; g++ )
-                    groups[i][j].push( groups[i][0][g] );
             }
 
           if( j > 0 )
             if( charges[i][j - 1] == charges[i][j] ){
-              for( let g = 0; g < groups[i][j - 1].length; g++ )
-                groups[i][j].push( groups[i][j - 1][g] );
+              for( let g = 0; g < groups[i][j - 1].length; g++ ){
+                let index = groups[i][j].indexOf( groups[i][j - 1][g] )
+                if( index == -1 )
+                  groups[i][j].push( groups[i][j - 1][g] );
+              }
               flag = false;
             }
 
@@ -146,31 +152,117 @@ class blend {
       }
 
 
-    let result = this.unification( groups );
-    console.log( result )
+    for( let i = 0; i < charges.length; i++ )
+      if( charges[i][0] == charges[i][charges[i].length - 1] )
+        for( let g = 0; g < groups[i][0].length; g++ )
+          groups[i][charges[i].length - 1].push( groups[i][0][g] );
+
+
+
+    this.unification( groups );
     let extent = [];
+    let values = [];
     group = -1;
 
-    for( let i = 0; i < result.length; i++ )
-      for( let j = 0; j < result[i].length; j++ )
-        if( result[i][j] > group ){
-          group = result[i][j];
+    for( let i = 0; i < groups.length; i++ )
+      for( let j = 0; j < groups[i].length; j++ )
+        if( groups[i][j] > group ){
+          group = groups[i][j];
           extent.push( 1 );
+          values.push( charges[i][j] )
         }
         else
-          extent[result[i][j]]++;
+          extent[groups[i][j]]++;
 
-    this.sortGroupsByExtent( result, extent );
+    this.sortGroupsByExtent( groups, extent, values );
   }
 
-  sortGroupsByExtent( groups, extent ){
-    console.log( groups[0], groups[1], extent )
-    let longest = {
+  sortGroupsByExtent( groups, extent, values ){
+    let table = this.table.shred[this.var.shred];
+    let shreds = [];
+
+    for( let s = 0; s < table.length; s++ ){
+      shreds.push( [] );
+
+      for( let i = 0; i < extent.length; i++ )
+            if( table[s] == values[i] )
+              shreds[s].push( {
+                group: i,
+                extent: extent[i],
+              } );
+    }
+
+    let shortest, longest;
+
+    for( let s = 0; s < shreds.length; s++ ){
+      longest = {
+        group: null,
+        extent: 0,
+        unique: true
+       };
+      shortest = {
+        group: null,
+        extent: Math.pow( this.const.field.size, 2 ) * this.const.field.count - this.table.shred[this.var.shred].length + 1,
+        unique: true
+       };
+
+      for( let j = 0; j < shreds[s].length; j++ ){
+        if( shreds[s][j].extent == shortest.extent )
+          shortest.unique = false;
+        if( shreds[s][j].extent < shortest.extent ){
+          shortest.extent = shreds[s][j].extent;
+          shortest.group = shreds[s][j].group;
+          shortest.unique = true;
+        }
+
+        if( shreds[s][j].extent == longest.extent )
+          longest.unique = false;
+        if( shreds[s][j].extent > longest.extent ){
+          longest.extent = shreds[s][j].extent;
+          longest.group = shreds[s][j].group;
+          longest.unique = true;
+        }
+      }
+
+      if( shortest.group != longest.group ){
+        if( shortest.unique )
+          for( let i = 0; i < groups.length; i++ )
+            for( let j = 0; j < groups[i].length; j++ ){
+              if( groups[i][j] == shortest.group ){
+                let brick = createVector( j, i );
+                let shred = this.convertBrick( brick );
+                this.array.shred[shred.f][shred.i][shred.j].setGroup( -1, groups[i][j] );
+              }
+            }
+
+        if( longest.unique )
+          for( let i = 0; i < groups.length; i++ )
+            for( let j = 0; j < groups[i].length; j++ ){
+              if( groups[i][j] == longest.group ){
+                let brick = createVector( j, i );
+                let shred = this.convertBrick( brick );
+                this.array.shred[shred.f][shred.i][shred.j].setGroup( 1, groups[i][j] );
+              }
+            }
+      }
+
+      if( shreds[s].length == 1 )
+        for( let i = 0; i < groups.length; i++ )
+          for( let j = 0; j < groups[i].length; j++ ){
+            if( groups[i][j] == longest.group ){
+              let brick = createVector( j, i );
+              let shred = this.convertBrick( brick );
+              this.array.shred[shred.f][shred.i][shred.j].setSingle( true );
+            }
+          }
+    }
+
+    longest = {
       group: null,
       extent: 0,
       unique: true
      };
-    let shortest = {
+    shortest = {
       group: null,
       extent: Math.pow( this.const.field.size, 2 ) * this.const.field.count - this.table.shred[this.var.shred].length + 1,
       unique: true
@@ -200,7 +292,7 @@ class blend {
           if( groups[i][j] == shortest.group ){
             let brick = createVector( j, i );
             let shred = this.convertBrick( brick );
-            this.array.shred[shred.f][shred.i][shred.j].setGroup( -1 );
+            this.array.shred[shred.f][shred.i][shred.j].setGroup( -2, groups[i][j] );
           }
         }
 
@@ -210,11 +302,9 @@ class blend {
           if( groups[i][j] == longest.group ){
             let brick = createVector( j, i );
             let shred = this.convertBrick( brick );
-            this.array.shred[shred.f][shred.i][shred.j].setGroup( 1 );
+            this.array.shred[shred.f][shred.i][shred.j].setGroup( 2, groups[i][j] );
           }
         }
-
-
   }
 
   init(){
@@ -223,9 +313,14 @@ class blend {
     this.initNodes();
     this.initShreds();
     this.findConnections();
+    this.defineLaws();
   }
 
   click(){
+
+  }
+
+  key(){
 
   }
 
@@ -239,30 +334,128 @@ class blend {
 
   unification( array ){
     let result = [];
+    let synonyms = [];
+    for( let i = 0; i < array.length; i++ )
+      for( let j = 0; j < array[i].length; j++ )
+        synonyms.push( [] );
+
+
+    for( let i = 0; i < synonyms.length; i++ )
+      synonyms[i].push( i );
 
     for( let i = 0; i < array.length; i++ )
       for( let j = 0; j < array[i].length; j++ )
-        if( array[i][j].length > 1 ){
-          for( let g = array[i][j].length - 1; g > 0; g-- ){
+        if(  array[i][j].length > 1 )
+          for( let g = 0; g < array[i][j].length; g++ ){
             let group = array[i][j][g];
-            for( let ii = 0; ii < array.length; ii++ )
-              for( let jj = 0; jj < array[ii].length; jj++ )
-                for( let gg = 1; gg < array[ii][jj].length; gg++ )
-                  if( array[ii][jj][gg] == group ){
-                    array[ii][jj].splice( gg, 1 );
-                    array[ii][jj].push( array[i][j][0] );
-                  }
+
+            for( let gg = g + 1; gg < array[i][j].length; gg++ ){
+
+              let index = synonyms[group].indexOf( array[i][j][gg] );
+              if( index == -1 ){
+                synonyms[group].push( array[i][j][gg] );
+                synonyms[array[i][j][gg]].push( group );
+              }
+            }
           }
-        }
 
-    for( let i = 0; i < array.length; i++ ){
-      result.push( [] );
+
+    for( let i = 0; i < synonyms.length; i++ )
+        synonyms[i].sort();
+
+
+    this.supplementWithSynonyms( array, synonyms );
+
+    for( let i = 0; i < array.length; i++ )
       for( let j = 0; j < array[i].length; j++ )
-        result[i].push( array[i][j][0] );
+        array[i][j] = array[i][j][0];
 
-    }
+    let max = -1;
+    let displaced = [];
 
-    return result;
+    for( let i = 0; i < array.length; i++ )
+      for( let j = 0; j < array[i].length; j++ ){
+        let index = displaced.indexOf( array[i][j] );
+        if( index == -1 )
+          displaced.push( array[i][j] );
+      }
+
+    for( let d = 0; d < displaced.length; d++ )
+      if( d != displaced[d] )
+        for( let i = 0; i < array.length; i++ )
+          for( let j = 0; j < array[i].length; j++ )
+            if( array[i][j] == displaced[d] )
+              array[i][j] = d;
+
+  }
+
+  supplementWithSynonyms( groups, synonyms ){
+    for( let i = 0; i < groups.length; i++ )
+      for( let j = 0; j < groups[i].length; j++ ){
+        groups[i][j] = synonyms[groups[i][j][0]];
+      }
+  }
+
+  defineLaws(){
+    let table = this.table.shred[this.var.shred];
+    this.obj.laws = new laws( table );
+    let subtypes = [ 'single', 'shortest', 'longest' ];
+    let location = 'on';
+
+
+      for( let f = 0; f < this.array.shred.length; f++ )
+        for( let i = 0; i < this.array.shred[f].length; i++ )
+          for( let j = 0; j < this.array.shred[f][i].length; j++ ){
+              let shred = this.array.shred[f][i][j];
+
+              for( let s = 0; s < subtypes.length; s++ ){
+                  if( shred.var.value[subtypes[s]] )
+                    this.obj.laws.updateInfluence( subtypes[s], location, shred.const.value.id, shred.const.index );
+
+                  if( shred.var.group[subtypes[s]] && subtypes[s] != 'single' )
+                    this.obj.laws.updateInfluence( subtypes[s], location, 0, shred.const.index );
+              }
+            }
+
+      let neighbors = [
+        createVector( 0, -1 ),
+        createVector( 1, 0 ),
+        createVector( 0, 1 ),
+        createVector( -1, 0 ),
+      ];
+      let size = this.const.field.size;
+
+      for( let subtype in this.obj.laws.obj )
+        for( let value in this.obj.laws.obj[subtype]['on'] )
+          if( this.obj.laws.obj[subtype]['on'][value].length > 0 ){
+          let on = this.obj.laws.obj[subtype]['on'][value];
+          let near = [];
+
+          for( let i = 0; i < on.length; i++ ){
+            let index = on[i];
+            let result = this.convertIndex( index );
+
+            for( let j = 0; j < neighbors.length; j++ ){
+              let neighbor = createVector( result.j, result.i, result.f );
+              let z = result.f;
+              let y = ( neighbor.y + neighbors[j].y + size ) % size;
+              let x = ( neighbor.x + neighbors[j].x + size ) % size;
+
+              if( ( ( neighbor.x == 0 && neighbors[j].x == -1 ) ) ||
+                    ( neighbor.x == size - 1 && neighbors[j].x == 1 ) )
+                      z = ( result.f + neighbors[j].x + this.const.field.count ) % this.const.field.count;
+
+              if( this.array.shred[z][y][x].var.group.id !=
+                  this.array.shred[result.f][result.i][result.j].var.group.id )
+                if( near.indexOf( this.array.shred[z][y][x].const.index ) == -1 )
+                  near.push( this.array.shred[z][y][x].const.index );
+            }
+          }
+
+          let a, b;
+          near.sort( this.compare );
+          this.obj.laws.obj[subtype]['near'][value] = near;
+        }
   }
 
   convertBrick( brick ){
@@ -272,6 +465,24 @@ class blend {
       j: brick.x % this.const.field.size
     };
     return result;
+  }
+
+  convertIndex( index ){
+    let f = Math.floor( index / this.const.field.size / this.const.field.size );
+    let id = index - f * this.const.field.size * this.const.field.size;
+    let i = Math.floor( id / this.const.field.size );
+    let j = id % this.const.field.size;
+
+    let result = {
+      f: f,
+      i: i,
+      j: j
+    };
+    return result;
+  }
+
+  compare( a, b ){
+    return a - b;
   }
 
   draw(){

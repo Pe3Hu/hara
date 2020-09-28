@@ -16,14 +16,21 @@ class shred {
     this.array = {
       vertex: [],
       corner: [],
-      segment: []
+      segment: [],
+      color: []
     };
     this.var = {
       center: center.copy(),
       harmony: null,
       group:{
-        shortest: false,
-        longest: false
+        id: null,
+        'shortest': false,
+        'longest': false
+      },
+      value:{
+        'shortest': false,
+        'longest': false,
+        'single': false
       }
     };
     this.flag = {
@@ -34,14 +41,16 @@ class shred {
     };
     this.color = {
       bg:{
-        h: null,
+        h: 60,
         s: colorMax * 0.75,
         l: colorMax * 0.5
       },
       value:{
-        h: 270,
+        h: colorMax * 0.5,
         s: colorMax * 0.75,
-        l: colorMax * 0.5
+        l: colorMax * 0
+      },
+      extent:{
       }
     }
 
@@ -58,9 +67,22 @@ class shred {
     }
   }
 
+  initColors(){
+    this.color.extent = {
+      13: 210,
+      14: 240,
+      5: 270,
+      15: 300,
+      10: 330,
+      7: 0,
+      11: 30
+    }
+  }
+
   init( value ){
     this.const.r =  this.const.a / ( Math.cos( Math.PI / this.const.n ) );
     this.initVertexs();
+    this.initColors();
     this.setValue( value );
     this.setGroup( 0 );
   }
@@ -343,8 +365,6 @@ class shred {
         sqaure.push( createVector( -1, 0 ) );
         sqaure.push( createVector( 1, 0 ) );
 
-        console.log( this.array.corner )
-
         for( let i = 0; i < this.array.corner.length; i++ )
           if( this.array.corner[i] )
             segments[i] = true;
@@ -371,24 +391,40 @@ class shred {
 
   }
 
-  setGroup( type ){
+  setGroup( type, id ){
+    if( id == undefined )
+      id = null;
+    this.var.group.id = id;
+
     switch ( type ) {
+      case -2:
+        this.var.group['shortest'] = true;
+        this.var.group['longest'] = false;
+        break;
       case -1:
-        this.var.group.shortest = true;
-        this.var.group.longest = false;
-        this.color.bg.h = 120;
+        this.var.value['shortest'] = true;
+        this.var.value['longest'] = false;
         break;
       case 0:
-        this.var.group.shortest = false;
-        this.var.group.longest = false;
-        this.color.bg.h = 60;
+        this.var.value['shortest'] = false;
+        this.var.value['shortest'] = false;
+        this.var.value['longest'] = false;
+        this.var.group['shortest'] = false;
+        this.var.group['longest'] = false;
         break;
       case 1:
-        this.var.group.longest = true;
-        this.var.group.shortest = false;
-        this.color.bg.h = 330;
+        this.var.value['longest'] = true;
+        this.var.value['shortest'] = false;
+        break;
+      case 2:
+        this.var.group['longest'] = true;
+        this.var.group['shortest'] = false;
         break;
     }
+  }
+
+  setSingle( single ){
+    this.var.value['single'] = single;
   }
 
   updateHarmony(){
@@ -429,8 +465,15 @@ class shred {
   }
 
   drawBackground( offset ){
+    let size = this.const.a * 1.75;
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-      fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+    stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+
+    if( this.var.group.shortest || this.var.group.longest ){
+      fill( this.color.extent[this.const.value.id], this.color.bg.s, this.color.bg.l );
+      stroke( this.color.extent[this.const.value.id], this.color.bg.s, this.color.bg.l );
+    }
+
     strokeWeight( 0.2 );
 
     for( let i = 0; i < this.array.vertex.length; i++ ){
@@ -440,10 +483,29 @@ class shred {
                 this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
                 this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
     }
+
+    noStroke();
+    fill( colorMax )
+    if( this.var.value.shortest || this.var.value.longest || this.var.value.single  ){
+      if( this.var.value.shortest )
+        size /= 3;
+
+      if( this.var.value.single )
+        size /= ( 3 / 2);
+
+      if( this.var.value.longest )
+        size *= 1;
+
+      ellipse( this.var.center.x + offset.x, this.var.center.y + offset.y, size, size );
+    }
   }
 
   draw( offset ){
    this.drawBackground( offset );
    this.drawValue( offset );
+
+   fill( 0 );
+   let txt = this.const.index;
+  // text( txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
   }
 }
