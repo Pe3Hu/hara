@@ -177,6 +177,286 @@ class blend {
     this.sortGroupsByExtent( groups, extent, values );
   }
 
+  defineLaws(){
+    let table = this.table.shred[this.var.shred];
+    this.obj.laws = new laws( table );
+    let subtypes = [ 'single', 'shortest', 'longest', 'total' ];
+    let location = 'on';
+
+    for( let f = 0; f < this.array.shred.length; f++ )
+      for( let i = 0; i < this.array.shred[f].length; i++ )
+        for( let j = 0; j < this.array.shred[f][i].length; j++ ){
+            let shred = this.array.shred[f][i][j];
+
+            for( let s = 0; s < subtypes.length; s++ ){
+                if( shred.var.value[subtypes[s]] )
+                  this.obj.laws.updateInfluence( subtypes[s], location, shred.const.value.id, shred.const.index );
+
+                if( shred.var.group[subtypes[s]] && subtypes[s] != 'single' )
+                  this.obj.laws.updateInfluence( subtypes[s], location, 0, shred.const.index );
+            }
+          }
+
+    let neighbors = [
+      createVector( 0, -1 ),
+      createVector( 1, 0 ),
+      createVector( 0, 1 ),
+      createVector( -1, 0 ),
+    ];
+    let size = this.const.field.size;
+
+    for( let subtype in this.obj.laws.obj )
+      for( let value in this.obj.laws.obj[subtype]['on'] )
+        if( this.obj.laws.obj[subtype]['on'][value].length > 0 ){
+        let on = this.obj.laws.obj[subtype]['on'][value];
+        let near = [];
+
+        for( let i = 0; i < on.length; i++ ){
+          let index = on[i];
+          let result = this.convertIndex( index );
+
+          for( let j = 0; j < neighbors.length; j++ ){
+            let neighbor = createVector( result.j, result.i, result.f );
+            let z = result.f;
+            let y = ( neighbor.y + neighbors[j].y + size ) % size;
+            let x = ( neighbor.x + neighbors[j].x + size ) % size;
+
+            if( ( ( neighbor.x == 0 && neighbors[j].x == -1 ) ) ||
+                  ( neighbor.x == size - 1 && neighbors[j].x == 1 ) )
+                    z = ( result.f + neighbors[j].x + this.const.field.count ) % this.const.field.count;
+
+            if( this.array.shred[z][y][x].var.group.id !=
+                this.array.shred[result.f][result.i][result.j].var.group.id )
+              if( near.indexOf( this.array.shred[z][y][x].const.index ) == -1 )
+                near.push( this.array.shred[z][y][x].const.index );
+          }
+        }
+
+        let a, b;
+        near.sort( this.compare );
+        this.obj.laws.obj[subtype]['near'][value] = near;
+      }
+
+    console.log( this.obj.laws.obj )
+    let locations = [ 'on', 'near' ];
+    let max = Math.pow( this.const.field.size, 2 ) * this.const.field.count;
+
+    for( let subtype in this.obj.laws.obj )
+      for( let location in this.obj.laws.obj[subtype] )
+        if( location.includes( 'not' ) ){
+          let notLocation = location.substr( 3 ).toLowerCase();
+          for( let value in this.obj.laws.obj[subtype][notLocation] )
+            if( this.obj.laws.obj[subtype][notLocation][value].length > 0 ){
+              let indexs = [];
+
+              for( let j = 0; j < max; j++ )
+                if( this.obj.laws.obj[subtype][notLocation][value].indexOf( j ) == -1 )
+                  this.obj.laws.obj[subtype][location][value].push( j );
+            }
+        }
+  }
+
+  generateIntersections(){
+    let laws = [];
+    let max = Math.pow( this.const.field.size, 2 ) * this.const.field.count;
+
+    for( let subtype in this.obj.laws.obj )
+      for( let location in this.obj.laws.obj[subtype] )
+        for( let value in this.obj.laws.obj[subtype][location] ){
+          let indexs = this.obj.laws.obj[subtype][location][value];
+          if( indexs.length > 0 && indexs.length < max - 1 )
+            laws.push( {
+              subtype: subtype,
+              location: location,
+              value: value,
+              indexs: indexs
+            } );
+        }
+
+    let intersections = [];
+
+    for( let i = 0; i < laws.length; i++ ){
+      let origin = [];
+      let conclusion = {
+        id: null,
+        added: 0,
+        idle: null
+      }
+
+      for( let j = 0; j < laws[i].indexs.length; j++ )
+        origin.push( laws[i].indexs[j] );
+
+      for( let j = 0; j < laws.length; j++ )
+        if( i != j ){
+          let innovation = laws[j].indexs;
+          let difference = [];
+          let repetition = [];
+
+          for( let l = 0; l < innovation.length; l++ ){
+            if( origin.indexOf( innovation[l] ) == -1 )
+              difference.push( innovation[l] );
+            else
+              repetition.push( innovation[l] );
+          }
+          //console.log( difference )
+
+          if( difference.length > conclusion.added &&
+              difference.length + origin.length < max ){
+                let alreadyUsed = ( i > j );
+                if( alreadyUsed )
+                    alreadyUsed = ( intersections[j].child == i );
+                if( !alreadyUsed )
+                  conclusion = {
+                    id: j,
+                    added: difference.length,
+                    idle: repetition.length
+                  }
+              }
+
+            if( difference.length == conclusion.added &&
+                conclusion.idle > repetition.length )
+              conclusion = {
+                id: j,
+                added: difference.length,
+                idle: repetition.length
+              }
+          }
+
+      if( conclusion.id == null )
+        conclusion = {
+          id: i,
+          added: 0,
+          idle: origin.length
+        }
+
+      for( let j = 0; j < laws[conclusion.id].indexs.length; j++ )
+        if( origin.indexOf( laws[conclusion.id].indexs[j] ) == -1 )
+          origin.push( laws[conclusion.id].indexs[j] );
+
+      origin.sort( this.compare );
+      intersections.push( {
+        parent: i,
+        child: conclusion.id,
+        idle: conclusion.idle,
+        indexs: origin
+      } );
+    }
+
+    let best = [];
+    let length = 3;
+    let counter = 0;
+    let stoper = 0;
+    let stop = 100;
+    let previousMax = max;
+
+
+    let indexs = [];
+    for( let i = 0; i < max; i++ ){
+      indexs.push( [] );
+
+      for( let j = 0; j < max; j++ )
+        indexs[i].push( [] );
+    }
+
+    do{
+      let maxL = 0;
+
+      for( let i = 0; i < intersections.length; i++ )
+        if( intersections[i].child != intersections[i].parent ){
+            let idle = intersections[i].idle;
+            let l = intersections[i].indexs.length;
+
+            if( l == maxL && l < max ){
+              indexs[l][idle].push( i );
+              counter++;
+            }
+
+            if( l > maxL && l < previousMax ){
+              maxL = intersections[i].indexs.length;
+              indexs[l][idle] = [ i ];
+              counter = 0;
+            }
+          }
+
+      best.push( {
+        length: maxL,
+        indexs: indexs[maxL]
+      } );
+
+      stoper++;
+      previousMax = maxL;
+    }
+    while( counter < length && stoper < stop );
+
+    let top3 = [];
+    let i = 0;
+
+    while( length > 0 ){
+      if( best[i].indexs.length > 0 )
+        for( let j = 0; j < best[i].indexs.length; j++ )
+          if( best[i].indexs[j].length <= length  &&
+              best[i].indexs[j].length > 0 ){
+            length -= best[i].indexs[j].length;
+
+            for( let l = 0; l < best[i].indexs[j].length; l++ )
+              top3.push( best[i].indexs[j][l] );
+          }
+          else
+            if( best[i].indexs[j].length > 0 )
+              while( length > 0 ){
+                let rand = Math.floor( Math.random() * best[i].indexs[j].length );
+                top3.push( best[i].indexs[j][rand] );
+                best[i].indexs[j].splice( rand, 1 );
+                length--;
+              }
+
+      i++;
+    }
+
+    let result = [];
+
+    for( let i = 0; i < top3.length; i++ ){
+      let intersection = intersections[top3[i]];
+      let parent = {
+        subtype: laws[intersection.parent].subtype,
+        location: laws[intersection.parent].location,
+        value: laws[intersection.parent].value
+      };
+      let child = {
+        subtype: laws[intersection.child].subtype,
+        location: laws[intersection.child].location,
+        value: laws[intersection.child].value
+      };
+      let answers = [];
+
+      for( let j = 0; j < max; j++ )
+        if( intersection.indexs.indexOf( j ) == -1 )
+          answers.push( j );
+
+      result.push( {
+        parent: parent,
+        child: child,
+        idle: intersection.idle,
+        indexs: intersection.indexs,
+        answers: answers
+      } );
+    }
+
+    this.obj.laws.setAnswers( result );
+  }
+
+  init(){
+    this.initTables();
+    this.initMap();
+    this.initNodes();
+    this.initShreds();
+    this.findConnections();
+    this.defineLaws();
+    this.generateIntersections();
+    this.setAnswer();
+    //console.log( this.obj.laws.obj )
+  }
+
   sortGroupsByExtent( groups, extent, values ){
     let table = this.table.shred[this.var.shred];
     let shreds = [];
@@ -307,31 +587,6 @@ class blend {
         }
   }
 
-  init(){
-    this.initTables();
-    this.initMap();
-    this.initNodes();
-    this.initShreds();
-    this.findConnections();
-    this.defineLaws();
-  }
-
-  click(){
-
-  }
-
-  key(){
-
-  }
-
-  shuffle( array ){
-    for( let i = array.length; i > -1; i-- ){
-      let shift = Math.floor( Math.random() * i );
-      let index = array.pop();
-      array.splice( shift, 0, index );
-    }
-  }
-
   unification( array ){
     let result = [];
     let synonyms = [];
@@ -396,66 +651,36 @@ class blend {
       }
   }
 
-  defineLaws(){
-    let table = this.table.shred[this.var.shred];
-    this.obj.laws = new laws( table );
-    let subtypes = [ 'single', 'shortest', 'longest' ];
-    let location = 'on';
+  setAnswer(){
+    let laws = this.obj.laws;
+    let parent = laws.array.answers[0].parent;
+    let child = laws.array.answers[0].child;
+    let indexsP = laws.obj[parent.subtype][parent.location][parent.value];
+    let indexsC = laws.obj[child.subtype][child.location][child.value];
+    console.log(  parent.subtype, parent.location, parent.value, indexsP )
+    console.log(  child.subtype, child.location, child.value, indexsC )
+    console.log( laws.array.answers[0].indexs )
 
+    this.approveLaw( parent.subtype, parent.location, parent.value )
+    this.approveLaw( child.subtype, child.location, child.value )
+  }
 
-      for( let f = 0; f < this.array.shred.length; f++ )
-        for( let i = 0; i < this.array.shred[f].length; i++ )
-          for( let j = 0; j < this.array.shred[f][i].length; j++ ){
-              let shred = this.array.shred[f][i][j];
+  approveLaw( subtype, location, value ){
+    let laws = this.obj.laws;
+    let indexs = laws.obj[subtype][location][value];
 
-              for( let s = 0; s < subtypes.length; s++ ){
-                  if( shred.var.value[subtypes[s]] )
-                    this.obj.laws.updateInfluence( subtypes[s], location, shred.const.value.id, shred.const.index );
+    for( let i = 0; i < indexs.length; i++ ){
+      let result = this.convertIndex( indexs[i] );
+      this.array.shred[result.f][result.i][result.j].setFit( false );
+    }
+  }
 
-                  if( shred.var.group[subtypes[s]] && subtypes[s] != 'single' )
-                    this.obj.laws.updateInfluence( subtypes[s], location, 0, shred.const.index );
-              }
-            }
-
-      let neighbors = [
-        createVector( 0, -1 ),
-        createVector( 1, 0 ),
-        createVector( 0, 1 ),
-        createVector( -1, 0 ),
-      ];
-      let size = this.const.field.size;
-
-      for( let subtype in this.obj.laws.obj )
-        for( let value in this.obj.laws.obj[subtype]['on'] )
-          if( this.obj.laws.obj[subtype]['on'][value].length > 0 ){
-          let on = this.obj.laws.obj[subtype]['on'][value];
-          let near = [];
-
-          for( let i = 0; i < on.length; i++ ){
-            let index = on[i];
-            let result = this.convertIndex( index );
-
-            for( let j = 0; j < neighbors.length; j++ ){
-              let neighbor = createVector( result.j, result.i, result.f );
-              let z = result.f;
-              let y = ( neighbor.y + neighbors[j].y + size ) % size;
-              let x = ( neighbor.x + neighbors[j].x + size ) % size;
-
-              if( ( ( neighbor.x == 0 && neighbors[j].x == -1 ) ) ||
-                    ( neighbor.x == size - 1 && neighbors[j].x == 1 ) )
-                      z = ( result.f + neighbors[j].x + this.const.field.count ) % this.const.field.count;
-
-              if( this.array.shred[z][y][x].var.group.id !=
-                  this.array.shred[result.f][result.i][result.j].var.group.id )
-                if( near.indexOf( this.array.shred[z][y][x].const.index ) == -1 )
-                  near.push( this.array.shred[z][y][x].const.index );
-            }
-          }
-
-          let a, b;
-          near.sort( this.compare );
-          this.obj.laws.obj[subtype]['near'][value] = near;
-        }
+  shuffle( array ){
+    for( let i = array.length; i > -1; i-- ){
+      let shift = Math.floor( Math.random() * i );
+      let index = array.pop();
+      array.splice( shift, 0, index );
+    }
   }
 
   convertBrick( brick ){
@@ -483,6 +708,14 @@ class blend {
 
   compare( a, b ){
     return a - b;
+  }
+
+  click(){
+
+  }
+
+  key(){
+
   }
 
   draw(){

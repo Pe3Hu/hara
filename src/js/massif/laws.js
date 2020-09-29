@@ -4,17 +4,32 @@ class laws {
     this.obj = {
       'single': {
         'on': {},
-        'near': {}
+        'notOn': {},
+        'near': {},
+        'notNear': {}
       },
       'shortest': {
         'on': {},
-        'near': {}
+        'notOn': {},
+        'near': {},
+        'notNear': {}
       },
       'longest': {
         'on': {},
-        'near': {}
+        'notOn': {},
+        'near': {},
+        'notNear': {}
+      },
+      'total': {
+        'on': {},
+        'notOn': {},
+        'near': {},
+        'notNear': {}
       }
     };
+    this.array = {
+      answers: []
+    }
 
     this.init( values );
   }
@@ -36,5 +51,9 @@ class laws {
 
   updateInfluence( subtype, location, value, index ){
     this.obj[subtype][location][value].push( index );
+  }
+
+  setAnswers( answers ){
+    this.array.answers = answers
   }
 }

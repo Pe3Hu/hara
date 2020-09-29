@@ -30,8 +30,10 @@ class shred {
       value:{
         'shortest': false,
         'longest': false,
-        'single': false
-      }
+        'single': false,
+        'total': false
+      },
+      fit: true
     };
     this.flag = {
       digital: [],
@@ -49,8 +51,6 @@ class shred {
         h: colorMax * 0.5,
         s: colorMax * 0.75,
         l: colorMax * 0
-      },
-      extent:{
       }
     }
 
@@ -406,6 +406,7 @@ class shred {
         this.var.value['longest'] = false;
         break;
       case 0:
+        this.var.value['total'] = true;
         this.var.value['shortest'] = false;
         this.var.value['shortest'] = false;
         this.var.value['longest'] = false;
@@ -425,6 +426,14 @@ class shred {
 
   setSingle( single ){
     this.var.value['single'] = single;
+  }
+
+  setFit( flag ){
+    this.var.fit = flag;
+    if( flag )
+      this.color.bg.h = 60;
+    else
+      this.color.bg.h = 120;
   }
 
   updateHarmony(){
@@ -469,11 +478,6 @@ class shred {
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
     stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
 
-    if( this.var.group.shortest || this.var.group.longest ){
-      fill( this.color.extent[this.const.value.id], this.color.bg.s, this.color.bg.l );
-      stroke( this.color.extent[this.const.value.id], this.color.bg.s, this.color.bg.l );
-    }
-
     strokeWeight( 0.2 );
 
     for( let i = 0; i < this.array.vertex.length; i++ ){
@@ -482,21 +486,6 @@ class shred {
       triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
                 this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
                 this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
-    }
-
-    noStroke();
-    fill( colorMax )
-    if( this.var.value.shortest || this.var.value.longest || this.var.value.single  ){
-      if( this.var.value.shortest )
-        size /= 3;
-
-      if( this.var.value.single )
-        size /= ( 3 / 2);
-
-      if( this.var.value.longest )
-        size *= 1;
-
-      ellipse( this.var.center.x + offset.x, this.var.center.y + offset.y, size, size );
     }
   }
 
