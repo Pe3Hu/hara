@@ -18,6 +18,7 @@ class button {
     }
     this.description = null;
     this.onScreen = true;
+    this.pressed = false;
 
     this.initVertexs();
   }
@@ -40,6 +41,10 @@ class button {
 
   setDescription( txt ){
     this.description = txt;
+  }
+
+  press(){
+    this.pressed = !this.pressed;
   }
 
   draw( layer ){
@@ -73,20 +78,29 @@ class button {
         );
       }
 
-      //
-      if ( this.type == 10 ){
-        noStroke();
-        fill('purple');
-        rect(
-          this.center.x - this.const.a / 2,
-          this.center.y - this.const.a / 2,
-          this.const.a, this.const.a
-        );
+      if( this.type > 9 && this.type < 12  ){
+        switch ( this.type ) {
+          case 10:
+            fill('purple');
+            break;
+          case 11:
+            fill('purple');
+            break;
+          }
+          noStroke();
+          rect(
+            this.center.x - this.const.a / 2,
+            this.center.y - this.const.a / 2,
+            this.const.a, this.const.a
+          );
       }
 
-      if ( this.type == 11 ){
+      if( this.type == 12 ){
+        if( this.pressed )
+          fill( 60, colorMax * 1, colorMax * 0.5 );
+        else
+          fill( 210, colorMax * 1, colorMax * 0.5 );
         noStroke();
-        fill('blue');
         rect(
           this.center.x - this.const.a / 2,
           this.center.y - this.const.a / 2,

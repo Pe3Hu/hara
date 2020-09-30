@@ -1,7 +1,7 @@
 let cellSize = 24;
 let daoNum = 9;
 let colorMax = 360;
-let colorBG = colorMax * 2 / 3;
+let colorBG = colorMax / 2;
 let colorButton = colorMax / 2;
 let infinity = 999999999;
 let fr = 60;

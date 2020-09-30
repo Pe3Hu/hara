@@ -1,11 +1,11 @@
 //
 class blend {
-  constructor (){
+  constructor ( size, shred, a ){
     this.const = {
-      a: cellSize * 2,
+      a: a,
       field:{
         count: 3,
-        size: 3,
+        size: size,
       }
     };
     this.array = {
@@ -14,7 +14,7 @@ class blend {
       value: []
     };
     this.var = {
-      shred: 0,
+      shred: shred,
       kind: 0
     };
     this.table = {
@@ -29,10 +29,16 @@ class blend {
 
   initTables(){
     this.table.shred = [
+      [ 15, 10, 5 ],
+      [ 15, 14, 10, 7, 5 ],
+      [ 15, 14, 13, 11, 10, 7, 5 ]
+    ];
+    /*
+    this.table.shred = [
       [ 5, 10, 15 ],
       [ 5, 7, 10, 14, 15 ],
       [ 5, 7, 10, 11, 13, 14, 15 ]
-    ];
+    ];*/
   }
 
   initMap(){
@@ -81,7 +87,6 @@ class blend {
 
     let exmaple = [ 10, 5, 5, 5, 5, 5, 15, 15, 5, 5, 5, 15 ];
     let count = 0;
-
 
     for( let field = 0; field < this.const.field.count; field++ ){
       this.array.shred.push( [] );
@@ -217,16 +222,18 @@ class blend {
 
           for( let j = 0; j < neighbors.length; j++ ){
             let neighbor = createVector( result.j, result.i, result.f );
+            let y = neighbor.y + neighbors[j].y;
+            if( y >= size || y < 0 )
+              continue;
             let z = result.f;
-            let y = ( neighbor.y + neighbors[j].y + size ) % size;
             let x = ( neighbor.x + neighbors[j].x + size ) % size;
 
             if( ( ( neighbor.x == 0 && neighbors[j].x == -1 ) ) ||
                   ( neighbor.x == size - 1 && neighbors[j].x == 1 ) )
                     z = ( result.f + neighbors[j].x + this.const.field.count ) % this.const.field.count;
 
-            if( this.array.shred[z][y][x].var.group.id !=
-                this.array.shred[result.f][result.i][result.j].var.group.id )
+            if( this.array.shred[z][y][x].const.value.id !=
+                this.array.shred[result.f][result.i][result.j].const.value.id )
               if( near.indexOf( this.array.shred[z][y][x].const.index ) == -1 )
                 near.push( this.array.shred[z][y][x].const.index );
           }
@@ -237,8 +244,6 @@ class blend {
         this.obj.laws.obj[subtype]['near'][value] = near;
       }
 
-    console.log( this.obj.laws.obj )
-    let locations = [ 'on', 'near' ];
     let max = Math.pow( this.const.field.size, 2 ) * this.const.field.count;
 
     for( let subtype in this.obj.laws.obj )
@@ -250,8 +255,14 @@ class blend {
               let indexs = [];
 
               for( let j = 0; j < max; j++ )
-                if( this.obj.laws.obj[subtype][notLocation][value].indexOf( j ) == -1 )
-                  this.obj.laws.obj[subtype][location][value].push( j );
+                if( this.obj.laws.obj[subtype][notLocation][value].indexOf( j ) == -1 ){
+                  let flag = true;
+                  if( location == 'notNear' )
+                    flag = ( this.obj.laws.obj[subtype]['on'][value].indexOf( j ) == -1 );
+
+                  if( flag )
+                    this.obj.laws.obj[subtype][location][value].push( j );
+                }
             }
         }
   }
@@ -653,13 +664,13 @@ class blend {
 
   setAnswer(){
     let laws = this.obj.laws;
-    let parent = laws.array.answers[0].parent;
-    let child = laws.array.answers[0].child;
+    let parent = laws.array.answer[0].parent;
+    let child = laws.array.answer[0].child;
     let indexsP = laws.obj[parent.subtype][parent.location][parent.value];
     let indexsC = laws.obj[child.subtype][child.location][child.value];
     console.log(  parent.subtype, parent.location, parent.value, indexsP )
     console.log(  child.subtype, child.location, child.value, indexsC )
-    console.log( laws.array.answers[0].indexs )
+    console.log( laws.array.answer[0].indexs )
 
     this.approveLaw( parent.subtype, parent.location, parent.value )
     this.approveLaw( child.subtype, child.location, child.value )
@@ -673,6 +684,13 @@ class blend {
       let result = this.convertIndex( indexs[i] );
       this.array.shred[result.f][result.i][result.j].setFit( false );
     }
+  }
+
+  buttonPressed( buttons, id ){
+
+    buttons[id].press();
+    let txt = buttons[id].name;
+    console.log( id,  buttons[id].name );
   }
 
   shuffle( array ){
@@ -718,8 +736,9 @@ class blend {
 
   }
 
-  draw(){
-    let offset = createVector( cellSize * 2, cellSize * 2 );
+  draw(  offsets ){
+    let offset = offsets[1].copy();
+    offset.add( this.const.a / 3,  this.const.a / 3 )
 
     for( let f = 0; f < this.array.shred.length; f++ )
       for( let i = 0; i < this.array.shred[f].length; i++ )

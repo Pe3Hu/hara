@@ -28,25 +28,43 @@ class laws {
       }
     };
     this.array = {
-      answers: []
+      value: values,
+      answer: []
+    }
+    this.table = {
+      label: {}
     }
 
-    this.init( values );
+    this.init();
   }
 
-  initValues( values ){
+  initValues(){
     for( let subtype in this.obj )
       for( let location in this.obj[subtype] ){
-        for( let i = 0; i < values.length; i++ )
-          this.obj[subtype][location][values[i]] = [];
+        for( let i = 0; i < this.array.value.length; i++ )
+          this.obj[subtype][location][this.array.value[i]] = [];
 
-        if( subtype != 'single' )
+        if( subtype != 'single' && subtype != 'total' )
           this.obj[subtype][location][0] = [];
       }
   }
 
-  init( values ){
-    this.initValues( values );
+  initLabels(){
+    this.table.label = {
+      '0': 'all',
+      '5': '2',
+      '7': 'a',
+      '10': '5',
+      '11': '9',
+      '13': 'e',
+      '14': '6',
+      '15': '8'
+    }
+  }
+
+  init(){
+    this.initValues();
+    this.initLabels();
   }
 
   updateInfluence( subtype, location, value, index ){
@@ -54,6 +72,6 @@ class laws {
   }
 
   setAnswers( answers ){
-    this.array.answers = answers
+    this.array.answer = answers
   }
 }

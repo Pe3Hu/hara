@@ -46,9 +46,11 @@ class node {
                this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
    }
 
+    textSize( this.const.a );
     strokeWeight( 1 );
     fill( 0 );
     let txt = this.const.label;
-    text( txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
+    text( txt, this.var.center.x + offset.x, this.var.center.y + offset.y + this.const.a / 3 );
+    textSize( fontSize );
   }
 }

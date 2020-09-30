@@ -7,7 +7,7 @@ class border {
     this.name = name;
     this.offset = offset;
     this.size = size;
-    this.color = color( colorMax / 3 );
+    this.color = color( colorMax / 3 * 2 );
     this.onScreen = true;
   }
 
