@@ -1,48 +1,45 @@
-let cellSize = 24;
-let daoNum = 9;
-let colorMax = 360;
-let colorBG = colorMax / 2;
-let colorButton = colorMax / 2;
-let infinity = 999999999;
-let fr = 60;
-let font;
-let fontSize = 12;//18//12
-let canvasSize;
-let canvasGrid;
-let interfaceBoundaries;
-let gameBoard;
-let offset;
+const CELL_SIZE = 24;
+const DAO_NUM = 9;
+const COLOR_MAX = 360;
+const COLOR_BG = COLOR_MAX / 2;
+const INFINITY = 999999999;
+const FRAME_RATE = 60;
+const FONT_SIZE = 12;
+const MENU_LAYER = 99;
+
+let CANVAS_SIZE;
+let CANVAS_GRID;
+let FONT;
+let GAME_BOARD;
 
 function preload() {
-  font = loadFont('src/fonts/Chunkfive.otf');
+  FONT = loadFont('src/fonts/Chunkfive.otf');
 }
 
 function setup() {
-  canvasSize = createVector( 800, 700 );//800 600
-  canvasGrid = createVector( Math.floor( canvasSize.x / cellSize ), Math.floor( canvasSize.y / cellSize ) );
-  createCanvas( canvasSize.x, canvasSize.y );
+  CANVAS_SIZE = createVector( 800, 700 );//800 600
+  CANVAS_GRID = createVector( Math.floor( CANVAS_SIZE.x / CELL_SIZE ), Math.floor( CANVAS_SIZE.y / CELL_SIZE ) );
+  createCanvas( CANVAS_SIZE.x, CANVAS_SIZE.y );
 
-  textFont( font );
-  textSize( fontSize );
+  textFont( FONT );
+  textSize( FONT_SIZE );
   textAlign( CENTER );
 
-  colorMode( HSL, colorMax );
-  frameRate( fr );
+  colorMode( HSL, COLOR_MAX );
+  frameRate( FRAME_RATE );
 
-  offset = createVector( cellSize * 3, cellSize * 3 );
-
-  gameBoard = new board( offset );
+  GAME_BOARD = new board();
 }
 
 function draw() {
-  background( colorBG );
-  gameBoard.draw();
+  background( COLOR_BG );
+  GAME_BOARD.draw();
 }
 
 function mouseClicked() {
-  gameBoard.click();
+  GAME_BOARD.click();
 }
 
 function keyPressed() {
-  gameBoard.key();
+  GAME_BOARD.key();
 }

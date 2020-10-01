@@ -84,7 +84,7 @@ class knot {
       case 0:
         this.var.color.h = 0;
         this.var.color.s = 0;
-        this.var.color.l = colorMax * 0.75;
+        this.var.color.l = COLOR_MAX * 0.75;
         break;
       case 1:
       case 2:
@@ -95,8 +95,8 @@ class knot {
       case 7:
       case 8:
         this.var.color.h = 30 * ( type + 1 );
-        this.var.color.s = colorMax;
-        this.var.color.l = colorMax * 0.5;
+        this.var.color.s = COLOR_MAX;
+        this.var.color.l = COLOR_MAX * 0.5;
         break;
     }
   }
@@ -230,7 +230,7 @@ class knot {
        fill( 0 );
        this.var.txt = this.const.index;// +':'+this.var.label;//
        if( flag )
-        text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
+        text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + FONT_SIZE / 3 );
     }
   }
 }

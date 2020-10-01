@@ -2,7 +2,7 @@
 class square{
   constructor( size ){
     this.const = {
-      a: cellSize * 2,
+      a: CELL_SIZE * 2,
       n: size * 2 + 1,
       size: size
     };

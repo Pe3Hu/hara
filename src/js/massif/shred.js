@@ -33,7 +33,10 @@ class shred {
         'single': false,
         'total': false
       },
-      fit: true
+      fit: {
+        law: true,
+        node: true
+      }
     };
     this.flag = {
       digital: [],
@@ -44,13 +47,13 @@ class shred {
     this.color = {
       bg:{
         h: 60,
-        s: colorMax * 0.75,
-        l: colorMax * 0.5
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
       },
       value:{
-        h: colorMax * 0.5,
-        s: colorMax * 0.75,
-        l: colorMax * 0
+        h: COLOR_MAX * 0.5,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0
       }
     }
 
@@ -428,12 +431,21 @@ class shred {
     this.var.value['single'] = single;
   }
 
-  setFit( flag ){
-    this.var.fit = flag;
-    if( flag )
-      this.color.bg.h = 60;
-    else
+  setFit( flag, type ){
+    //
+    switch ( type ) {
+      case 0:
+        this.var.fit.law = flag;
+        break;
+      case 1:
+        this.var.fit.node = flag;
+        break;
+    }
+
+    if( !this.var.fit.law || !this.var.fit.node )
       this.color.bg.h = 120;
+    else
+      this.color.bg.h = 60;
   }
 
   updateHarmony(){
@@ -465,12 +477,7 @@ class shred {
                     this.array.segment[i][j].x + offset.x, this.array.segment[i][j].y + offset.y,
                     this.array.segment[i][jj].x + offset.x, this.array.segment[i][jj].y + offset.y );
       }
-
-
     }
-
-
-
   }
 
   drawBackground( offset ){

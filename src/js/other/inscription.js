@@ -14,12 +14,12 @@ class inscription {
   }
 
   draw( layer ){
-    if ( ( this.const.layer == layer || this.const.layer == 99 ) && this.var.onScreen ){
+    if ( ( this.const.layer == layer || this.const.layer == MENU_LAYER ) && this.var.onScreen ){
       textSize( this.const.size );
       strokeWeight( 1 );
       fill( 0 );
       text( this.const.content, this.const.center.x, this.const.center.y + this.const.size / 3 );
-      textSize( fontSize );
+      textSize( FONT_SIZE );
     }
   }
 }

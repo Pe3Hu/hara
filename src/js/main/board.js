@@ -1,16 +1,15 @@
 //playing field displayed on screen
 class board {
-  constructor ( offset ){
-    this.offset = offset;
+  constructor (){
     this.const = {
-      a: cellSize,
+      a: CELL_SIZE,
       menuButtons: 10,
       menuInscription: 0,
       grid: {
         x: null,
         y: null,
       },
-      blendSize: 2,
+      blendSize: 4,
       blendCount: 3,
       blendShred: 2,
       blendA: null
@@ -29,7 +28,7 @@ class board {
       inscription: [],
       offset: []
     }
-    this.const.blendA = Math.floor( ( canvasGrid.x - 3.5 ) * cellSize / ( this.const.blendSize + 1 ) / this.const.blendCount );
+    this.const.blendA = Math.floor( ( CANVAS_GRID.x - 3.5 ) * CELL_SIZE / ( this.const.blendSize + 1 ) / this.const.blendCount );
 
     this.init();
   }
@@ -44,8 +43,8 @@ class board {
   }
 
   initGrid(){
-    this.const.grid.x = Math.floor( canvasSize.x / cellSize );
-    this.const.grid.y = Math.floor( canvasSize.y / cellSize );
+    this.const.grid.x = Math.floor( CANVAS_SIZE.x / CELL_SIZE );
+    this.const.grid.y = Math.floor( CANVAS_SIZE.y / CELL_SIZE );
   }
 
   initOffsets(){
@@ -56,7 +55,7 @@ class board {
     this.array.offset.push( [] );
 
     let layer = 3;
-    this.array.offset[layer].push( createVector( cellSize *  0.5, cellSize * 0.5 ) );
+    this.array.offset[layer].push( createVector( CELL_SIZE *  0.5, CELL_SIZE * 0.5 ) );
   }
 
   initLayers(){
@@ -68,22 +67,22 @@ class board {
 
   initBorders(){
     //
-    let layer = 99;
+    let layer = MENU_LAYER/*MENU_LAYER*/;
     let name = 'layerMenu';
-    let offset = createVector( cellSize * ( canvasGrid.x - 2.25 ), cellSize * 0.5 );
-    let size = createVector( cellSize * 2, cellSize * 5 );
+    let offset = createVector( CELL_SIZE * ( CANVAS_GRID.x - 2.25 ), CELL_SIZE * 0.5 );
+    let size = createVector( CELL_SIZE * 2, CELL_SIZE * 5 );
     this.addBorder( layer, name, offset, size );
 
     layer = 3;
     name = 'blendMenu';
     offset = this.array.offset[layer][0];
     let l = this.array.layer[layer].table.shred[this.const.blendShred].length;
-    size = createVector( cellSize * ( 16 * 1.25 + 2.5 ), cellSize * 1.25 * l + cellSize * 4 );
+    size = createVector( CELL_SIZE * ( 16 * 1.25 + 2.5 ), CELL_SIZE * 1.25 * l + CELL_SIZE * 4 );
     this.addBorder( layer, name, offset, size );
 
     name = 'blendSreds';
     offset = this.array.offset[layer][0].copy();
-    offset.y +=  cellSize * 1.25 * l + cellSize * 4.5;
+    offset.y +=  CELL_SIZE * 1.25 * l + CELL_SIZE * 4.5;
     this.array.offset[layer][1] = offset;
     size = createVector(
       this.const.blendA * ( ( this.const.blendSize + 1 ) * this.const.blendCount - 0.25 ),
@@ -100,7 +99,7 @@ class board {
 
   cleanBorders(){
     for ( let i = 0; i < this.array.border.length; i++ )
-      if( this.array.border[i].layer != 99 )
+      if( this.array.border[i].layer != MENU_LAYER )
         this.array.border[i].onScreen = false;
   }
 
@@ -122,37 +121,37 @@ class board {
     let layer, name, type, vec, offset;
 
     //set layer change buttons
-    layer = 99;
+    layer = MENU_LAYER;
     name = 'switchToExpansion';
     type = 0;
-    vec = createVector( cellSize * ( canvasGrid.x - 1.25 ), cellSize * 1.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 1.5 );
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToPolimino';
     type++;
-    vec = createVector( cellSize * ( canvasGrid.x - 1.25 ), cellSize * 2.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 2.5 );
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToScroll';
     type++;
-    vec = createVector( cellSize * ( canvasGrid.x - 1.25 ), cellSize * 3.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 3.5 );
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToBlend';
     type++;
-    vec = createVector( cellSize * ( canvasGrid.x - 1.25 ), cellSize * 4.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 4.5 );
     this.addButton( layer, name, type, vec.copy() );
 
     layer = 1;
     name = '';
     type = this.const.menuButtons;
-    vec = createVector( cellSize * 20.5, cellSize * 2 );
+    vec = createVector( CELL_SIZE * 20.5, CELL_SIZE * 2 );
     this.addButton( layer, name, type, vec.copy() );
 
     layer = 1;
     name = '';
     type++;
-    vec = createVector( cellSize * 20.5, cellSize * 4 );
+    vec = createVector( CELL_SIZE * 20.5, CELL_SIZE * 4 );
     this.addButton( layer, name, type, vec.copy() );
 
     layer = 3;
@@ -160,7 +159,6 @@ class board {
     let laws = this.array.layer[layer].obj.laws.obj;
     offset = this.array.offset[layer][0];
     let l = this.array.layer[layer].obj.laws.array.value.length;
-    console.log(l)
 
     let i = 0;
     for( let subtype in laws )
@@ -172,7 +170,7 @@ class board {
 
         for( let value in laws[subtype][location] ){
           name = subtype + ' ' + location + ' ' + value;
-          vec = createVector( cellSize * ( i * 1.25 + 2.75 ), cellSize * ( ( j + jj ) * 1.25 + 3 ) );
+          vec = createVector( CELL_SIZE * ( i * 1.25 + 2.75 ), CELL_SIZE * ( ( j + jj ) * 1.25 + 3 ) );
           vec.add( offset );
           this.addButton( layer, name, type, vec.copy() );
           j++;
@@ -181,7 +179,7 @@ class board {
       }
 
     for ( let i = 0; i < this.array.button.length; i++ )
-      if( this.array.button[i].layer == 99 )
+      if( this.array.button[i].layer == MENU_LAYER )
         this.array.button[i].onScreen = true;
 
     this.updateButtons();
@@ -190,7 +188,7 @@ class board {
   addButton( layer, name, type, center ){
     this.array.button.push( new button( this.var.buttonID, layer, name, type, center ));
     this.var.buttonID++;
-    if( layer == 99 )
+    if( layer == MENU_LAYER )
       this.var.menuButton++
   }
 
@@ -228,7 +226,7 @@ class board {
     let a = this.const.a * 1.25;
 
     layer = 3;
-    size = fontSize;
+    size = FONT_SIZE;
 
     let laws = this.array.layer[layer].obj.laws;
     let offset = this.array.offset[0];
@@ -236,7 +234,7 @@ class board {
 
     for( let subtype in laws.obj ){
       let j = 0;
-      center = createVector( a * ( 4 * i + j + 1.25 ) + cellSize * 3.5, cellSize * 1.5 );
+      center = createVector( a * ( 4 * i + j + 1.25 ) + CELL_SIZE * 3.5, CELL_SIZE * 1.5 );
       center.add( offset );
       content = subtype;
       this.addInscription( layer, content, center, size );
@@ -244,7 +242,7 @@ class board {
 
       for( let location in laws.obj[subtype] )
         if( !location.includes( 'not' ) ){
-          center = createVector( a * ( 4 * i + j + 1.25 ) + cellSize * 3.5, cellSize * 2.5 );
+          center = createVector( a * ( 4 * i + j + 1.25 ) + CELL_SIZE * 3.5, CELL_SIZE * 2.5 );
           center.add( offset );
           content = location;
           this.addInscription( layer, content, center, size );
@@ -257,10 +255,9 @@ class board {
     i = 0;
 
     for( let value in laws.obj['shortest']['on'] ){
-      center = createVector( a * -1.5  + cellSize * 3.5, a * i + cellSize * 3.5 );
+      center = createVector( a * -1.5  + CELL_SIZE * 3.5, a * i + CELL_SIZE * 3.5 );
       center.add( offset );
-      //content = laws.table['label'][value];
-      content = value;
+      content = laws.table['label'][value];
       this.addInscription( layer, content, center, size );
       i++;
     }
@@ -304,7 +301,7 @@ class board {
     let x = mouseX;// - this.offset.x;
     let y = mouseY;// - this.offset.y;
     let vec = createVector( x, y );
-    let minDist = infinity;
+    let minDist = INFINITY;
     let buttonID = null;
 
     for( let i = 0; i < this.array.button.length; i++ )
@@ -312,7 +309,7 @@ class board {
         minDist = vec.dist( this.array.button[i].center );
         buttonID = i;
       }
-    if ( minDist > cellSize / 2 || !this.array.button[buttonID].onScreen )
+    if ( minDist > CELL_SIZE / 2 || !this.array.button[buttonID].onScreen )
         return;
 
     //change board layer
@@ -347,7 +344,7 @@ class board {
   click(){
     this.buttonClickCheck();
 
-    this.array.layer[this.var.layer].click();
+    this.array.layer[this.var.layer].click( this.array.offset[this.var.layer] );//this.array.offset[this.var.layer]
   }
 
   key(){

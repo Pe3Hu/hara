@@ -2,8 +2,8 @@
 class pentamino {
   constructor(){
     this.const = {
-      offset: createVector( cellSize * 2, cellSize * 2 ),
-      a: cellSize * 0.5,
+      offset: createVector( CELL_SIZE * 2, CELL_SIZE * 2 ),
+      a: CELL_SIZE * 0.5,
       round: 4,
       n: 9
     };

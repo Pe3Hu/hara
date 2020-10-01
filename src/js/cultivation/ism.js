@@ -385,7 +385,7 @@ class ism{
   }
 
   click( offset ){
-    let min = infinity;
+    let min = INFINITY;
     let index = null;
     let mouse = createVector(
       mouseX + this.var.center.x - offset.x,

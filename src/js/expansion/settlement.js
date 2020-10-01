@@ -2,11 +2,11 @@
 class settlement{
   constructor( size ){
     this.const = {
-      offset: createVector( cellSize * 2, cellSize * 2 ),
+      offset: createVector( CELL_SIZE * 2, CELL_SIZE * 2 ),
       n: size * 2 + 1,
       m: size * 2 + 1,
       size: size,
-      a: cellSize * 0.5
+      a: CELL_SIZE * 0.5
     };
     this.var = {
     }
@@ -143,6 +143,10 @@ class settlement{
       flag = this.array.area[grid.y][grid.x].var.free;
 
     return flag;
+  }
+
+  click(){
+    
   }
 
   draw(){

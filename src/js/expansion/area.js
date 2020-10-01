@@ -13,7 +13,7 @@ class area {
       dot: []
     };
     this.var = {
-      lightness: colorMax * 0.75,
+      lightness: COLOR_MAX * 0.75,
       center: center.copy(),
       status: 'empty',
       saturation: 0,
@@ -76,15 +76,15 @@ class area {
         this.var.free = true;
         this.var.hue = 0;
         this.var.saturation = 0;
-        this.var.lightness = colorMax * 0.75;
+        this.var.lightness = COLOR_MAX * 0.75;
         break;
       //show free
       case 1:
         this.var.status = 'center';
         this.var.free = false;
         this.var.hue = 60;
-        this.var.saturation = colorMax * 1;
-        this.var.lightness = colorMax * 0.5;
+        this.var.saturation = COLOR_MAX * 1;
+        this.var.lightness = COLOR_MAX * 0.5;
         break;
     }
   }
@@ -105,7 +105,7 @@ class area {
        stroke( 0 );
        fill( 0 );
        this.var.txt = this.const.index;
-       text( this.var.txt, this.var.center.x, this.var.center.y + fontSize / 3 );
+       text( this.var.txt, this.var.center.x, this.var.center.y + FONT_SIZE / 3 );
     }
   }
 }

@@ -4,12 +4,12 @@ class button {
     this.name = name;
     this.type = type;
     this.center = center;
-    this.color = color( colorMax / 2 );
+    this.color = color( COLOR_MAX / 2 );
     this.const = {
       index: index,
-      a: cellSize,
-      d: cellSize * 1,
-      r: cellSize * 0.4,
+      a: CELL_SIZE,
+      d: CELL_SIZE * 1,
+      r: CELL_SIZE * 0.4,
       n: 5,
       m: 8
     };
@@ -56,19 +56,19 @@ class button {
         noStroke();
         switch ( this.type ) {
           case 0:
-            fill( 340, colorMax * 1, colorMax * 0.5 );
+            fill( 340, COLOR_MAX * 1, COLOR_MAX * 0.5 );
             break;
           case 1:
-            fill( 150, colorMax * 1, colorMax * 0.5 );
+            fill( 150, COLOR_MAX * 1, COLOR_MAX * 0.5 );
             break;
           case 2:
-            fill( 50, colorMax * 1, colorMax * 0.5 );
+            fill( 50, COLOR_MAX * 1, COLOR_MAX * 0.5 );
             break;
           case 3:
-            fill( 220, colorMax * 1, colorMax * 0.5 );
+            fill( 220, COLOR_MAX * 1, COLOR_MAX * 0.5 );
             break;
           case 4:
-            fill( 300, colorMax * 1, colorMax * 0.5 );
+            fill( 300, COLOR_MAX * 1, COLOR_MAX * 0.5 );
             break;
         }
         rect(
@@ -97,9 +97,9 @@ class button {
 
       if( this.type == 12 ){
         if( this.pressed )
-          fill( 60, colorMax * 1, colorMax * 0.5 );
+          fill( 120, COLOR_MAX * 1, COLOR_MAX * 0.5 );
         else
-          fill( 210, colorMax * 1, colorMax * 0.5 );
+          fill( 60, COLOR_MAX * 1, COLOR_MAX * 0.5 );
         noStroke();
         rect(
           this.center.x - this.const.a / 2,

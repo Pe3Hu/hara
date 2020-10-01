@@ -1,19 +1,22 @@
 //
 class node {
-  constructor ( index, label, center, grid, a ){
+  constructor ( index, label, center, grid, neighbors, a ){
     this.const = {
       index: index,
       label: label,
-      i: grid.y,
-      j: grid.x,
+      i: grid.x,
+      j: grid.y,
+      f: grid.z,
       n: 4,
       a: a
     };
     this.array = {
-      vertex: []
+      vertex: [],
+      neighbors: neighbors
     };
     this.var = {
-      center: center.copy()
+      center: center.copy(),
+      pressed: false
     };
 
     this.init();
@@ -34,16 +37,23 @@ class node {
     this.initVertexs();
   }
 
+  press(){
+    this.var.pressed = !this.var.pressed;
+  }
+
   draw( offset ){
-   fill( 120, colorMax * 0.75, colorMax * 0.5 );
-   noStroke();
+    if( this.var.pressed  )
+      fill( 120, COLOR_MAX * 0.75, COLOR_MAX * 0.5 );
+    else
+      fill( 60, COLOR_MAX * 0.75, COLOR_MAX * 0.5 );
+    noStroke();
 
-   for( let i = 0; i < this.array.vertex.length; i++ ){
-     let ii = ( i + 1 ) % this.array.vertex.length;
+    for( let i = 0; i < this.array.vertex.length; i++ ){
+    let ii = ( i + 1 ) % this.array.vertex.length;
 
-     triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
-               this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
-               this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
+    triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
+             this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
+             this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
    }
 
     textSize( this.const.a );
@@ -51,6 +61,6 @@ class node {
     fill( 0 );
     let txt = this.const.label;
     text( txt, this.var.center.x + offset.x, this.var.center.y + offset.y + this.const.a / 3 );
-    textSize( fontSize );
+    textSize( FONT_SIZE );
   }
 }

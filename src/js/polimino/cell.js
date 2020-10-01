@@ -28,8 +28,8 @@ class cell {
         this.var.status = 'empty';
         this.var.free = true;
         this.var.hue = 60;
-        this.var.saturation = colorMax;
-        this.var.lightness = colorMax * 0.75;
+        this.var.saturation = COLOR_MAX;
+        this.var.lightness = COLOR_MAX * 0.75;
         this.var.card = null;
         break;
       //show taken
@@ -37,8 +37,8 @@ class cell {
         this.var.status = 'taken';
         this.var.free = false;
         this.var.hue = 210;
-        this.var.saturation = colorMax;
-        this.var.lightness = colorMax * 0.5;
+        this.var.saturation = COLOR_MAX;
+        this.var.lightness = COLOR_MAX * 0.5;
         this.var.card = card;
         break;
     }
@@ -57,7 +57,7 @@ class cell {
       stroke( 0 );
       fill( 0 );
       let txt = this.const.index;
-      text( txt, this.const.center.x, this.const.center.y + fontSize / 3 );
+      text( txt, this.const.center.x, this.const.center.y + FONT_SIZE / 3 );
     }
   }
 }

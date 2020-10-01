@@ -2,7 +2,7 @@
 class scroll {
   constructor (){
     this.const = {
-      a: cellSize * 0.2,
+      a: CELL_SIZE * 0.2,
       markup:{
         n: null,
         m: null
@@ -38,11 +38,11 @@ class scroll {
     //1 - ism
     this.table.markup = [ [], [] ];
     let size = 10 * this.const.a;
-    let leftBorder = 2 * cellSize;
-    let rightBorder = ( canvasGrid.x - 3.5 ) * cellSize;
+    let leftBorder = 2 * CELL_SIZE;
+    let rightBorder = ( CANVAS_GRID.x - 3.5 ) * CELL_SIZE;
     this.const.markup.n = Math.floor( ( rightBorder - leftBorder ) / size );
-    let topBorder = 2 * cellSize;
-    let botBorder = ( canvasGrid.y - 1 ) * cellSize;
+    let topBorder = 2 * CELL_SIZE;
+    let botBorder = ( CANVAS_GRID.y - 1 ) * CELL_SIZE;
     this.const.markup.m = 3;//Math.floor( ( botBorder - topBorder ) / size );
 
     for( let i = 0; i < this.const.markup.m; i++ ){
@@ -201,7 +201,7 @@ class scroll {
   pickRune(){
     let a = this.array.rune[0][0].const.a * 5;
     let mouse = createVector( mouseX - a * 0.5, mouseY - a * 0.3 );
-    let min = infinity;
+    let min = INFINITY;
     let index = null;
     let i = 0;
 

@@ -57,13 +57,68 @@ class blend {
     let a = this.const.a / 4;
     let index = 0;
     let label = 0;
+    let sqaure = [];
+
+    sqaure.push( createVector( 0, -1 ) );
+    sqaure.push( createVector( 0, 0 ) );
+    sqaure.push( createVector( -1, 0 ) );
+    sqaure.push( createVector( -1, -1 ) );
 
     for( let field = 0; field < this.const.field.count; field++ ){
       this.array.node.push( [] );
       for( let i = 0; i < this.const.field.size + 1; i++ ){
         this.array.node[field].push( [] );
         for( let j = 0; j < this.const.field.size + 1; j++ ){
-          let grid = createVector( j, i );
+          let grid = createVector( i, j, field );
+          let type = 0;
+          let neighbors = [ 0, 1, 2, 3 ];
+          let exceptions = [];
+          if( j == 0 ){
+            exceptions.push( 0 );
+            exceptions.push( 3 );
+          }
+          if( i == this.const.field.size ){
+            exceptions.push( 0 );
+            exceptions.push( 1 );
+          }
+          if( j == this.const.field.size ){
+            exceptions.push( 1 );
+            exceptions.push( 2 );
+          }
+          if( i == 0 ){
+            exceptions.push( 2 );
+            exceptions.push( 3 );
+          }
+
+          for( let i = neighbors.length - 1; i > -1; i-- )
+            if( exceptions.indexOf( neighbors[i] ) != -1 )
+              neighbors.splice( i, 1 );
+
+          let array = [];
+          for( let i = 0; i < neighbors.length; i++ )
+            array.push( sqaure[neighbors[i]] );
+          /*
+          if( j == 0 ){
+            type = 1;
+            if( i == this.const.field.size )
+              type = 2;
+            if( i == 0 )
+              type = 8;
+          }
+          else
+            if( j == this.const.field.size ){
+              type = 5;
+              if( i == this.const.field.size )
+                type = 4;
+              if( i == 0 )
+                type = 6;
+            }
+          else{
+            if( i == 0 )
+              type = 7;
+            if( i ==  this.const.field.size )
+              type = 3;
+          }*/
           let vec = createVector( this.const.a * ( i + field * ( this.const.field.size + 1 ) ), this.const.a * j );
           let l = label;
           let flag = ( field > 0 && i == 0 );
@@ -74,7 +129,7 @@ class blend {
           flag = ( field == this.const.field.count - 1 && i == this.const.field.size );
           if( flag )
             l = this.array.node[0][0][j].const.label;
-          this.array.node[field][i].push( new node( index, l, vec, grid, a ) );
+          this.array.node[field][i].push( new node( index, l, vec, grid, array, a ) );
           index++;
         }
       }
@@ -98,7 +153,7 @@ class blend {
           count++;
           this.array.value.splice( rand, 1 );
           let kind = this.var.kind;
-          let grid = createVector( j, i );
+          let grid = createVector( j, i, field );
           let vec = createVector( this.const.a * ( j + 0.5 + field * ( this.const.field.size + 1 ) ), this.const.a * ( i + 0.5 ) );
           this.array.shred[field][i].push( new shred( index, value, kind, vec, grid,  a ) );
           index++;
@@ -464,7 +519,7 @@ class blend {
     this.findConnections();
     this.defineLaws();
     this.generateIntersections();
-    this.setAnswer();
+    //this.setAnswer();
     //console.log( this.obj.laws.obj )
   }
 
@@ -676,21 +731,49 @@ class blend {
     this.approveLaw( child.subtype, child.location, child.value )
   }
 
-  approveLaw( subtype, location, value ){
+  approveLaw( subtype, location, value, flag ){
     let laws = this.obj.laws;
     let indexs = laws.obj[subtype][location][value];
 
     for( let i = 0; i < indexs.length; i++ ){
       let result = this.convertIndex( indexs[i] );
-      this.array.shred[result.f][result.i][result.j].setFit( false );
+      this.array.shred[result.f][result.i][result.j].setFit( !flag, 0 );
     }
   }
 
   buttonPressed( buttons, id ){
+    let array = buttons[id].name.split( ' ' );
+    let subtype = array[0];
+    let location = array[1];
+    let value = array[2];
+    let l = this.obj.laws.array.value.length;
+    let shift = null;
+
+    switch ( subtype ) {
+      case 'shortest':
+      case 'longest':
+        l++;
+        break;
+    }
+
+    if( location.includes( 'not' ) )
+      shift = -l;
+    else
+      shift = l;
+
+    let shifteID = id + shift;
+    if(  buttons[shifteID].pressed ){
+      buttons[shifteID].press();
+      let old = buttons[shifteID].name.split( ' ' );
+      console.log( old )
+      this.approveLaw( old[0], old[1], old[2], false );
+    }
+
+    let flag = buttons[id].pressed;
 
     buttons[id].press();
-    let txt = buttons[id].name;
-    console.log( id,  buttons[id].name );
+    this.approveLaw( subtype, location, value, !flag );
+
   }
 
   shuffle( array ){
@@ -728,15 +811,74 @@ class blend {
     return a - b;
   }
 
-  click(){
+  click( offsets ){
+    this.clickNode( offsets );
+  }
 
+  clickNode( offsets ){
+    let minDist = INFINITY;
+    let node = null;
+    let mouse = createVector( mouseX, mouseY );
+    mouse.sub( offsets[1].copy() );
+    mouse.sub( this.const.a / 3,  this.const.a / 3 );
+
+    for( let f = 0; f < this.array.node.length; f++ )
+      for( let i = 0; i < this.array.node[f].length; i++ )
+        for( let j = 0; j < this.array.node[f][i].length; j++ ){
+          let center = this.array.node[f][i][j].var.center;
+          let d = mouse.dist( center );
+
+          if ( d < minDist ){
+            minDist = d;
+
+            if( this.array.node[f][i][j].const.a > minDist ){
+              node = this.array.node[f][i][j];
+              break;
+            }
+          }
+        }
+
+    if( node != null ){
+      node.press();
+      this.activateNode( node );
+      console.log( node.const.f, node.const.j, node.const.i )
+
+      let double = null;
+      if( node.const.j == 0 )
+        double = createVector(
+          this.const.field.size,
+          node.const.i,
+          ( node.const.f - 1 + this.const.field.count ) % this.const.field.count );
+
+      if( node.const.j == this.const.field.size )
+        double = createVector(
+          0,
+          node.const.i,
+          ( node.const.f + 1 ) % this.const.field.count );
+
+      if( double != null )
+        this.array.node[double.z][double.x][double.y].press();
+    }
+  }
+
+  activateNode( node ){
+    console.log( node.const.index, node.const.label, node.array.neighbors )
+    let center = createVector(  node.const.i,  node.const.j,  node.const.f );
+    console.log( center )
+
+    for( let i = 0; i < node.array.neighbors; i++ ){
+      let neighbor = center.copy();
+      neighbor.add( node.array.neighbors[i] );
+      this.array.shred[neighbor.z][neighbor.x][neighbor.y].setFit( true, 1 );
+      console.log( neighbor )
+    }
   }
 
   key(){
-
+    //
   }
 
-  draw(  offsets ){
+  draw( offsets ){
     let offset = offsets[1].copy();
     offset.add( this.const.a / 3,  this.const.a / 3 )
 

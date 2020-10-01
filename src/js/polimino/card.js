@@ -52,22 +52,22 @@ class card {
 
     for ( let i = 0; i < n; i++ )
       this.array.color.push( {
-        hue: i * colorMax / n,
-        saturation: colorMax,
-        lightness: colorMax * 0.5
+        hue: i * COLOR_MAX / n,
+        saturation: COLOR_MAX,
+        lightness: COLOR_MAX * 0.5
       } );
 
     this.array.color.push( {
       hue: 0,
       saturation: 0,
-      lightness: colorMax * 0.75
+      lightness: COLOR_MAX * 0.75
     } );
 
 
     this.array.color.push( {
       hue: 0,
       saturation: 0,
-      lightness: colorMax
+      lightness: COLOR_MAX
     } );
   }
 
@@ -316,7 +316,7 @@ class card {
             break;
         }
 
-        text( caste, casteVec.x, casteVec.y + fontSize / 3 );
+        text( caste, casteVec.x, casteVec.y + FONT_SIZE / 3 );
         let color = this.array.color[this.var.sin.id];
         fill( color.hue, color.saturation, color.lightness );
         rect( rectVec.x, rectVec.y, rectSize.x, rectSize.y );
@@ -332,19 +332,19 @@ class card {
           vec.y += this.array.size[i].y / 2;
           let txt = this.array.predisposition[i];
 
-          textSize( fontSize * 0.8 );
+          textSize( FONT_SIZE * 0.8 );
           if( this.array.predisposition[i] == this.var.maxPredisposition )
             fill( this.array.color[8].hue, this.array.color[8].saturation, this.array.color[8].lightness );
           else
             fill( this.array.color[7].hue, this.array.color[7].saturation, this.array.color[7].lightness );
-          text( txt, vec.x, vec.y + fontSize / 3 * 0.8 );
-          textSize( fontSize );
+          text( txt, vec.x, vec.y + FONT_SIZE / 3 * 0.8 );
+          textSize( FONT_SIZE );
         }
 
         casteVec = this.const.center.copy();
         caste = this.var.caste.name.charAt( 0 ).toUpperCase();
         fill( 0 );
-        text( caste, casteVec.x, casteVec.y + fontSize / 3 );
+        text( caste, casteVec.x, casteVec.y + FONT_SIZE / 3 );
         break;
     }
 
