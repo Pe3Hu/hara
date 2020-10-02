@@ -34,9 +34,11 @@ class shred {
         'total': false
       },
       fit: {
-        law: true,
-        node: true
-      }
+        law: 2,
+        node: 2,
+        answer: false
+      },
+      answer: false
     };
     this.flag = {
       digital: [],
@@ -51,9 +53,9 @@ class shred {
         l: COLOR_MAX * 0.5
       },
       value:{
-        h: COLOR_MAX * 0.5,
+        h: 30,
         s: COLOR_MAX * 0.75,
-        l: COLOR_MAX * 0
+        l: 0
       }
     }
 
@@ -431,21 +433,48 @@ class shred {
     this.var.value['single'] = single;
   }
 
-  setFit( flag, type ){
-    //
+  setFit( type, status ){
+    //status
+    //0 - definitely not an answer
+    //1- definitely an answer
+    //2 - maybe an answer
     switch ( type ) {
       case 0:
-        this.var.fit.law = flag;
+        this.var.fit.law = status;
         break;
       case 1:
-        this.var.fit.node = flag;
+        this.var.fit.node = status;
+        break;
+      case 2:
+        this.var.fit.law = status;
+        this.var.fit.node = status;
         break;
     }
 
-    if( !this.var.fit.law || !this.var.fit.node )
-      this.color.bg.h = 120;
-    else
+    if( this.var.fit.law == 2 &&
+        this.var.fit.node == 2 )
       this.color.bg.h = 60;
+
+    if( this.var.fit.law == 0 ||
+        this.var.fit.node == 0 )
+      this.color.bg.h = 120;
+
+      
+    this.color.value.h = 30;
+
+    if( ( this.var.fit.law == 1 && this.var.fit.node == 2 ) ||
+        ( this.var.fit.law == 2 && this.var.fit.node == 1 ) ){
+          this.color.bg.h = 30;
+          this.color.value.h = 120;
+        }
+  }
+
+  setAnswer( flag ){
+    this.var.answer = flag;
+    if( flag )
+      this.color.value.l = COLOR_MAX * 0.5;
+    else
+      this.color.value.l = 0;
   }
 
   updateHarmony(){

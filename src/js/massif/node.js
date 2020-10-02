@@ -16,7 +16,14 @@ class node {
     };
     this.var = {
       center: center.copy(),
-      pressed: false
+      status: 2
+    };
+    this.color = {
+      bg:{
+        h: 60,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      }
     };
 
     this.init();
@@ -37,15 +44,32 @@ class node {
     this.initVertexs();
   }
 
-  press(){
-    this.var.pressed = !this.var.pressed;
+  press( status ){
+    switch ( this.var.status ) {
+      case 0:
+      case 1:
+        this.var.status = 2;
+        break;
+      case 2:
+        this.var.status = status;
+        break;
+    }
+
+    switch ( this.var.status ) {
+      case 0:
+        this.color.bg.h = 120;
+        break;
+      case 1:
+        this.color.bg.h = 30;
+        break;
+      case 2:
+        this.color.bg.h = 60;
+        break;
+    }
   }
 
   draw( offset ){
-    if( this.var.pressed  )
-      fill( 120, COLOR_MAX * 0.75, COLOR_MAX * 0.5 );
-    else
-      fill( 60, COLOR_MAX * 0.75, COLOR_MAX * 0.5 );
+    fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
     noStroke();
 
     for( let i = 0; i < this.array.vertex.length; i++ ){

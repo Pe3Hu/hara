@@ -8,7 +8,6 @@ class inscription {
       size: size
     };
     this.var = {
-      color: color( 0 ),
       onScreen: true
     };
   }

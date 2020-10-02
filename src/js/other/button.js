@@ -1,12 +1,11 @@
 class button {
   constructor ( index, layer, name, type, center ){
-    this.layer = layer;
-    this.name = name;
-    this.type = type;
-    this.center = center;
-    this.color = color( COLOR_MAX / 2 );
     this.const = {
       index: index,
+      layer: layer,
+      name: name,
+      center: center,
+      type: type,
       a: CELL_SIZE,
       d: CELL_SIZE * 1,
       r: CELL_SIZE * 0.4,
@@ -15,12 +14,27 @@ class button {
     };
     this.array = {
       vertex: []
-    }
-    this.description = null;
-    this.onScreen = true;
-    this.pressed = false;
+    };
+    this.var = {
+      status: null,
+      pressed: false,
+      description: null,
+      onScreen: true
+    };
+    this.color = {
+      bg:{
+        h: 0,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      }
+    };
 
+    this.init();
+  }
+
+  init(){
     this.initVertexs();
+    this.setColor();
   }
 
   initVertexs(){
@@ -31,79 +45,108 @@ class button {
         let r = this.const.a / 4;
         if ( j == 0 )
           r *= 2;
-        let x = this.center.x + Math.sin( angle ) * r;
-        let y = this.center.y + Math.cos( angle ) * r;
+        let x = this.const.center.x + Math.sin( angle ) * r;
+        let y = this.const.center.y + Math.cos( angle ) * r;
         let vec = createVector( x, y );
         this.array.vertex[i].push( vec.copy() );
       }
     }
   }
 
-  setDescription( txt ){
-    this.description = txt;
+  setStatus( status ){
+    this.var.pressed = !this.var.pressed;
+
+    switch ( this.var.status ) {
+      case 0:
+      case 1:
+        this.var.status = 2;
+        break;
+      case 2:
+      case null:
+          this.var.status = status;
+        break;
+    }
+
+    switch ( this.var.status ) {
+      case 0:
+        this.color.bg.h = 120;
+        break;
+      case 1:
+        this.color.bg.h = 30;
+        break;
+      case 2:
+        this.color.bg.h = 60;
+        break;
+    }
   }
 
-  press(){
-    this.pressed = !this.pressed;
+  setColor(){
+    switch ( this.const.type ) {
+      case 0:
+        this.color.bg.h = 340;
+        break;
+      case 1:
+        this.color.bg.h = 150;
+        break;
+      case 2:
+        this.color.bg.h = 50;
+        break;
+      case 3:
+        this.color.bg.h = 220;
+        break;
+      case 4:
+        this.color.bg.h = 300;
+        break;
+      case 10:
+        this.color.bg.h = 330;
+        break;
+      case 11:
+        this.color.bg.h = 30;
+        break;
+    }
   }
+
+  setDescription( txt ){
+    this.var.description = txt;
+  }
+
 
   draw( layer ){
-    if ( ( this.layer == layer || this.layer == 99 ) && this.onScreen ){
+    fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+
+    if ( ( this.const.layer == layer || this.const.layer == MENU_LAYER ) && this.var.onScreen ){
       let d = null;
+      noStroke();
 
       //draw layer change buttons
-      if ( this.type > -1 && this.type < 10 ){
-        noStroke();
-        switch ( this.type ) {
-          case 0:
-            fill( 340, COLOR_MAX * 1, COLOR_MAX * 0.5 );
-            break;
-          case 1:
-            fill( 150, COLOR_MAX * 1, COLOR_MAX * 0.5 );
-            break;
-          case 2:
-            fill( 50, COLOR_MAX * 1, COLOR_MAX * 0.5 );
-            break;
-          case 3:
-            fill( 220, COLOR_MAX * 1, COLOR_MAX * 0.5 );
-            break;
-          case 4:
-            fill( 300, COLOR_MAX * 1, COLOR_MAX * 0.5 );
-            break;
-        }
+      if ( this.const.type > -1 && this.const.type < 10 ){
         rect(
-          this.center.x - this.const.a / 2,
-          this.center.y - this.const.a / 2,
+          this.const.center.x - this.const.a / 2,
+          this.const.center.y - this.const.a / 2,
           this.const.a, this.const.a
         );
       }
 
-      if( this.type > 9 && this.type < 12  ){
-        switch ( this.type ) {
-          case 10:
+      if( this.const.type > 9 && this.const.type < 12 ){
+        /*cswitch ( this.const.type ) {
+          ase 10:
             fill('purple');
             break;
           case 11:
             fill('purple');
             break;
-          }
-          noStroke();
+          }*/
           rect(
-            this.center.x - this.const.a / 2,
-            this.center.y - this.const.a / 2,
+            this.const.center.x - this.const.a / 2,
+            this.const.center.y - this.const.a / 2,
             this.const.a, this.const.a
           );
       }
 
-      if( this.type == 12 ){
-        if( this.pressed )
-          fill( 120, COLOR_MAX * 1, COLOR_MAX * 0.5 );
-        else
-          fill( 60, COLOR_MAX * 1, COLOR_MAX * 0.5 );
-        noStroke();
+      if( this.const.type == 12 ){
         rect(
-          this.center.x - this.const.a / 2,
-          this.center.y - this.const.a / 2,
+          this.const.center.x - this.const.a / 2,
+          this.const.center.y - this.const.a / 2,
           this.const.a, this.const.a
         );
       }

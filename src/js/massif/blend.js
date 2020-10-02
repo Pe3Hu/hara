@@ -11,7 +11,12 @@ class blend {
     this.array = {
       node: [],
       shred: [],
-      value: []
+      value: [],
+      activated: {
+        law: [],
+        node: []
+      },
+      answer: []
     };
     this.var = {
       shred: shred,
@@ -162,6 +167,16 @@ class blend {
     }
   }
 
+  cleanShreds(){
+    let type = 2;
+    let status = 2;
+    //
+    for( let f = 0; f < this.array.shred.length; f++ )
+      for( let i = 0; i < this.array.shred[f].length; i++ )
+        for( let j = 0; j < this.array.shred[f][i].length; j++ )
+          this.array.shred[f][i][j].setFit( type, status );
+  }
+
   findConnections(){
     let charges = [];
     let groups = [];
@@ -273,7 +288,7 @@ class blend {
 
         for( let i = 0; i < on.length; i++ ){
           let index = on[i];
-          let result = this.convertIndex( index );
+          let result = this.convertShredIndex( index );
 
           for( let j = 0; j < neighbors.length; j++ ){
             let neighbor = createVector( result.j, result.i, result.f );
@@ -509,6 +524,7 @@ class blend {
     }
 
     this.obj.laws.setAnswers( result );
+    console.log( result );
   }
 
   init(){
@@ -519,8 +535,7 @@ class blend {
     this.findConnections();
     this.defineLaws();
     this.generateIntersections();
-    //this.setAnswer();
-    //console.log( this.obj.laws.obj )
+    this.setAnswer();
   }
 
   sortGroupsByExtent( groups, extent, values ){
@@ -718,34 +733,63 @@ class blend {
   }
 
   setAnswer(){
+    this.array.answer = [];
+    let id = 0;
     let laws = this.obj.laws;
-    let parent = laws.array.answer[0].parent;
-    let child = laws.array.answer[0].child;
-    let indexsP = laws.obj[parent.subtype][parent.location][parent.value];
-    let indexsC = laws.obj[child.subtype][child.location][child.value];
-    console.log(  parent.subtype, parent.location, parent.value, indexsP )
-    console.log(  child.subtype, child.location, child.value, indexsC )
-    console.log( laws.array.answer[0].indexs )
+    let answers = laws.array.answer[id].answers;
 
-    this.approveLaw( parent.subtype, parent.location, parent.value )
-    this.approveLaw( child.subtype, child.location, child.value )
-  }
-
-  approveLaw( subtype, location, value, flag ){
-    let laws = this.obj.laws;
-    let indexs = laws.obj[subtype][location][value];
-
-    for( let i = 0; i < indexs.length; i++ ){
-      let result = this.convertIndex( indexs[i] );
-      this.array.shred[result.f][result.i][result.j].setFit( !flag, 0 );
+    for( let i = 0; i < answers.length; i++ ){
+      let obj = this.convertShredIndex( answers[i] );
+      this.array.shred[obj.f][obj.i][obj.j].setAnswer( true );
+      this.array.answer.push( answers[i] );
     }
   }
 
-  buttonPressed( buttons, id ){
-    let array = buttons[id].name.split( ' ' );
+  activateLaw( string ){
+    //
+    let id =  this.array.activated.law.indexOf( string );
+    if( id == -1 )
+      this.array.activated.law.push( string );
+    else
+      this.array.activated.law.splice( id, 1 );
+  }
+
+  updateLaws(){
+    //
+    let type = 0;
+
+    for( let i = 0; i < this.array.activated.law.length; i++ ){
+      let string = this.array.activated.law[i];
+      let array = string.split( ' ' );
+      let subtype = array[0];
+      let location = array[1];
+      let value = array[2];
+      let indexs = this.obj.laws.obj[subtype][location][value];
+      let status = false;
+
+      for( let j = 0; j < indexs.length; j++ ){
+        let obj = this.convertShredIndex( indexs[j] );
+        status = this.array.answer.includes(this.array.shred[obj.f][obj.i][obj.j].const.index ) || status;
+      }
+
+      if( status )
+        status = 1;
+      else
+        status = 0;
+
+      for( let j = 0; j < indexs.length; j++ ){
+        let obj = this.convertShredIndex( indexs[j] );
+        this.array.shred[obj.f][obj.i][obj.j].setFit( type, status );
+      }
+    }
+  }
+
+  activateButton( buttons, id ){
+    let array = buttons[id].const.name.split( ' ' );
     let subtype = array[0];
     let location = array[1];
     let value = array[2];
+    let indexs = this.obj.laws.obj[subtype][location][value];
     let l = this.obj.laws.array.value.length;
     let shift = null;
 
@@ -761,19 +805,35 @@ class blend {
     else
       shift = l;
 
+    let status = this.checkLaw( indexs );
     let shifteID = id + shift;
-    if(  buttons[shifteID].pressed ){
-      buttons[shifteID].press();
-      let old = buttons[shifteID].name.split( ' ' );
-      console.log( old )
-      this.approveLaw( old[0], old[1], old[2], false );
+    let shiftedStatus = 2;
+
+    if( status == 1 ){
+      shiftedStatus = 0;
+      buttons[shifteID].setStatus( shiftedStatus );
+      this.activateLaw( buttons[shifteID].const.name );
     }
 
-    let flag = buttons[id].pressed;
+    let string = buttons[id].const.name;
+    buttons[id].setStatus( status );
+    this.activateLaw( string );
+  }
 
-    buttons[id].press();
-    this.approveLaw( subtype, location, value, !flag );
+  checkLaw( indexs ){
+    let status = false;
 
+    for( let j = 0; j < indexs.length; j++ ){
+      let obj = this.convertShredIndex( indexs[j] );
+      status = this.array.answer.includes(this.array.shred[obj.f][obj.i][obj.j].const.index ) || status;
+    }
+
+    if( status )
+      status = 1;
+    else
+      status = 0;
+
+    return status;
   }
 
   shuffle( array ){
@@ -793,11 +853,25 @@ class blend {
     return result;
   }
 
-  convertIndex( index ){
-    let f = Math.floor( index / this.const.field.size / this.const.field.size );
-    let id = index - f * this.const.field.size * this.const.field.size;
+  convertShredIndex( index ){
+    let f = Math.floor( index / Math.pow( this.const.field.size, 2 ) );
+    let id = index - f * Math.pow( this.const.field.size, 2 );
     let i = Math.floor( id / this.const.field.size );
     let j = id % this.const.field.size;
+
+    let result = {
+      f: f,
+      i: i,
+      j: j
+    };
+    return result;
+  }
+
+  convertNodeIndex( index ){
+    let f = Math.floor( index / Math.pow( ( this.const.field.size + 1 ), 2 ) );
+    let id = index - f * Math.pow( ( this.const.field.size + 1 ), 2 );
+    let i = Math.floor( id / ( this.const.field.size + 1 ) );
+    let j = id % ( this.const.field.size + 1 );
 
     let result = {
       f: f,
@@ -813,6 +887,7 @@ class blend {
 
   click( offsets ){
     this.clickNode( offsets );
+    this.update();
   }
 
   clickNode( offsets ){
@@ -839,39 +914,104 @@ class blend {
         }
 
     if( node != null ){
-      node.press();
-      this.activateNode( node );
-      console.log( node.const.f, node.const.j, node.const.i )
-
       let double = null;
-      if( node.const.j == 0 )
+
+      if( node.const.i == 0 )
         double = createVector(
           this.const.field.size,
-          node.const.i,
+          node.const.j,
           ( node.const.f - 1 + this.const.field.count ) % this.const.field.count );
 
-      if( node.const.j == this.const.field.size )
+      if( node.const.i == this.const.field.size )
         double = createVector(
           0,
-          node.const.i,
+          node.const.j,
           ( node.const.f + 1 ) % this.const.field.count );
 
+
+      let status = this.checkNode( node );
+      let doubleStatus = 2;
+
       if( double != null )
-        this.array.node[double.z][double.x][double.y].press();
+        doubleStatus = this.checkNode( this.array.node[double.z][double.x][double.y] )
+
+      if( doubleStatus != 2 )
+        status = Math.max( status, doubleStatus );
+
+      node.press( status );
+      this.activateNode( node.const.index );
+
+      if( double != null ){
+        this.array.node[double.z][double.x][double.y].press( status );
+        this.activateNode( this.array.node[double.z][double.x][double.y].const.index );
+      }
     }
   }
 
-  activateNode( node ){
-    console.log( node.const.index, node.const.label, node.array.neighbors )
-    let center = createVector(  node.const.i,  node.const.j,  node.const.f );
-    console.log( center )
+  checkNode( node ){
+    let status = false;
+    let center = createVector( node.const.i, node.const.j, node.const.f );
 
-    for( let i = 0; i < node.array.neighbors; i++ ){
+    for( let i = 0; i < node.array.neighbors.length; i++ ){
       let neighbor = center.copy();
       neighbor.add( node.array.neighbors[i] );
-      this.array.shred[neighbor.z][neighbor.x][neighbor.y].setFit( true, 1 );
-      console.log( neighbor )
+      status = this.array.answer.includes( this.array.shred[neighbor.z][neighbor.y][neighbor.x].const.index ) || status;
     }
+
+    if( status )
+      status = 1;
+    else
+      status = 0;
+
+    return status;
+  }
+
+  activateNode( index ){
+    let id =  this.array.activated.node.indexOf( index );
+    if( id == -1 )
+      this.array.activated.node.push( index );
+    else
+      this.array.activated.node.splice( id, 1 );
+  }
+
+  updateNodes(){
+    //
+    let type = 1;
+
+    for( let i = 0; i < this.array.activated.node.length; i++ ){
+      let index = this.array.activated.node[i];
+      let obj = this.convertNodeIndex( index );
+      let node = this.array.node[obj.f][obj.i][obj.j];
+      let center = createVector( obj.i, obj.j, obj.f );
+      let status = false;
+
+      for( let i = 0; i < node.array.neighbors.length; i++ ){
+        let neighbor = center.copy();
+        neighbor.add( node.array.neighbors[i] );
+        status = this.array.answer.includes( this.array.shred[neighbor.z][neighbor.y][neighbor.x].const.index ) || status;
+      }
+
+      if( status )
+        status = 1;
+      else
+        status = 0;
+
+      if( node.var.status != 2 )
+        status = node.var.status;
+
+      for( let i = 0; i < node.array.neighbors.length; i++ ){
+        let neighbor = center.copy();
+        neighbor.add( node.array.neighbors[i] );
+        this.array.shred[neighbor.z][neighbor.y][neighbor.x].setFit( type, status );
+      }
+    }
+  }
+
+  update(){
+    console.log( '_____________________' )
+    this.cleanShreds();
+    this.updateLaws();
+    this.updateNodes();
   }
 
   key(){

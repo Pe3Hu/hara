@@ -2,7 +2,7 @@
 class laws {
   constructor ( values ){
     this.obj = {
-      'single': {
+      'total': {
         'on': {},
         'notOn': {},
         'near': {},
@@ -20,7 +20,7 @@ class laws {
         'near': {},
         'notNear': {}
       },
-      'total': {
+      'single': {
         'on': {},
         'notOn': {},
         'near': {},

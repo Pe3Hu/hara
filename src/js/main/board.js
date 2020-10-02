@@ -100,7 +100,7 @@ class board {
   cleanBorders(){
     for ( let i = 0; i < this.array.border.length; i++ )
       if( this.array.border[i].layer != MENU_LAYER )
-        this.array.border[i].onScreen = false;
+        this.array.border[i].var.onScreen = false;
   }
 
   updateBorders(){
@@ -110,8 +110,8 @@ class board {
     switch ( this.var.layer ) {
       case 3:
         offsetID = 1;
-        this.array.border[offsetID].onScreen = true;
-        this.array.border[offsetID + 1].onScreen = true;
+        this.array.border[offsetID].var.onScreen = true;
+        this.array.border[offsetID + 1].var.onScreen = true;
         break;
     }
   }
@@ -180,7 +180,7 @@ class board {
 
     for ( let i = 0; i < this.array.button.length; i++ )
       if( this.array.button[i].layer == MENU_LAYER )
-        this.array.button[i].onScreen = true;
+        this.array.button[i].var.onScreen = true;
 
     this.updateButtons();
   }
@@ -189,12 +189,14 @@ class board {
     this.array.button.push( new button( this.var.buttonID, layer, name, type, center ));
     this.var.buttonID++;
     if( layer == MENU_LAYER )
-      this.var.menuButton++
+      this.var.menuButton++;
   }
 
   cleanButtons(){
-    for( let i = this.const.menuButtons; i < this.array.button.length; i++ )
-      this.array.button[i].onScreen = false;
+    let begin = this.var.menuButtons;
+
+    for( let i = begin; i < this.array.button.length; i++ )
+      this.array.button[i].var.onScreen = false;
   }
 
   updateButtons(){
@@ -207,15 +209,17 @@ class board {
       case 0:
           break;
       case 1:;
-          this.array.button[offsetID].onScreen = true;
-          this.array.button[offsetID + 1].onScreen = true;
+          this.array.button[offsetID].var.onScreen = true;
+          this.array.button[offsetID + 1].var.onScreen = true;
           break;
       case 3:
           offsetID += 2;
           let l = this.array.layer[this.var.layer].obj.laws.array.value.length;
           let length = 16 * ( l + 0.5 );
-          for( let i = offsetID; i < length + offsetID ; i++ )
-            this.array.button[i].onScreen = true;
+          for( let i = offsetID; i < length + offsetID ; i++ ){
+            this.array.button[i].var.onScreen = true;
+            this.array.button[i].setStatus( 2 );
+          }
 
           break;
       }
@@ -305,11 +309,11 @@ class board {
     let buttonID = null;
 
     for( let i = 0; i < this.array.button.length; i++ )
-      if ( vec.dist( this.array.button[i].center ) < minDist ){
-        minDist = vec.dist( this.array.button[i].center );
+      if ( vec.dist( this.array.button[i].const.center ) < minDist ){
+        minDist = vec.dist( this.array.button[i].const.center );
         buttonID = i;
       }
-    if ( minDist > CELL_SIZE / 2 || !this.array.button[buttonID].onScreen )
+    if ( minDist > CELL_SIZE / 2 || !this.array.button[buttonID].var.onScreen )
         return;
 
     //change board layer
@@ -331,7 +335,7 @@ class board {
           let layer = this.array.layer[this.var.layer];
           let length = 16 * ( layer.obj.laws.array.value.length + 0.5 ) + 1;
           if( buttonID > 5 && buttonID < 5 + length )
-            layer.buttonPressed( this.array.button, buttonID );
+            layer.activateButton( this.array.button, buttonID );
           break;
 
       }
