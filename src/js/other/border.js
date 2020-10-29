@@ -20,6 +20,8 @@ class border {
   }
 
   draw( layer ){
+    noStroke();
+    
     if ( ( this.const.layer == layer || this.const.layer == MENU_LAYER ) && this.var.onScreen ){
       fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
       rect( this.const.offset.x, this.const.offset.y, this.const.size.x, this.const.size.y );

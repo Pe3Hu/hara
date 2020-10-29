@@ -524,7 +524,7 @@ class blend {
     }
 
     this.obj.laws.setAnswers( result );
-    console.log( result );
+    //console.log( result );
   }
 
   init(){

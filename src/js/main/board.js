@@ -15,7 +15,7 @@ class board {
       blendA: null
     }
     this.var = {
-      layer: 3,
+      layer: 5,
       buttonID: 0,
       borderID: 0,
       inscriptionID: 0,
@@ -37,8 +37,8 @@ class board {
     this.initGrid();
     this.initLayers();
     this.initOffsets();
-    this.initBorders();
     this.initButtons();
+    this.initBorders();
     this.initInscriptions();
   }
 
@@ -63,21 +63,23 @@ class board {
     this.array.layer.push( new square( 2 ) );
     this.array.layer.push( new scroll() );
     this.array.layer.push( new blend( this.const.blendSize,  this.const.blendShred, this.const.blendA ) );
+    this.array.layer.push( new carpet() );
+    this.array.layer.push( new isle() );
   }
 
   initBorders(){
     //
-    let layer = MENU_LAYER/*MENU_LAYER*/;
+    let layer = MENU_LAYER;
     let name = 'layerMenu';
     let offset = createVector( CELL_SIZE * ( CANVAS_GRID.x - 2.25 ), CELL_SIZE * 0.5 );
-    let size = createVector( CELL_SIZE * 2, CELL_SIZE * 5 );
+    let size = createVector( CELL_SIZE * 2, CELL_SIZE * ( this.var.menuButton + 1 ) );
     this.addBorder( layer, name, offset, size );
-
+    
     layer = 3;
     name = 'blendMenu';
     offset = this.array.offset[layer][0];
     let l = this.array.layer[layer].table.shred[this.const.blendShred].length;
-    size = createVector( CELL_SIZE * ( 16 * 1.25 + 2.5 ), CELL_SIZE * 1.25 * l + CELL_SIZE * 4 );
+    size = createVector( CELL_SIZE * ( 16 * 1.25 + 3 ), CELL_SIZE * 1.25 * l + CELL_SIZE * 4 );
     this.addBorder( layer, name, offset, size );
 
     name = 'blendSreds';
@@ -99,7 +101,7 @@ class board {
 
   cleanBorders(){
     for ( let i = 0; i < this.array.border.length; i++ )
-      if( this.array.border[i].layer != MENU_LAYER )
+      if( this.array.border[i].const.layer != MENU_LAYER )
         this.array.border[i].var.onScreen = false;
   }
 
@@ -124,22 +126,32 @@ class board {
     layer = MENU_LAYER;
     name = 'switchToExpansion';
     type = 0;
-    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 1.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToPolimino';
     type++;
-    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 2.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToScroll';
     type++;
-    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 3.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToBlend';
     type++;
-    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * 4.5 );
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
+    this.addButton( layer, name, type, vec.copy() );
+
+    name = 'switchToCarpet';
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
+    this.addButton( layer, name, type, vec.copy() );
+
+    name = 'switchToShattered';
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
 
     layer = 1;
@@ -179,7 +191,7 @@ class board {
       }
 
     for ( let i = 0; i < this.array.button.length; i++ )
-      if( this.array.button[i].layer == MENU_LAYER )
+      if( this.array.button[i].const.layer == MENU_LAYER )
         this.array.button[i].var.onScreen = true;
 
     this.updateButtons();
@@ -317,7 +329,7 @@ class board {
         return;
 
     //change board layer
-    if( buttonID >= 0 && buttonID < 4 )
+    if( buttonID >= 0 && buttonID < 6 )
       this.switchLayer( buttonID );
 
       switch ( this.var.layer ) {
@@ -340,7 +352,9 @@ class board {
 
       }
 
-    if( this.var.layer == 1 )
+    if( this.var.layer == 1 ){
+
+    }
 
     this.update();
   }
@@ -366,9 +380,6 @@ class board {
     for( let i = 0; i < this.array.border.length; i++ )
       this.array.border[i].draw( this.var.layer );
 
-    //draw layer
-    this.array.layer[this.var.layer].draw( this.array.offset[this.var.layer] );
-
     //draw buttons
     for( let i = 0; i < this.array.button.length; i++ )
       this.array.button[i].draw( this.var.layer );
@@ -376,5 +387,8 @@ class board {
     //draw inscriptions
     for( let i = 0; i < this.array.inscription.length; i++ )
         this.array.inscription[i].draw( this.var.layer );
+
+    //draw layer
+    this.array.layer[this.var.layer].draw( this.array.offset[this.var.layer] );
   }
 }
