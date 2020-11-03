@@ -74,7 +74,7 @@ class board {
     let offset = createVector( CELL_SIZE * ( CANVAS_GRID.x - 2.25 ), CELL_SIZE * 0.5 );
     let size = createVector( CELL_SIZE * 2, CELL_SIZE * ( this.var.menuButton + 1 ) );
     this.addBorder( layer, name, offset, size );
-    
+
     layer = 3;
     name = 'blendMenu';
     offset = this.array.offset[layer][0];
@@ -161,7 +161,6 @@ class board {
     this.addButton( layer, name, type, vec.copy() );
 
     layer = 1;
-    name = '';
     type++;
     vec = createVector( CELL_SIZE * 20.5, CELL_SIZE * 4 );
     this.addButton( layer, name, type, vec.copy() );
@@ -190,6 +189,16 @@ class board {
         i++
       }
 
+    layer = 5;
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 3.25 ), CELL_SIZE * 1.5 );
+    this.addButton( layer, name, type, vec.copy() );
+
+    layer = 5;
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 3.25 ), CELL_SIZE * 2.5 );
+    this.addButton( layer, name, type, vec.copy() );
+
     for ( let i = 0; i < this.array.button.length; i++ )
       if( this.array.button[i].const.layer == MENU_LAYER )
         this.array.button[i].var.onScreen = true;
@@ -217,10 +226,15 @@ class board {
     let offsetID = this.var.menuButton;
     let count = null;
 
-    switch ( this.var.layer ) {
+    for( let i = offsetID; i < this.array.button.length; i++ ){
+        if( this.array.button[i].const.layer ==  this.var.layer )
+          this.array.button[i].var.onScreen = true;
+    }
+
+    /*switch ( this.var.layer ) {
       case 0:
           break;
-      case 1:;
+      case 1:
           this.array.button[offsetID].var.onScreen = true;
           this.array.button[offsetID + 1].var.onScreen = true;
           break;
@@ -232,9 +246,13 @@ class board {
             this.array.button[i].var.onScreen = true;
             this.array.button[i].setStatus( 2 );
           }
-
           break;
-      }
+      case 5:
+          offsetID =
+          this.array.button[offsetID].var.onScreen = true;
+          this.array.button[offsetID + 1].var.onScreen = true;
+          break;
+      }*/
   }
 
   initInscriptions(){
@@ -332,28 +350,29 @@ class board {
     if( buttonID >= 0 && buttonID < 6 )
       this.switchLayer( buttonID );
 
-      switch ( this.var.layer ) {
-        case 1:
-          switch ( buttonID ) {
-            case 4:
-              this.array.layer[this.var.layer].nextCell();
-              break;
-            case 5:
-              this.array.layer[this.var.layer].returnCard();
-              break;
-          }
-          break;
-        case 3:
-          let layer = this.array.layer[this.var.layer];
-          let length = 16 * ( layer.obj.laws.array.value.length + 0.5 ) + 1;
-          if( buttonID > 5 && buttonID < 5 + length )
-            layer.activateButton( this.array.button, buttonID );
-          break;
-
-      }
-
-    if( this.var.layer == 1 ){
-
+    let layer = this.array.layer[this.var.layer];
+    switch ( this.var.layer ) {
+      case 1:
+        switch ( buttonID ) {
+          case 4:
+            this.array.layer[this.var.layer].nextCell();
+            break;
+          case 5:
+            this.array.layer[this.var.layer].returnCard();
+            break;
+        }
+        break;
+      case 3:
+        let length = 16 * ( layer.obj.laws.array.value.length + 0.5 ) + 1;
+        if( buttonID > 5 && buttonID < 5 + length )
+          layer.activateButton( this.array.button, buttonID );
+        break;
+      case 5:
+        if( buttonID > 127 && buttonID < 130 ){
+          let shift = -( buttonID - 128.5 ) * 2;
+          layer.part.underworld.switchFloor( shift );
+        }
+        break;
     }
 
     this.update();

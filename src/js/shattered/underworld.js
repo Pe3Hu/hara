@@ -5,11 +5,16 @@ class underworld {
       offset: createVector( CELL_SIZE * 2, CELL_SIZE * 2 ),
       n: size * 2 + 1,
       m: size * 2 + 1,
-      h: size,
+      f: size,
       size: size,
-      a: CELL_SIZE * 0.5
+      a: CELL_SIZE * 0.5,
+      floor:{
+        min: 0,
+        max: size * 2
+      }
     };
     this.var = {
+      floor: 0
     }
     this.array = {
       rood: [],
@@ -41,22 +46,25 @@ class underworld {
   }
 
   initRoods(){
-    for( let i = 0; i < this.const.m; i++ ){
+    for( let f = 0; f < this.const.f; f++ ){
       this.array.rood.push( [] );
-      for( let j = 0; j < this.const.n; j++ ){
-          let index = i * this.const.n + j;
-          let vec = createVector( this.const.offset.x, this.const.offset.y );
-          let grid = createVector( j, i );
-          vec.x += this.const.r * 2 * j;
-          vec.y += this.const.a * 1.5 * i;
-          if( i % 2 == 1 )
-            vec.x += this.const.r;
-          this.array.rood[i].push( new rood( index, vec, grid, this.const.a *0.9 ) );
+      for( let i = 0; i < this.const.m; i++ ){
+        this.array.rood[f].push( [] );
+        for( let j = 0; j < this.const.n; j++ ){
+            let index = i * this.const.n + j + f * this.const.m * this.const.n;
+            let vec = createVector( this.const.offset.x, this.const.offset.y );
+            let grid = createVector( j, i );
+            vec.x += this.const.r * 2 * j;
+            vec.y += this.const.a * 1.5 * i;
+            vec.z += this.const.r * f;
+            if( i % 2 == 1 )
+              vec.x += this.const.r;
+            this.array.rood[f][i].push( new rood( index, vec, grid, this.const.a ) );
+        }
       }
     }
 
     this.roodsAroundCenter();
-    this.array.rood[this.const.size][this.const.size].setStatus( 1 );
   }
 
   initHues(){
@@ -85,27 +93,41 @@ class underworld {
   }
 
   roodsAroundCenter(){
-    let indexs = [];
-    indexs.push( this.array.rood[this.const.size][this.const.size].const.index );
+    for( let f = 0; f < this.const.f; f++ ){
+      let indexs = [];
+      let paritys  = [];
+      indexs.push( this.array.rood[f][this.const.size][this.const.size].const.index );
 
-    for( let i = 0; i < this.const.size; i++ )
-      for( let j = indexs.length - 1; j >= 0; j-- ){
-        let vec = this.convertIndex( indexs[j] );
-        let parity = ( vec.y % 2 );
+      for( let i = 0; i < this.const.size; i++ ){
 
-        for( let l = 0; l < this.array.neighbor[parity].length; l++ ){
-          vec = this.convertIndex( indexs[j] );
-          vec.add( this.array.neighbor[parity][l] );
-          let addIndex = this.convertGrid( vec );
-            if( !indexs.includes( addIndex ) )
-                indexs.push( addIndex );
+          console.log( indexs );
+          for( let j = indexs.length - 1; j >= 0; j-- ){
+            let vec = this.convertIndex( indexs[j] );
+            let parity = ( vec.y % 2 );
+
+            for( let l = 0; l < this.array.neighbor[parity].length; l++ ){
+              vec = this.convertIndex( indexs[j] );
+              vec.add( this.array.neighbor[parity][l] );
+              let addIndex = this.convertGrid( vec );
+                if( !indexs.includes( addIndex ) ){
+                  indexs.push( addIndex );
+                  paritys.push( ( i + 1 ) % 2  );
+                  console.log( addIndex, ( i + 1 ) % 2 )
+                }
+            }
+          }
+      }
+                console.log( indexs );
+
+
+        for( let i = 0; i < indexs.length; i++ ){
+          let vec = this.convertIndex( indexs[i] );
+          this.array.rood[f][vec.y][vec.x].var.visiable = true;
+          this.array.rood[f][vec.y][vec.x].var.parity = paritys[i];
+          console.log( i, paritys[i] )
         }
-      }
-
-      for( let i = 0; i < indexs.length; i++ ){
-        let vec = this.convertIndex( indexs[i] );
-        this.array.rood[vec.y][vec.x].var.visiable = true;
-      }
+    }
+    //    this.array.rood[this.const.size][this.const.size].setStatus( 1 );
   }
 
   //find the grid coordinates by index
@@ -113,9 +135,12 @@ class underworld {
     if( index == undefined )
       return null;
 
-    let i = Math.floor( index / this.const.n );
-    let j = index % this.const.n;
-    return createVector( j, i );
+
+    let f = Math.floor( index / this.const.n / this.const.m );
+    let remainder = index % ( this.const.n * this.const.m )
+    let i = Math.floor( remainder / this.const.n );
+    let j = remainder % this.const.n;
+    return createVector( j, i, f );
   }
 
   //find the index coordinates by grid coordinates
@@ -149,10 +174,23 @@ class underworld {
     //
   }
 
+  switchFloor( shift ){
+    this.var.floor += shift;
+    if( this.var.floor < this.const.floor.min )
+      this.var.floor = this.const.floor.min;
+    if( this.var.floor > this.const.floor.max )
+      this.var.floor = this.const.floor.max;
+    console.log( this.var.floor )
+  }
+
   draw(){
     //this.cleanRoods();
-    for( let i = 0; i < this.array.rood.length; i++ )
-      for( let j = 0; j < this.array.rood[i].length; j++ )
-        this.array.rood[i][j].draw( this.array.toConstruct );
+    let f = Math.floor( this.var.floor / 2 );
+    let parity = this.var.floor % 2;
+
+    for( let i = 0; i < this.array.rood[f].length; i++ )
+      for( let j = 0; j < this.array.rood[f][i].length; j++ )
+        //if( this.array.rood[f][i][j] == parity )
+          this.array.rood[f][i][j].draw( this.array.toConstruct );
   }
 }

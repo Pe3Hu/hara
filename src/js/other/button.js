@@ -103,6 +103,15 @@ class button {
       case 11:
         this.color.bg.h = 30;
         break;
+      case 12:
+        this.color.bg.h = 60;
+        break;
+      case 13:
+        this.color.bg.h = 210;
+        break;
+      case 14:
+        this.color.bg.h = 330;
+        break;
     }
   }
 
@@ -127,28 +136,41 @@ class button {
         );
       }
 
-      if( this.const.type > 9 && this.const.type < 12 ){
-        /*cswitch ( this.const.type ) {
-          ase 10:
-            fill('purple');
-            break;
+      if( this.const.type > 9 && this.const.type < 15 ){
+        switch ( this.const.type ) {
+          case 10:
           case 11:
-            fill('purple');
+          case 12:
             break;
-          }*/
-          rect(
-            this.const.center.x - this.const.a / 2,
-            this.const.center.y - this.const.a / 2,
-            this.const.a, this.const.a
-          );
-      }
+            rect(
+              this.const.center.x - this.const.a / 2,
+              this.const.center.y - this.const.a / 2,
+              this.const.a, this.const.a
+            );
+          }
 
-      if( this.const.type == 12 ){
-        rect(
-          this.const.center.x - this.const.a / 2,
-          this.const.center.y - this.const.a / 2,
-          this.const.a, this.const.a
-        );
+
+          switch ( this.const.type ){
+            case 13:
+            case 14:
+              d = ( this.const.type - 13 ) * 4;
+            noFill();
+            stroke( 0 );
+            ellipse( this.const.center.x, this.const.center.y, this.const.a, this.const.a );
+
+            noStroke();
+            fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+            triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
+              this.array.vertex[d][1].x, this.array.vertex[d][1].y,
+              this.array.vertex[d][2].x, this.array.vertex[d][2].y );
+            triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
+              this.array.vertex[d][3].x, this.array.vertex[d][3].y,
+              this.array.vertex[d][2].x, this.array.vertex[d][2].y );
+            triangle( this.array.vertex[d][0].x, this.array.vertex[d][0].y,
+              this.array.vertex[d][3].x, this.array.vertex[d][3].y,
+              this.array.vertex[d][4].x, this.array.vertex[d][4].y );
+              break;
+          }
       }
     }
   }

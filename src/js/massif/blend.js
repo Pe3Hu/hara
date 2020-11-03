@@ -1008,7 +1008,6 @@ class blend {
   }
 
   update(){
-    console.log( '_____________________' )
     this.cleanShreds();
     this.updateLaws();
     this.updateNodes();
