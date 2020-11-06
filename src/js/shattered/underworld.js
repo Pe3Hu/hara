@@ -10,7 +10,7 @@ class underworld {
       a: CELL_SIZE * 0.5,
       floor:{
         min: 0,
-        max: size * 2
+        max: size * 2 - 1
       }
     };
     this.var = {
@@ -100,7 +100,7 @@ class underworld {
 
       for( let i = 0; i < this.const.size; i++ ){
 
-          console.log( indexs );
+          //console.log( indexs );
           for( let j = indexs.length - 1; j >= 0; j-- ){
             let vec = this.convertIndex( indexs[j] );
             let parity = ( vec.y % 2 );
@@ -112,19 +112,19 @@ class underworld {
                 if( !indexs.includes( addIndex ) ){
                   indexs.push( addIndex );
                   paritys.push( ( i + 1 ) % 2  );
-                  console.log( addIndex, ( i + 1 ) % 2 )
+                  //console.log( addIndex, ( i + 1 ) % 2 )
                 }
             }
           }
       }
-                console.log( indexs );
+        //console.log( indexs );
 
 
         for( let i = 0; i < indexs.length; i++ ){
           let vec = this.convertIndex( indexs[i] );
           this.array.rood[f][vec.y][vec.x].var.visiable = true;
           this.array.rood[f][vec.y][vec.x].var.parity = paritys[i];
-          console.log( i, paritys[i] )
+          //console.log( i, paritys[i] )
         }
     }
     //    this.array.rood[this.const.size][this.const.size].setStatus( 1 );
@@ -161,7 +161,7 @@ class underworld {
     return flag;
   }
 
-  checkrood( grid ){
+  checkRood( grid ){
     let flag = this.checkBorder( grid );
 
     if( flag )
@@ -180,6 +180,7 @@ class underworld {
       this.var.floor = this.const.floor.min;
     if( this.var.floor > this.const.floor.max )
       this.var.floor = this.const.floor.max;
+
     console.log( this.var.floor )
   }
 
@@ -188,9 +189,10 @@ class underworld {
     let f = Math.floor( this.var.floor / 2 );
     let parity = this.var.floor % 2;
 
-    for( let i = 0; i < this.array.rood[f].length; i++ )
-      for( let j = 0; j < this.array.rood[f][i].length; j++ )
-        //if( this.array.rood[f][i][j] == parity )
-          this.array.rood[f][i][j].draw( this.array.toConstruct );
+    if( this.array.rood.length > 0 )
+      for( let i = 0; i < this.array.rood[f].length; i++ )
+        for( let j = 0; j < this.array.rood[f][i].length; j++ )
+          //if( this.array.rood[f][i][j] == parity )
+            this.array.rood[f][i][j].draw( this.array.toConstruct );
   }
 }

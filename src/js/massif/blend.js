@@ -1019,7 +1019,7 @@ class blend {
 
   draw( offsets ){
     let offset = offsets[1].copy();
-    offset.add( this.const.a / 3,  this.const.a / 3 )
+    offset.add( this.const.a / 3, this.const.a / 3 )
 
     for( let f = 0; f < this.array.shred.length; f++ )
       for( let i = 0; i < this.array.shred[f].length; i++ )

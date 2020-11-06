@@ -2,7 +2,7 @@
 class isle {
   constructor (  ){
     this.const = {
-      size: 4
+      size: 2
     };
     this.var = {
     };

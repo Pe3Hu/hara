@@ -97,6 +97,12 @@ class button {
       case 4:
         this.color.bg.h = 300;
         break;
+      case 5:
+        this.color.bg.h = 270;
+        break;
+      case 6:
+        this.color.bg.h = 180;
+        break;
       case 10:
         this.color.bg.h = 330;
         break;
@@ -136,17 +142,18 @@ class button {
         );
       }
 
+
       if( this.const.type > 9 && this.const.type < 15 ){
         switch ( this.const.type ) {
           case 10:
           case 11:
           case 12:
-            break;
             rect(
               this.const.center.x - this.const.a / 2,
               this.const.center.y - this.const.a / 2,
               this.const.a, this.const.a
             );
+              break;
           }
 
 

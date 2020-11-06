@@ -15,7 +15,7 @@ class board {
       blendA: null
     }
     this.var = {
-      layer: 5,
+      layer: 6,
       buttonID: 0,
       borderID: 0,
       inscriptionID: 0,
@@ -65,6 +65,7 @@ class board {
     this.array.layer.push( new blend( this.const.blendSize,  this.const.blendShred, this.const.blendA ) );
     this.array.layer.push( new carpet() );
     this.array.layer.push( new isle() );
+    this.array.layer.push( new debate() );
   }
 
   initBorders(){
@@ -150,6 +151,11 @@ class board {
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToShattered';
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
+    this.addButton( layer, name, type, vec.copy() );
+
+    name = 'switchToElection';
     type++;
     vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
@@ -347,7 +353,7 @@ class board {
         return;
 
     //change board layer
-    if( buttonID >= 0 && buttonID < 6 )
+    if( buttonID >= 0 && buttonID < this.const.menuButtons )
       this.switchLayer( buttonID );
 
     let layer = this.array.layer[this.var.layer];
@@ -364,7 +370,7 @@ class board {
         break;
       case 3:
         let length = 16 * ( layer.obj.laws.array.value.length + 0.5 ) + 1;
-        if( buttonID > 5 && buttonID < 5 + length )
+        if( buttonID > this.const.menuButtons - 1 && buttonID < this.const.menuButtons + length )
           layer.activateButton( this.array.button, buttonID );
         break;
       case 5:
