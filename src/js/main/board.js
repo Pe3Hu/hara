@@ -49,20 +49,20 @@ class board {
 
   initOffsets(){
     this.array.offset = [];
-    this.array.offset.push( [] );
-    this.array.offset.push( [] );
-    this.array.offset.push( [] );
-    this.array.offset.push( [] );
+    for ( let i = 0; i < this.var.layer + 1; i++ )
+      this.array.offset.push( [] );
 
     let layer = 3;
-    this.array.offset[layer].push( createVector( CELL_SIZE *  0.5, CELL_SIZE * 0.5 ) );
+    this.array.offset[layer].push( createVector( CELL_SIZE * 0.5, CELL_SIZE * 0.5 ) );
+    layer = 6;
+    this.array.offset[layer].push( createVector( CELL_SIZE * Math.floor( this.const.grid.x / 2 ), CELL_SIZE * 2.5 ) );
   }
 
   initLayers(){
     this.array.layer.push( new settlement( 4 ) );
     this.array.layer.push( new square( 2 ) );
     this.array.layer.push( new scroll() );
-    this.array.layer.push( new blend( this.const.blendSize,  this.const.blendShred, this.const.blendA ) );
+    this.array.layer.push( new blend( this.const.blendSize, this.const.blendShred, this.const.blendA ) );
     this.array.layer.push( new carpet() );
     this.array.layer.push( new isle() );
     this.array.layer.push( new debate() );
@@ -92,6 +92,26 @@ class board {
       this.const.blendA * ( this.const.blendSize + 0.75 ) );
     this.addBorder( layer, name, offset, size );
 
+    layer = 6;
+    let t = this.array.layer[layer].data.tribune;
+    this.array.offset[layer][0].x -= t.const.a * 1.5 * ( t.const.m / 2 - 0.5 );
+    name = 'communityZoom';
+    offset = this.array.offset[layer][0].copy();
+    offset.x -= t.const.a + this.const.a;
+    offset.y -= this.const.a + ( 1 - t.const.size % 2 ) * t.const.r;
+    size = createVector(
+      t.const.a * 1.5 * ( t.const.m + 1/3 ) + this.const.a * 2,
+      t.const.r * ( t.const.n * 2)  + this.const.a * 2 );
+    this.addBorder( layer, name, offset, size );
+
+    name = 'communityZoom';
+    offset = this.array.offset[layer][0].copy();
+    size = createVector( t.const.a * 10, t.const.a * 10 );
+    offset.y += t.const.r * ( t.const.n * 2 - ( 1 - t.const.size % 2 ) ) + this.const.a * 2;
+    offset.x += t.const.a * 1.5 * ( t.const.m / 2 - 0.5 ) - size.x / 2
+    this.addBorder( layer, name, offset, size );
+    this.array.offset[layer].push( offset.copy() );
+
     this.updateBorders();
   }
 
@@ -113,6 +133,11 @@ class board {
     switch ( this.var.layer ) {
       case 3:
         offsetID = 1;
+        this.array.border[offsetID].var.onScreen = true;
+        this.array.border[offsetID + 1].var.onScreen = true;
+        break;
+      case 6:
+        offsetID = 3;
         this.array.border[offsetID].var.onScreen = true;
         this.array.border[offsetID + 1].var.onScreen = true;
         break;

@@ -9,7 +9,9 @@ class community {
       a: a
     };
     this.array = {
-      vertex: []
+      vertex: [],
+      parent: [],
+      child: []
     };
     this.var = {
       center: center.copy(),
@@ -21,7 +23,7 @@ class community {
       remoteness: null
     };
     this.color = {
-      bg:{
+      bg: {
         h: 45,
         s: COLOR_MAX * 0.75,
         l: COLOR_MAX * 0.5
@@ -36,11 +38,32 @@ class community {
       this.var.remoteness = remoteness;
     else{
       this.var.temp.remoteness = remoteness;
-
-      for( let i = 0; i < path.length; i++ )
-        this.var.temp.path.push( path[i] );
+      if( typeof path === 'number' )
+        this.var.temp.path.push( path );
+      else
+        for( let i = 0; i < path.length; i++ )
+          this.var.temp.path.push( path[i] );
     }
-    console.log( this.var.temp.path )
+  }
+
+  setRelations( remoteness, parent ){
+    this.var.remoteness = remoteness;
+    parent.addChild( this.const.index );
+    this.addParent( parent.const.index );
+  }
+
+  addParent( parent ){
+    let index = this.array.parent.indexOf( parent );
+
+    if( index == - 1 )
+      this.array.parent.push( parent );
+  }
+
+  addChild( child ){
+    let index = this.array.child.indexOf( child );
+
+    if( index == - 1 )
+      this.array.child.push( child );
   }
 
   initVertexs(){
@@ -58,22 +81,22 @@ class community {
     this.initVertexs();
   }
 
-  draw( gap ){
+  draw( offset ){
     if( this.var.visiable ){
       noStroke();
       fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
 
       for( let i = 0; i < this.array.vertex.length; i++ ){
         let ii = ( i + 1 ) % this.array.vertex.length;
-        triangle( this.var.center.x, this.var.center.y,
-                  this.array.vertex[i].x, this.array.vertex[i].y,
-                  this.array.vertex[ii].x, this.array.vertex[ii].y );
+        triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
+                  this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
+                  this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
        }
 
        //stroke( 0 );
        fill( 0 );
-       this.var.txt = this.const.index + '_' + this.var.temp.path;
-       text( this.var.txt, this.var.center.x, this.var.center.y + FONT_SIZE / 3 );
+       this.var.txt = this.const.index;
+       text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + FONT_SIZE / 3 );
     }
   }
 }

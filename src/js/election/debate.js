@@ -2,7 +2,7 @@
 class debate {
   constructor (  ){
     this.const = {
-      size: 3
+      size: 5
     };
     this.var = {
     };
@@ -17,11 +17,11 @@ class debate {
     this.data.tribune = new tribune( this.const.size );
   }
 
-  click(){
-
+  click( offset ){
+    this.data.tribune.click( offset );
   }
 
-  draw(){
-    this.data.tribune.draw();
+  draw( offset ){
+    this.data.tribune.draw( offset );
   }
 }
