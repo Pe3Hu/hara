@@ -95,7 +95,7 @@ class board {
     layer = 6;
     let t = this.array.layer[layer].data.tribune;
     this.array.offset[layer][0].x -= t.const.a * 1.5 * ( t.const.m / 2 - 0.5 );
-    name = 'communityZoom';
+    name = 'tribune';
     offset = this.array.offset[layer][0].copy();
     offset.x -= t.const.a + this.const.a;
     offset.y -= this.const.a + ( 1 - t.const.size % 2 ) * t.const.r;
@@ -104,11 +104,16 @@ class board {
       t.const.r * ( t.const.n * 2)  + this.const.a * 2 );
     this.addBorder( layer, name, offset, size );
 
-    name = 'communityZoom';
+    name = 'communityZoomOrigin';
     offset = this.array.offset[layer][0].copy();
-    size = createVector( t.const.a * 10, t.const.a * 10 );
+    //size = createVector( t.const.a * 10, t.const.a * 10 );
+    size = createVector();
     offset.y += t.const.r * ( t.const.n * 2 - ( 1 - t.const.size % 2 ) ) + this.const.a * 2;
-    offset.x += t.const.a * 1.5 * ( t.const.m / 2 - 0.5 ) - size.x / 2
+    offset.x += t.const.a * 1.5 * ( t.const.m / 2 - 0.5 );
+    this.addBorder( layer, name, offset, size );
+    this.array.offset[layer].push( offset.copy() );
+
+    name = 'communityZoomShifted';
     this.addBorder( layer, name, offset, size );
     this.array.offset[layer].push( offset.copy() );
 
@@ -225,7 +230,6 @@ class board {
     vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 3.25 ), CELL_SIZE * 1.5 );
     this.addButton( layer, name, type, vec.copy() );
 
-    layer = 5;
     type++;
     vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 3.25 ), CELL_SIZE * 2.5 );
     this.addButton( layer, name, type, vec.copy() );
@@ -261,29 +265,6 @@ class board {
         if( this.array.button[i].const.layer ==  this.var.layer )
           this.array.button[i].var.onScreen = true;
     }
-
-    /*switch ( this.var.layer ) {
-      case 0:
-          break;
-      case 1:
-          this.array.button[offsetID].var.onScreen = true;
-          this.array.button[offsetID + 1].var.onScreen = true;
-          break;
-      case 3:
-          offsetID += 2;
-          let l = this.array.layer[this.var.layer].obj.laws.array.value.length;
-          let length = 16 * ( l + 0.5 );
-          for( let i = offsetID; i < length + offsetID ; i++ ){
-            this.array.button[i].var.onScreen = true;
-            this.array.button[i].setStatus( 2 );
-          }
-          break;
-      case 5:
-          offsetID =
-          this.array.button[offsetID].var.onScreen = true;
-          this.array.button[offsetID + 1].var.onScreen = true;
-          break;
-      }*/
   }
 
   initInscriptions(){
@@ -412,7 +393,23 @@ class board {
   click(){
     this.buttonClickCheck();
 
-    this.array.layer[this.var.layer].click( this.array.offset[this.var.layer] );//this.array.offset[this.var.layer]
+    this.array.layer[this.var.layer].click( this.array.offset[this.var.layer] );
+
+    switch ( this.var.layer ) {
+      case 6:
+      if( this.array.layer[this.var.layer].data.tribune.data.zoom == null )
+        this.array.border[4].setSize( createVector() );
+      else{
+        let l = this.array.layer[this.var.layer].data.tribune.data.zoom.const.a * 3;
+        let size = createVector( ( CELL_SIZE + l ) * 2, ( CELL_SIZE + l ) * 2 );
+        this.array.border[4].setSize( size );
+        let offset = this.array.border[5].const.offset.copy();
+        offset.x -= size.x / 2;
+        this.array.border[4].setOffset( offset );
+      }
+      break;
+    }
+
   }
 
   key(){

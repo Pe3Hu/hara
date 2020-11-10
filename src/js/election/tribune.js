@@ -9,13 +9,15 @@ class tribune {
     };
     this.var = {
       current: {
-        community: null,
-        zoom: null
+        community: null
       },
     };
     this.array = {
       community: [],
       visiable: []
+    };
+    this.data = {
+      zoom: null
     }
 
     this.init();
@@ -57,17 +59,10 @@ class tribune {
     }
 
     this.communitysBetweenCapital();
-
-
-  /*for( let i = 0; i < this.array.community.length; i++ )
-    for( let j = 0; j < this.array.community[i].length; j++ )
-      if( this.array.community[i][j].var.remoteness != null )
-        this.array.community[i][j].var.visiable = true;*/
-    //this.communitysAroundCenter();
   }
 
   init(){
-    this.const.r = this.const.a / ( Math.tan( Math.PI / 6 ) * 2 );
+    this.const.r = this.const.a / ( Math.tan( Math.PI / this.const.n ) * 2 );
 
     this.initNeighbors();
     this.initCommunitys();
@@ -196,7 +191,6 @@ class tribune {
       }
     }
 
-
     for( let i = 0; i < this.array.community.length; i++ )
       for( let j = 0; j < this.array.community[i].length; j++ )
         if( this.array.community[i][j].var.visiable )
@@ -239,38 +233,6 @@ class tribune {
       }
   }
 
-  communitysAroundCenter(){
-    let indexs = [];
-    indexs.push( this.array.community[this.const.size][this.const.size].const.index );
-
-    for( let i = 0; i < this.const.size; i++ ){
-      for( let j = indexs.length - 1; j >= 0; j-- ){
-        let vec = this.convertIndex( indexs[j] );
-        let parity = ( vec.x % 2 );
-
-        console.log( '#########', indexs[j], this.convertIndex( indexs[j] ) )
-        for( let l = 0; l < this.array.neighbor[parity].length; l++ ){
-          vec = this.convertIndex( indexs[j] );
-          vec.add( this.array.neighbor[parity][l] );
-          console.log( '#########' )
-          console.log( vec.x, vec.y )
-          console.log( this.array.neighbor[parity][l].x, this.array.neighbor[parity][l].y )
-          let addIndex = this.convertGrid( vec );
-          if( !indexs.includes( addIndex ) )
-            indexs.push( addIndex );
-        console.log( indexs[j], addIndex )
-        }
-      }
-    }
-      console.log( indexs )
-
-      for( let i = 0; i < indexs.length; i++ ){
-        let vec = this.convertIndex( indexs[i] );
-        this.array.community[vec.y][vec.x].var.visiable = true;
-      }
-
-  }
-
   //find the grid coordinates by index
   convertIndex( index ){
     if( index == undefined )
@@ -296,20 +258,37 @@ class tribune {
   }
 
   click(){
-    //if( this.var.current.community != null )
-    this.var.current.zoom = this.var.current.community;
+    if( this.var.current.community != null ){
+      let neighbors = [];
+      let grid = this.convertIndex( this.var.current.community );
+      let community = this.array.community[grid.y][grid.x];
+      let parity = ( grid.x % 2 );
+
+      for( let l = 0; l <  this.array.neighbor[parity].length; l++ ){
+        let vec = grid.copy();
+        vec.add( this.array.neighbor[parity][l] );
+
+        if( this.checkBorder( vec ) )
+          neighbors.push( this.array.community[vec.y][vec.x] );
+        }
+
+      this.data.zoom = new zoom( community, neighbors );
+    }
+    else
+      this.data.zoom = null;
   }
 
-  mouseMoves(){
-    this.detectZoom();
+  mouseMoves( offset ){
+    this.detectZoom( offset );
   }
 
-  detectZoom(){
+  detectZoom( offset ){
     let mouse = createVector( mouseX, mouseY );
     let min = {
       dist: INFINITY,
-      index:  null
+      index: null
     };
+    mouse.sub( offset );
 
     for( let i = 0; i < this.array.visiable.length; i++ ){
       let grid = this.convertIndex( this.array.visiable[i] );
@@ -326,11 +305,14 @@ class tribune {
 
   draw( offsets ){
     //this.cleanCommunitys();
-    this.mouseMoves();
+    this.mouseMoves( offsets[0] );
     let f = Math.floor( this.var.floor / 2 );
 
     for( let i = 0; i < this.array.community.length; i++ )
       for( let j = 0; j < this.array.community[i].length; j++ )
-          this.array.community[i][j].draw( offsets[0] );
+        this.array.community[i][j].draw( offsets[0] );
+
+    if( this.data.zoom != null )
+      this.data.zoom.draw( offsets[1] );
   }
 }

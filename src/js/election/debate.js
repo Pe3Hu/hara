@@ -21,6 +21,10 @@ class debate {
     this.data.tribune.click( offset );
   }
 
+  key(){
+    
+  }
+
   draw( offset ){
     this.data.tribune.draw( offset );
   }

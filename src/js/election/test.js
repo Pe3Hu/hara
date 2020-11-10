@@ -1,5 +1,5 @@
 //
-class bend {
+class test {
   constructor (  ){
     this.const = {
     };

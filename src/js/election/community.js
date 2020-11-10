@@ -20,6 +20,8 @@ class community {
         remoteness: null,
         path: []
       },
+      scale: 1,
+      fontSize: FONT_SIZE,
       remoteness: null
     };
     this.color = {
@@ -31,19 +33,6 @@ class community {
     };
 
     this.init();
-  }
-
-  setRemoteness( remoteness, path, flag ){
-    if( flag )
-      this.var.remoteness = remoteness;
-    else{
-      this.var.temp.remoteness = remoteness;
-      if( typeof path === 'number' )
-        this.var.temp.path.push( path );
-      else
-        for( let i = 0; i < path.length; i++ )
-          this.var.temp.path.push( path[i] );
-    }
   }
 
   setRelations( remoteness, parent ){
@@ -69,15 +58,15 @@ class community {
   initVertexs(){
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
-        Math.sin( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a,
-        Math.cos( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a );
+        Math.sin( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a * this.var.scale,
+        Math.cos( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a * this.var.scale );
       vec.add( this.var.center );
       this.array.vertex.push( vec );
     }
   }
 
   init(){
-    this.const.r =  this.const.a / ( Math.tan( Math.PI / 6 ) * 2 );
+    this.const.r =  this.const.a * this.var.scale / ( Math.tan( Math.PI / this.const.n ) * 2 );
     this.initVertexs();
   }
 
@@ -93,10 +82,12 @@ class community {
                   this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
        }
 
+       textSize( this.var.fontSize );
        //stroke( 0 );
        fill( 0 );
        this.var.txt = this.const.index;
        text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + FONT_SIZE / 3 );
+       textSize( FONT_SIZE );
     }
   }
 }

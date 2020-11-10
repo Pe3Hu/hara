@@ -4,7 +4,7 @@ const COLOR_MAX = 360;
 const COLOR_BG = COLOR_MAX / 2;
 const INFINITY = 999999999;
 const FRAME_RATE = 60;
-const FONT_SIZE = 6;//12
+const FONT_SIZE = 10;
 const MENU_LAYER = 99;
 
 let CANVAS_SIZE;
