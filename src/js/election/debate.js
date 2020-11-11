@@ -2,7 +2,7 @@
 class debate {
   constructor (  ){
     this.const = {
-      size: 5
+      size: 3
     };
     this.var = {
     };
@@ -22,7 +22,7 @@ class debate {
   }
 
   key(){
-    
+
   }
 
   draw( offset ){

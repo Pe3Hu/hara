@@ -11,9 +11,10 @@ class zoom {
       community: community
     };
     this.array = {
+      neighbor: neighbors,
       vertex: [],
       corner: [],
-      neighbor: neighbors
+      sector: [ [], [] ]
     };
     this.color = {
       bg: {
@@ -29,15 +30,42 @@ class zoom {
   initVertexs(){
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
-        Math.sin( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a * this.const.scale,
-        Math.cos( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a * this.const.scale );
+        Math.sin( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.a * this.const.scale,
+        Math.cos( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.a * this.const.scale );
       this.array.vertex.push( vec );
 
       vec = createVector(
-        Math.sin( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) ) * this.const.r * this.const.scale,
-        Math.cos( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) ) * this.const.r * this.const.scale );
+        Math.sin( Math.PI * 2 / this.const.n * ( -1 - i + this.const.n / 2 ) ) * this.const.r * this.const.scale,
+        Math.cos( Math.PI * 2 / this.const.n * ( -1 - i + this.const.n / 2 ) ) * this.const.r * this.const.scale );
       this.array.corner.push( vec );
     }
+  }
+
+  initSectors(){
+    for( let i = 0; i < this.const.n; i++ ){
+      let ii = ( i + 1 ) %  this.const.n;
+      let vertexs = [];
+      vertexs.push( createVector() );
+      vertexs.push( this.array.vertex[i].copy() );
+      vertexs.push( this.array.vertex[ii].copy() );
+      this.array.sector[0].push( new sector( i, this.data.community.const.index, vertexs ) );
+    }
+
+    for( let j = 0; j < this.array.neighbor.length; j++ ){
+        let i = this.array.neighbor[j].index;
+        let ii = ( i + 1 ) % this.const.n;
+        let mirror = ( i + this.const.n / 2 ) % this.const.n;
+        let vertexs = [];
+        vertexs.push( this.array.corner[i].copy() );
+        vertexs.push( this.array.vertex[i].copy() );
+        vertexs.push( this.array.vertex[ii].copy() );
+        this.array.sector[1].push( new sector( mirror, this.array.neighbor[j].community.const.index, vertexs ) );
+      }
+
+
+    for( let i = 1; i < this.array.sector.length; i++ )
+      for( let j = 0; j < this.array.sector[i].length; j++ )
+        this.array.sector[i][j].var.zoomed = true;
   }
 
   init(){
@@ -49,21 +77,18 @@ class zoom {
         this.const.a * this.const.scale + CELL_SIZE );
 
     this.initVertexs();
+    this.initSectors();
   }
 
   draw( vector ){
     let offset = vector.copy();
     offset.y += this.var.offset.y + CELL_SIZE;
-    //this.data.duplicate.draw( offset );
     noStroke();
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
 
-
-    for( let i = 0; i < this.array.vertex.length; i++ ){
-      let ii = ( i + 1 ) % this.array.vertex.length;
-      triangle( offset.x, offset.y,
-                this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
-                this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
-     }
+    for( let i = 0; i < this.array.sector.length; i++ )
+      for( let j = 0; j < this.array.sector[i].length; j++ ){
+          this.array.sector[i][j].draw( offset );
+      }
   }
 }

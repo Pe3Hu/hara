@@ -1,6 +1,6 @@
 //
 class community {
-  constructor ( index, center, grid, a ){
+  constructor ( index, center, grid, a, noise ){
     this.const = {
       index: index,
       i: grid.y,
@@ -10,16 +10,14 @@ class community {
     };
     this.array = {
       vertex: [],
+      sector: [],
       parent: [],
       child: []
     };
     this.var = {
       center: center.copy(),
+      noise: noise,
       visiable: false,
-      temp: {
-        remoteness: null,
-        path: []
-      },
       scale: 1,
       fontSize: FONT_SIZE,
       remoteness: null
@@ -58,35 +56,45 @@ class community {
   initVertexs(){
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
-        Math.sin( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a * this.var.scale,
-        Math.cos( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.a * this.var.scale );
-      vec.add( this.var.center );
+        Math.sin( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.a * this.var.scale,
+        Math.cos( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.a * this.var.scale );
       this.array.vertex.push( vec );
+    }
+  }
+
+  initSectors(){
+    for( let i = 0; i < this.const.n; i++ ){
+      let ii = ( i + 1 ) %  this.const.n;
+      let vertexs = [];
+      vertexs.push( createVector() );
+      vertexs.push( this.array.vertex[i].copy() );
+      vertexs.push( this.array.vertex[ii].copy() );
+      this.array.sector.push( new sector( i, this.const.index, vertexs ) );
     }
   }
 
   init(){
     this.const.r =  this.const.a * this.var.scale / ( Math.tan( Math.PI / this.const.n ) * 2 );
+
     this.initVertexs();
+    this.initSectors();
   }
 
-  draw( offset ){
+  draw( vector ){
     if( this.var.visiable ){
+      let offset = vector.copy();
+      offset.add( this.var.center );
       noStroke();
       fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
 
-      for( let i = 0; i < this.array.vertex.length; i++ ){
-        let ii = ( i + 1 ) % this.array.vertex.length;
-        triangle( this.var.center.x + offset.x, this.var.center.y + offset.y,
-                  this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
-                  this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
-       }
+      for( let i = 0; i < this.array.sector.length; i++ )
+        this.array.sector[i].draw( offset, this.var.noise  );
 
        textSize( this.var.fontSize );
        //stroke( 0 );
        fill( 0 );
        this.var.txt = this.const.index;
-       text( this.var.txt, this.var.center.x + offset.x, this.var.center.y + offset.y + FONT_SIZE / 3 );
+       text( this.var.txt, offset.x, offset.y + FONT_SIZE / 3 );
        textSize( FONT_SIZE );
     }
   }

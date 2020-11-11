@@ -45,24 +45,34 @@ class tribune {
   }
 
   initCommunitys(){
+    let yoff = Math.random();
+    let inc = 0.1;
+
     //
     for( let i = 0; i < this.const.n; i++ ){
       this.array.community.push( [] );
+      let xoff = 0;
+
       for( let j = 0; j < this.const.m; j++ ){
         let index = i * this.const.m + j;
         let grid = createVector( j, i );
         let vec = createVector( this.const.a * 1.5 * j, this.const.r * 2 * i );
         if( j % 2 == 1 )
           vec.y += this.const.r;
-        this.array.community[i].push( new community( index, vec, grid, this.const.a ) );
+        let n = noise( xoff, yoff );
+        this.array.community[i].push( new community( index, vec, grid, this.const.a, n ) );
+
+        xoff += inc;
       }
+
+      yoff += inc;
     }
 
     this.communitysBetweenCapital();
   }
 
   init(){
-    this.const.r = this.const.a / ( Math.tan( Math.PI / this.const.n ) * 2 );
+    this.const.r = this.const.a / ( Math.tan( Math.PI / 6 ) * 2 );
 
     this.initNeighbors();
     this.initCommunitys();
@@ -134,11 +144,9 @@ class tribune {
                   flag = true;
                 }
 
-                if( child.var.temp.remoteness == null ){
-                  child.setRelations( step, parent );
-                  let addIndex = this.convertGrid( vec );
-                  indexs.new.push( addIndex );
-                }
+                child.setRelations( step, parent );
+                let addIndex = this.convertGrid( vec );
+                indexs.new.push( addIndex );
               }
             }
           }
@@ -149,7 +157,6 @@ class tribune {
             indexs.old.push( indexs.new[k] );
         }
 
-
         let steps = [];
         let communityGrid = this.convertIndex( disputable.const.index );
         let community = this.array.community[communityGrid.y][communityGrid.x];
@@ -159,7 +166,6 @@ class tribune {
         };
         step = 0;
         flag = false;
-
 
         while( !flag && step < stopper ){
           step++;
@@ -191,10 +197,43 @@ class tribune {
       }
     }
 
+    let noise = {
+      min:{
+        index: null,
+        value: INFINITY
+      },
+      max:{
+        index: null,
+        value: -INFINITY
+      }
+    }
+
     for( let i = 0; i < this.array.community.length; i++ )
       for( let j = 0; j < this.array.community[i].length; j++ )
-        if( this.array.community[i][j].var.visiable )
-          this.array.visiable.push( this.array.community[i][j].const.index );
+        if( this.array.community[i][j].var.visiable ){
+              let community = this.array.community[i][j];
+              this.array.visiable.push( community.const.index );
+
+              if( noise.min.value > community.var.noise ){
+                noise.min.value = community.var.noise;
+                noise.min.index = community.const.index;
+              }
+
+              if( noise.max.value < community.var.noise ){
+                noise.max.value = community.var.noise;
+                noise.max.index = community.const.index;
+              }
+            }
+
+    let scale = noise.max.value - noise.min.value;
+    console.log( scale )
+
+    for( let i = 0; i < this.array.visiable.length; i++ ){
+      let grid = this.convertIndex( this.array.visiable[i] );
+      let community = this.array.community[grid.y][grid.x];
+      community.var.noise = ( community.var.noise - noise.min.value ) / scale;
+      console.log( community.var.noise )
+    }
   }
 
   handleSide( side, controversial ){
@@ -269,7 +308,11 @@ class tribune {
         vec.add( this.array.neighbor[parity][l] );
 
         if( this.checkBorder( vec ) )
-          neighbors.push( this.array.community[vec.y][vec.x] );
+          if( this.array.community[vec.y][vec.x].var.visiable )
+            neighbors.push( {
+              index: l,
+              community: this.array.community[vec.y][vec.x]
+            } );
         }
 
       this.data.zoom = new zoom( community, neighbors );
