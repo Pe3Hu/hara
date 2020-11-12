@@ -3,18 +3,20 @@ class tribune {
   constructor( size ){
     this.const = {
       n: size + 1,
-      m: ( size + + 1 ) * 2 + 1,
+      m: ( size + 1 ) * 2 + 1,
       size: size,
       a: CELL_SIZE * 0.5
     };
     this.var = {
       current: {
-        community: null
-      },
+        community: null,
+        noise: 0
+      }
     };
     this.array = {
       community: [],
-      visiable: []
+      visiable: [],
+      noise: [ 0, 1 ]
     };
     this.data = {
       zoom: null
@@ -45,13 +47,9 @@ class tribune {
   }
 
   initCommunitys(){
-    let yoff = Math.random();
-    let inc = 0.1;
-
     //
     for( let i = 0; i < this.const.n; i++ ){
       this.array.community.push( [] );
-      let xoff = 0;
 
       for( let j = 0; j < this.const.m; j++ ){
         let index = i * this.const.m + j;
@@ -59,13 +57,8 @@ class tribune {
         let vec = createVector( this.const.a * 1.5 * j, this.const.r * 2 * i );
         if( j % 2 == 1 )
           vec.y += this.const.r;
-        let n = noise( xoff, yoff );
-        this.array.community[i].push( new community( index, vec, grid, this.const.a, n ) );
-
-        xoff += inc;
+        this.array.community[i].push( new community( index, vec, grid, this.const.a, this.array.noise.length ) );
       }
-
-      yoff += inc;
     }
 
     this.communitysBetweenCapital();
@@ -76,6 +69,8 @@ class tribune {
 
     this.initNeighbors();
     this.initCommunitys();
+    this.generateNoise();
+    this.normalizeNoise();
   }
 
   cleanCommunitys(){
@@ -197,79 +192,259 @@ class tribune {
       }
     }
 
-    let noise = {
-      min:{
-        index: null,
-        value: INFINITY
-      },
-      max:{
-        index: null,
-        value: -INFINITY
-      }
+
+  }
+
+  generateNoise(){
+    let capitals = [];
+
+    for( let side = -1; side < 2; side += 2 ){
+      let x = this.const.n * ( 1 + side );
+      let y = Math.round( this.const.size / 2 );
+      capitals.push( createVector( x, y ) );
     }
 
-    for( let i = 0; i < this.array.community.length; i++ )
-      for( let j = 0; j < this.array.community[i].length; j++ )
-        if( this.array.community[i][j].var.visiable ){
-              let community = this.array.community[i][j];
-              this.array.visiable.push( community.const.index );
+    //move strictly left or right
+    //0 - right direction
+    //1 - left direction
+    let moves = [
+      [ 0, 2 ],
+      [ 3, 5 ]
+    ];
+    let inc = createVector( 0.01, 0.01 );
+    let xoffs = [
+      Math.random() * inc.y,
+      Math.random() * inc.y,
+    ];
 
-              if( noise.min.value > community.var.noise ){
-                noise.min.value = community.var.noise;
-                noise.min.index = community.const.index;
-              }
+    for( let i = 0; i < 2; i++ ){
+      console.log('______________________')
+      let capital = this.array.community[capitals[i].y][capitals[i].x];
+      let step = 0;
+      let indexs = {
+        old: [ capital.const.index ],
+        new: []
+      };
+      let xoff = Math.random();
 
-              if( noise.max.value < community.var.noise ){
-                noise.max.value = community.var.noise;
-                noise.max.index = community.const.index;
+      while( step < this.const.m ){
+        step++;
+        indexs.new = [];
+        let yoff = 0;
+
+        if( step == 1 ){
+          let n = noise( xoff, yoff );
+          //capital.setNoise( n );
+          capital.updateNoise( n, i );
+          xoff += inc.x;
+          yoff += inc.y;
+          console.log(  n )
+        }
+
+        for( let k = 0; k < indexs.old.length; k++ ){
+          let vec = this.convertIndex( indexs.old[k] );
+          let parent = this.array.community[vec.y][vec.x];
+          let parity = vec.x % 2;
+
+          for( let l = moves[i][0]; l < moves[i][1]; l++ ){
+            vec = this.convertIndex( indexs.old[k] );
+            vec.add( this.array.neighbor[parity][l] );
+            let noises = [];
+
+            if( this.checkBorder( vec ) ){
+              let child = this.array.community[vec.y][vec.x];
+              if( child.var.visiable ){
+                let index = indexs.new.indexOf( child.const.index );
+                if( index == -1 )
+                  indexs.new.push( child.const.index );
+                /*let noises = [];
+
+                for( let k = 0; k < yoffs.length; k++ )
+                  noises.push( noise( xoff, yoffs[k] ) );
+                noises.push( noise( xoff, yoffs[i] ) );
+
+                child.addNoise( {
+                  parent: parent.const.index,
+                  noises: noises } );*/
+
+                /*if( k == 0)
+                  console.log( child.const.index, noises )*/
               }
             }
+          }
+        }
 
-    let scale = noise.max.value - noise.min.value;
-    console.log( scale )
+        indexs.old = [];
 
-    for( let i = 0; i < this.array.visiable.length; i++ ){
-      let grid = this.convertIndex( this.array.visiable[i] );
-      let community = this.array.community[grid.y][grid.x];
-      community.var.noise = ( community.var.noise - noise.min.value ) / scale;
-      console.log( community.var.noise )
+        for( let p = 0; p < indexs.new.length; p++ ){
+          indexs.old.push( indexs.new[p] );
+          let vec = this.convertIndex( indexs.new[p] );
+          let community = this.array.community[vec.y][vec.x];
+          let n = noise( xoff, yoff );
+          //community.setNoise( n );
+          community.updateNoise( n, i );
+
+          console.log( indexs.new[p], n )
+
+          yoff += inc.y;
+        }
+
+        xoff += inc.x;
+        /*for( let k = 0; k < yoffs.length; k++ )
+          yoffs[k] += inc.y;*/
+      }
+
+
     }
   }
 
-  handleSide( side, controversial ){
-    let x = this.const.n * ( 1 + side );
-    let y = Math.round( this.const.size / 2 );
-    let capitalGrid = createVector( x, y );
-    let grid = {
-      community: null,
-      controversial: null,
-      capital: createVector( x, y )
-    };
-    let distance = {
-      controversial: 0,
-      capital: 0,
-      min: this.const.n
-    };
-    let capitalIndex = this.convertGrid( grid.capital );
-    let begin, end;
-    if( side < 0 ){
-      begin = grid.capital.x;
-      end = this.const.n;
-    }
-    else{
-      begin = this.const.n + 1;
-      end = grid.capital.x + 1;
-    }
+  normalizeNoise(){
+    for( let i = 0; i < this.array.community.length; i++ )
+      for( let j = 0; j < this.array.community[i].length; j++ )
+        if( this.array.community[i][j].var.visiable ){
+          let community = this.array.community[i][j];
+          this.array.visiable.push( community.const.index );
+        }
 
-    for( let i = 0; i < this.const.n; i++ )
-      for( let j = begin; j < end; j++ ){
-        grid.community = createVector( j, i );
-        grid.controversial = createVector( this.const.n, i );
-        distance.controversial = Math.abs( grid.controversial.x - grid.community.x ) + Math.abs( grid.controversial.y - grid.community.y );
-        distance.capital = Math.abs( grid.capital.x - grid.community.x ) + Math.abs( grid.capital.y - grid.community.y );
-        //if( distance.capital + distance.controversial == distance.min )
-          console.log( this.array.community[i][j].const.index, distance.capital, distance.controversial )
+
+    for( let k = 0; k <  this.array.noise.length; k++ ){
+      let noise = {
+        type: k,
+        min:{
+          index: null,
+          value: INFINITY
+        },
+        max:{
+          index: null,
+          value: -INFINITY
+        }
+      };
+
+      for( let i = 0; i < this.array.community.length; i++ )
+        for( let j = 0; j < this.array.community[i].length; j++ )
+          if( this.array.community[i][j].var.visiable ){
+            let community = this.array.community[i][j];
+
+            if( noise.min.value > community.array.noise[k] ){
+              noise.min.value = community.array.noise[k];
+              noise.min.index = community.const.index;
+            }
+
+            if( noise.max.value < community.array.noise[k] ){
+              noise.max.value = community.array.noise[k];
+              noise.max.index = community.const.index;
+            }
+          }
+
+      let gap = 0.15;
+
+      for( let k = 0; k < this.array.noise.length; k++ ){
+        let scale = noise.max.value - noise.min.value;
+        console.log( scale )
+        console.log(  this.array.visiable )
+
+        for( let i = 0; i < this.array.visiable.length; i++ ){
+          let grid = this.convertIndex( this.array.visiable[i] );
+          let community = this.array.community[grid.y][grid.x];
+          community.array.noise[k] = ( community.array.noise[k] - noise.min.value ) / scale * ( 1 - 2 * gap ) + gap;
+          console.log( this.array.visiable[i], community.array.noise[k] )
+        }
       }
+    }
+    /*
+    for( let k = 0; k < this.array.noise.length; k++ ){
+      let noise = {
+        type: k,
+        min:{
+          index: null,
+          value: INFINITY
+        },
+        max:{
+          index: null,
+          value: -INFINITY
+        }
+      };
+
+      for( let i = 0; i < this.array.community.length; i++ )
+        for( let j = 0; j < this.array.community[i].length; j++ )
+          if( this.array.community[i][j].var.visiable ){
+            let community = this.array.community[i][j];
+            this.array.visiable.push( community.const.index );
+
+            if( noise.min.value > community.var.noise ){
+              noise.min.value = community.var.noise;
+              noise.min.index = community.const.index;
+            }
+
+            if( noise.max.value < community.var.noise ){
+              noise.max.value = community.var.noise;
+              noise.max.index = community.const.index;
+            }
+          }
+
+      let gap = 0.15;
+      let scale = noise.max.value - noise.min.value;
+      console.log( scale )
+      console.log(  this.array.visiable )
+
+      for( let i = 0; i < this.array.visiable.length; i++ ){
+        let grid = this.convertIndex( this.array.visiable[i] );
+        let community = this.array.community[grid.y][grid.x];
+        community.var.noise = ( community.var.noise - noise.min.value ) / scale * ( 1 - 2 * gap ) + gap;
+        console.log( this.array.visiable[i], community.var.noise )
+      }
+    }
+    */
+    /*let noises = [];
+
+    for( let k = 0; k < this.array.noise.length; k++ )
+      noises.push( {
+        type: k,
+        min:{
+          index: null,
+          value: INFINITY
+        },
+        max:{
+          index: null,
+          value: -INFINITY
+        }
+      } );
+
+    for( let i = 0; i < this.array.community.length; i++ )
+      for( let j = 0; j < this.array.community[i].length; j++ )
+        if( this.array.community[i][j].var.visiable )
+          for( let k = 0; k <  this.array.noise.length; k++ ){
+            let community = this.array.community[i][j];
+            this.array.visiable.push( community.const.index );
+            community.equalizeNoise();
+
+            if( noises[k].min.value > community.array.noise[k] ){
+              noises[k].min.value = community.array.noise[k];
+              noises[k].min.index = community.const.index;
+            }
+
+            if( noises[k].max.value < community.array.noise[k] ){
+              noises[k].max.value = community.array.noise[k];
+              noises[k].max.index = community.const.index;
+            }
+
+          //console.log( community.array.noise[k] )
+        }
+
+        for( let k = 0; k < this.array.noise.length; k++ ){
+      let scale = noises[k].max.value - noises[k].min.value;
+      console.log( scale )
+      console.log(  this.array.visiable )
+
+      for( let i = 0; i < this.array.visiable.length; i++ ){
+        let grid = this.convertIndex( this.array.visiable[i] );
+        let community = this.array.community[grid.y][grid.x];
+        community.array.noise[k] = ( community.array.noise[k] - noises[k].min.value ) / scale;
+
+        console.log( this.array.visiable[i], community.array.noise[k] )
+        //console.log( community.array.noise[k] )
+      }
+    }*/
   }
 
   //find the grid coordinates by index
@@ -321,6 +496,15 @@ class tribune {
       this.data.zoom = null;
   }
 
+  key(){
+    switch ( keyCode ) {
+      case 32:
+        this.var.current.noise = ( this.var.current.noise + 1 ) % this.array.noise.length;
+        console.log( this.var.current.noise )
+        break;
+    }
+  }
+
   mouseMoves( offset ){
     this.detectZoom( offset );
   }
@@ -353,7 +537,7 @@ class tribune {
 
     for( let i = 0; i < this.array.community.length; i++ )
       for( let j = 0; j < this.array.community[i].length; j++ )
-        this.array.community[i][j].draw( offsets[0] );
+        this.array.community[i][j].draw( offsets[0], this.var.current.noise );
 
     if( this.data.zoom != null )
       this.data.zoom.draw( offsets[1] );

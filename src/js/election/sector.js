@@ -41,7 +41,7 @@ class sector {
     this.initHues();
   }
 
-  draw( offset, noise  ){
+  draw( offset, noise ){
     noStroke();
     fill( noise * COLOR_MAX );
     //fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );

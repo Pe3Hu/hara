@@ -6,21 +6,23 @@ class community {
       i: grid.y,
       j: grid.x,
       n: 6,
-      a: a
+      a: a,
+      noise: noise
     };
     this.array = {
       vertex: [],
       sector: [],
       parent: [],
-      child: []
+      child: [],
+      noise: []
     };
     this.var = {
       center: center.copy(),
-      noise: noise,
+      fontSize: FONT_SIZE,
+      remoteness: null,
       visiable: false,
       scale: 1,
-      fontSize: FONT_SIZE,
-      remoteness: null
+      noise: null
     };
     this.color = {
       bg: {
@@ -31,6 +33,39 @@ class community {
     };
 
     this.init();
+  }
+
+  setNoise( noise ){
+    this.var.noise = noise;
+  }
+
+  updateNoise( noise, index ){
+    this.array.noise[index] = noise;
+
+    //console.log( noise, index, this.array.noise )
+  }
+
+  addNoise( obj ){
+    if( obj.noises.length == this.array.noise.length )
+      for( let i = 0; i < obj.noises.length; i++ )
+        this.array.noise[i].push( {
+          noise: obj.noises[i],
+          parent: obj.parent } );
+  }
+
+  equalizeNoise(){
+    if( this.array.noise[0].length > 1 )
+      console.log( this.const.index, this.array.noise[0] );
+
+    for( let i = 0; i < this.array.noise.length; i++ ){
+      let sum = 0;
+      console.log(  this.array.noise[i] );
+
+      for( let j = 0; j < this.array.noise[i][j].length; j++ )
+        sum += this.array.noise[i][j].noise;
+
+      this.array.noise[i] = sum / this.array.noise[i].length;
+    }
   }
 
   setRelations( remoteness, parent ){
@@ -73,22 +108,29 @@ class community {
     }
   }
 
+  initNoises(){
+    for( let i = 0; i < this.const.noise; i++ )
+      this.array.noise.push( [] );
+  }
+
   init(){
     this.const.r =  this.const.a * this.var.scale / ( Math.tan( Math.PI / this.const.n ) * 2 );
 
     this.initVertexs();
     this.initSectors();
+    this.initNoises();
   }
 
-  draw( vector ){
+  draw( vector, noise ){
     if( this.var.visiable ){
       let offset = vector.copy();
       offset.add( this.var.center );
       noStroke();
       fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+      let n = this.array.noise[noise];
 
       for( let i = 0; i < this.array.sector.length; i++ )
-        this.array.sector[i].draw( offset, this.var.noise  );
+        this.array.sector[i].draw( offset, n );
 
        textSize( this.var.fontSize );
        //stroke( 0 );

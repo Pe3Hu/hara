@@ -22,7 +22,7 @@ class debate {
   }
 
   key(){
-
+    this.data.tribune.key();
   }
 
   draw( offset ){
