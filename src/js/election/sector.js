@@ -34,7 +34,7 @@ class sector {
       332
     ];
 
-    //this.color.bg.h = this.array.hue[this.const.index % this.const.n];
+    this.color.bg.h = this.array.hue[this.const.index % this.const.n];
   }
 
   init(){
@@ -43,8 +43,10 @@ class sector {
 
   draw( offset, noise ){
     noStroke();
-    fill( noise * COLOR_MAX );
-    //fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+    if( this.var.zoomed )
+      fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+    else
+      fill( noise * COLOR_MAX );
 
     triangle( this.array.vertex[0].x + offset.x, this.array.vertex[0].y + offset.y,
               this.array.vertex[1].x + offset.x, this.array.vertex[1].y + offset.y,

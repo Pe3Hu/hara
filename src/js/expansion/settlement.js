@@ -146,7 +146,7 @@ class settlement{
   }
 
   click(){
-    
+
   }
 
   draw(){

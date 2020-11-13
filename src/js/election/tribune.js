@@ -53,11 +53,10 @@ class tribune {
 
       for( let j = 0; j < this.const.m; j++ ){
         let index = i * this.const.m + j;
-        let grid = createVector( j, i );
         let vec = createVector( this.const.a * 1.5 * j, this.const.r * 2 * i );
         if( j % 2 == 1 )
           vec.y += this.const.r;
-        this.array.community[i].push( new community( index, vec, grid, this.const.a, this.array.noise.length ) );
+        this.array.community[i].push( new community( index, vec, this.const.a, this.array.noise.length ) );
       }
     }
 
@@ -191,8 +190,6 @@ class tribune {
         }
       }
     }
-
-
   }
 
   generateNoise(){
@@ -217,8 +214,7 @@ class tribune {
       Math.random() * inc.y,
     ];
 
-    for( let i = 0; i < 2; i++ ){
-      console.log('______________________')
+    for( let i = 0; i < capitals.length; i++ ){
       let capital = this.array.community[capitals[i].y][capitals[i].x];
       let step = 0;
       let indexs = {
@@ -234,11 +230,9 @@ class tribune {
 
         if( step == 1 ){
           let n = noise( xoff, yoff );
-          //capital.setNoise( n );
           capital.updateNoise( n, i );
           xoff += inc.x;
           yoff += inc.y;
-          console.log(  n )
         }
 
         for( let k = 0; k < indexs.old.length; k++ ){
@@ -257,18 +251,6 @@ class tribune {
                 let index = indexs.new.indexOf( child.const.index );
                 if( index == -1 )
                   indexs.new.push( child.const.index );
-                /*let noises = [];
-
-                for( let k = 0; k < yoffs.length; k++ )
-                  noises.push( noise( xoff, yoffs[k] ) );
-                noises.push( noise( xoff, yoffs[i] ) );
-
-                child.addNoise( {
-                  parent: parent.const.index,
-                  noises: noises } );*/
-
-                /*if( k == 0)
-                  console.log( child.const.index, noises )*/
               }
             }
           }
@@ -281,17 +263,12 @@ class tribune {
           let vec = this.convertIndex( indexs.new[p] );
           let community = this.array.community[vec.y][vec.x];
           let n = noise( xoff, yoff );
-          //community.setNoise( n );
           community.updateNoise( n, i );
-
-          console.log( indexs.new[p], n )
 
           yoff += inc.y;
         }
 
         xoff += inc.x;
-        /*for( let k = 0; k < yoffs.length; k++ )
-          yoffs[k] += inc.y;*/
       }
 
 
@@ -307,7 +284,7 @@ class tribune {
         }
 
 
-    for( let k = 0; k <  this.array.noise.length; k++ ){
+    for( let k = 0; k < this.array.noise.length; k++ ){
       let noise = {
         type: k,
         min:{
@@ -337,114 +314,14 @@ class tribune {
           }
 
       let gap = 0.15;
-
-      for( let k = 0; k < this.array.noise.length; k++ ){
-        let scale = noise.max.value - noise.min.value;
-        console.log( scale )
-        console.log(  this.array.visiable )
-
-        for( let i = 0; i < this.array.visiable.length; i++ ){
-          let grid = this.convertIndex( this.array.visiable[i] );
-          let community = this.array.community[grid.y][grid.x];
-          community.array.noise[k] = ( community.array.noise[k] - noise.min.value ) / scale * ( 1 - 2 * gap ) + gap;
-          console.log( this.array.visiable[i], community.array.noise[k] )
-        }
-      }
-    }
-    /*
-    for( let k = 0; k < this.array.noise.length; k++ ){
-      let noise = {
-        type: k,
-        min:{
-          index: null,
-          value: INFINITY
-        },
-        max:{
-          index: null,
-          value: -INFINITY
-        }
-      };
-
-      for( let i = 0; i < this.array.community.length; i++ )
-        for( let j = 0; j < this.array.community[i].length; j++ )
-          if( this.array.community[i][j].var.visiable ){
-            let community = this.array.community[i][j];
-            this.array.visiable.push( community.const.index );
-
-            if( noise.min.value > community.var.noise ){
-              noise.min.value = community.var.noise;
-              noise.min.index = community.const.index;
-            }
-
-            if( noise.max.value < community.var.noise ){
-              noise.max.value = community.var.noise;
-              noise.max.index = community.const.index;
-            }
-          }
-
-      let gap = 0.15;
       let scale = noise.max.value - noise.min.value;
-      console.log( scale )
-      console.log(  this.array.visiable )
 
       for( let i = 0; i < this.array.visiable.length; i++ ){
         let grid = this.convertIndex( this.array.visiable[i] );
         let community = this.array.community[grid.y][grid.x];
-        community.var.noise = ( community.var.noise - noise.min.value ) / scale * ( 1 - 2 * gap ) + gap;
-        console.log( this.array.visiable[i], community.var.noise )
+        community.array.noise[k] = ( community.array.noise[k] - noise.min.value ) / scale * ( 1 - 2 * gap ) + gap;
       }
     }
-    */
-    /*let noises = [];
-
-    for( let k = 0; k < this.array.noise.length; k++ )
-      noises.push( {
-        type: k,
-        min:{
-          index: null,
-          value: INFINITY
-        },
-        max:{
-          index: null,
-          value: -INFINITY
-        }
-      } );
-
-    for( let i = 0; i < this.array.community.length; i++ )
-      for( let j = 0; j < this.array.community[i].length; j++ )
-        if( this.array.community[i][j].var.visiable )
-          for( let k = 0; k <  this.array.noise.length; k++ ){
-            let community = this.array.community[i][j];
-            this.array.visiable.push( community.const.index );
-            community.equalizeNoise();
-
-            if( noises[k].min.value > community.array.noise[k] ){
-              noises[k].min.value = community.array.noise[k];
-              noises[k].min.index = community.const.index;
-            }
-
-            if( noises[k].max.value < community.array.noise[k] ){
-              noises[k].max.value = community.array.noise[k];
-              noises[k].max.index = community.const.index;
-            }
-
-          //console.log( community.array.noise[k] )
-        }
-
-        for( let k = 0; k < this.array.noise.length; k++ ){
-      let scale = noises[k].max.value - noises[k].min.value;
-      console.log( scale )
-      console.log(  this.array.visiable )
-
-      for( let i = 0; i < this.array.visiable.length; i++ ){
-        let grid = this.convertIndex( this.array.visiable[i] );
-        let community = this.array.community[grid.y][grid.x];
-        community.array.noise[k] = ( community.array.noise[k] - noises[k].min.value ) / scale;
-
-        console.log( this.array.visiable[i], community.array.noise[k] )
-        //console.log( community.array.noise[k] )
-      }
-    }*/
   }
 
   //find the grid coordinates by index

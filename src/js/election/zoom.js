@@ -63,7 +63,7 @@ class zoom {
       }
 
 
-    for( let i = 1; i < this.array.sector.length; i++ )
+    for( let i = 0; i < this.array.sector.length; i++ )
       for( let j = 0; j < this.array.sector[i].length; j++ )
         this.array.sector[i][j].var.zoomed = true;
   }
@@ -73,8 +73,8 @@ class zoom {
     this.const.r =  this.const.a * this.const.scale / ( Math.tan( Math.PI / this.const.n ) * 2 );
 
     this.var.offset = createVector(
-        this.const.a * this.const.scale + CELL_SIZE,
-        this.const.a * this.const.scale + CELL_SIZE );
+      this.const.a * this.const.scale + CELL_SIZE,
+      this.const.a * this.const.scale + CELL_SIZE );
 
     this.initVertexs();
     this.initSectors();

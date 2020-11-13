@@ -3,23 +3,31 @@ class board {
   constructor (){
     this.const = {
       a: CELL_SIZE,
-      menuButtons: 10,
-      menuInscription: 0,
+      menu: {
+        buttons: 10,
+        inscription: 0
+      },
       grid: {
         x: null,
         y: null,
       },
-      blendSize: 4,
-      blendCount: 3,
-      blendShred: 2,
-      blendA: null
+      blend: {
+        size: 4,
+        count: 3,
+        shread: 2,
+        a: null
+      }
     }
     this.var = {
-      layer: 6,
-      buttonID: 0,
-      borderID: 0,
-      inscriptionID: 0,
-      menuButton: 0
+      layer: 7,
+      id: {
+        button: 0,
+        border: 0,
+        inscription: 0
+      },
+      menu: {
+        button: 0
+      }
     }
     this.array = {
       layer: [],
@@ -28,7 +36,9 @@ class board {
       inscription: [],
       offset: []
     }
-    this.const.blendA = Math.floor( ( CANVAS_GRID.x - 3.5 ) * CELL_SIZE / ( this.const.blendSize + 1 ) / this.const.blendCount );
+    this.const.blend.a = Math.floor(
+      ( CANVAS_GRID.x - 3.5 ) * CELL_SIZE /
+      ( this.const.blend.size + 1 ) / this.const.blend.count );
 
     this.init();
   }
@@ -49,6 +59,7 @@ class board {
 
   initOffsets(){
     this.array.offset = [];
+
     for ( let i = 0; i < this.var.layer + 1; i++ )
       this.array.offset.push( [] );
 
@@ -56,16 +67,22 @@ class board {
     this.array.offset[layer].push( createVector( CELL_SIZE * 0.5, CELL_SIZE * 0.5 ) );
     layer = 6;
     this.array.offset[layer].push( createVector( CELL_SIZE * Math.floor( this.const.grid.x / 2 ), CELL_SIZE * 2.5 ) );
+    layer = 7;
+    this.array.offset[layer].push( createVector( CELL_SIZE * 2.5, CELL_SIZE * 2.5 ) );
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
+      CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
   }
 
   initLayers(){
     this.array.layer.push( new settlement( 4 ) );
     this.array.layer.push( new square( 2 ) );
     this.array.layer.push( new scroll() );
-    this.array.layer.push( new blend( this.const.blendSize, this.const.blendShred, this.const.blendA ) );
+    this.array.layer.push( new blend( this.const.blend.size, this.const.blend.shread, this.const.blend.a ) );
     this.array.layer.push( new carpet() );
     this.array.layer.push( new isle() );
     this.array.layer.push( new debate() );
+    this.array.layer.push( new collision() );
   }
 
   initBorders(){
@@ -73,13 +90,13 @@ class board {
     let layer = MENU_LAYER;
     let name = 'layerMenu';
     let offset = createVector( CELL_SIZE * ( CANVAS_GRID.x - 2.25 ), CELL_SIZE * 0.5 );
-    let size = createVector( CELL_SIZE * 2, CELL_SIZE * ( this.var.menuButton + 1 ) );
+    let size = createVector( CELL_SIZE * 2, CELL_SIZE * ( this.var.menu.button + 1 ) );
     this.addBorder( layer, name, offset, size );
 
     layer = 3;
     name = 'blendMenu';
     offset = this.array.offset[layer][0];
-    let l = this.array.layer[layer].table.shred[this.const.blendShred].length;
+    let l = this.array.layer[layer].table.shred[this.const.blend.shread].length;
     size = createVector( CELL_SIZE * ( 16 * 1.25 + 3 ), CELL_SIZE * 1.25 * l + CELL_SIZE * 4 );
     this.addBorder( layer, name, offset, size );
 
@@ -88,8 +105,8 @@ class board {
     offset.y +=  CELL_SIZE * 1.25 * l + CELL_SIZE * 4.5;
     this.array.offset[layer][1] = offset;
     size = createVector(
-      this.const.blendA * ( ( this.const.blendSize + 1 ) * this.const.blendCount - 0.25 ),
-      this.const.blendA * ( this.const.blendSize + 0.75 ) );
+      this.const.blend.a * ( ( this.const.blend.size + 1 ) * this.const.blend.count - 0.25 ),
+      this.const.blend.a * ( this.const.blend.size + 0.75 ) );
     this.addBorder( layer, name, offset, size );
 
     layer = 6;
@@ -106,7 +123,6 @@ class board {
 
     name = 'communityZoomOrigin';
     offset = this.array.offset[layer][0].copy();
-    //size = createVector( t.const.a * 10, t.const.a * 10 );
     size = createVector();
     offset.y += t.const.r * ( t.const.n * 2 - ( 1 - t.const.size % 2 ) ) + this.const.a * 2;
     offset.x += t.const.a * 1.5 * ( t.const.m / 2 - 0.5 );
@@ -121,8 +137,8 @@ class board {
   }
 
   addBorder( layer, name, offset, size ){
-    this.array.border.push( new border( this.var.borderID, layer, name, offset, size ));
-    this.var.borderID++;
+    this.array.border.push( new border( this.var.id.border, layer, name, offset, size ));
+    this.var.id.border++;
   }
 
   cleanBorders(){
@@ -190,9 +206,14 @@ class board {
     vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
 
+    name = 'switchToDominance';
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
+    this.addButton( layer, name, type, vec.copy() );
+
     layer = 1;
     name = '';
-    type = this.const.menuButtons;
+    type = this.const.menu.buttons;
     vec = createVector( CELL_SIZE * 20.5, CELL_SIZE * 2 );
     this.addButton( layer, name, type, vec.copy() );
 
@@ -242,14 +263,14 @@ class board {
   }
 
   addButton( layer, name, type, center ){
-    this.array.button.push( new button( this.var.buttonID, layer, name, type, center ));
-    this.var.buttonID++;
+    this.array.button.push( new button( this.var.id.button, layer, name, type, center ));
+    this.var.id.button++;
     if( layer == MENU_LAYER )
-      this.var.menuButton++;
+      this.var.menu.button++;
   }
 
   cleanButtons(){
-    let begin = this.var.menuButtons;
+    let begin = this.var.menu.buttons;
 
     for( let i = begin; i < this.array.button.length; i++ )
       this.array.button[i].var.onScreen = false;
@@ -258,7 +279,7 @@ class board {
   updateButtons(){
     this.cleanButtons();
 
-    let offsetID = this.var.menuButton;
+    let offsetID = this.var.menu.button;
     let count = null;
 
     for( let i = offsetID; i < this.array.button.length; i++ ){
@@ -312,12 +333,12 @@ class board {
   }
 
   addInscription( layer, content, center, size ){
-    this.array.inscription.push( new inscription( this.var.inscriptionID, layer, content, center, size ));
-    this.var.inscriptionID++;
+    this.array.inscription.push( new inscription( this.var.id.inscription, layer, content, center, size ));
+    this.var.id.inscription++;
   }
 
   cleanInscriptions(){
-    for( let i = this.const.menuInscription; i < this.array.inscription.length; i++ )
+    for( let i = this.const.menu.inscription; i < this.array.inscription.length; i++ )
       this.array.inscription[i].var.onScreen = false;
   }
 
@@ -359,7 +380,7 @@ class board {
         return;
 
     //change board layer
-    if( buttonID >= 0 && buttonID < this.const.menuButtons )
+    if( buttonID >= 0 && buttonID < this.const.menu.buttons )
       this.switchLayer( buttonID );
 
     let layer = this.array.layer[this.var.layer];
@@ -376,12 +397,14 @@ class board {
         break;
       case 3:
         let length = 16 * ( layer.obj.laws.array.value.length + 0.5 ) + 1;
-        if( buttonID > this.const.menuButtons - 1 && buttonID < this.const.menuButtons + length )
+        if( buttonID > this.const.menu.buttons - 1 && buttonID < this.const.menu.buttons + length )
           layer.activateButton( this.array.button, buttonID );
         break;
       case 5:
-        if( buttonID > 127 && buttonID < 130 ){
-          let shift = -( buttonID - 128.5 ) * 2;
+        let buttonNumber = 130;
+        if( buttonID == buttonNumber ||
+            buttonID == buttonNumber + 1 ){
+          let shift = -( buttonID - buttonNumber - 0.5 ) * 2;
           layer.part.underworld.switchFloor( shift );
         }
         break;

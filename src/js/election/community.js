@@ -1,10 +1,8 @@
 //
 class community {
-  constructor ( index, center, grid, a, noise ){
+  constructor ( index, center, a, noise ){
     this.const = {
       index: index,
-      i: grid.y,
-      j: grid.x,
       n: 6,
       a: a,
       noise: noise
@@ -114,7 +112,7 @@ class community {
   }
 
   init(){
-    this.const.r =  this.const.a * this.var.scale / ( Math.tan( Math.PI / this.const.n ) * 2 );
+    this.const.r = this.const.a * this.var.scale / ( Math.tan( Math.PI / this.const.n ) * 2 );
 
     this.initVertexs();
     this.initSectors();

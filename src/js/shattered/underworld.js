@@ -89,7 +89,7 @@ class underworld {
   cleanRoods(){
     for( let i = 0; i < this.array.rood.length; i++ )
       for( let j = 0; j < this.array.rood[i].length; j++ )
-          this.array.rood[i][j].setStatus( 0 );
+        this.array.rood[i][j].setStatus( 0 );
   }
 
   roodsAroundCenter(){
@@ -99,33 +99,27 @@ class underworld {
       indexs.push( this.array.rood[f][this.const.size][this.const.size].const.index );
 
       for( let i = 0; i < this.const.size; i++ ){
+        for( let j = indexs.length - 1; j >= 0; j-- ){
+          let vec = this.convertIndex( indexs[j] );
+          let parity = ( vec.y % 2 );
 
-          //console.log( indexs );
-          for( let j = indexs.length - 1; j >= 0; j-- ){
-            let vec = this.convertIndex( indexs[j] );
-            let parity = ( vec.y % 2 );
-
-            for( let l = 0; l < this.array.neighbor[parity].length; l++ ){
-              vec = this.convertIndex( indexs[j] );
-              vec.add( this.array.neighbor[parity][l] );
-              let addIndex = this.convertGrid( vec );
-                if( !indexs.includes( addIndex ) ){
-                  indexs.push( addIndex );
-                  paritys.push( ( i + 1 ) % 2  );
-                  //console.log( addIndex, ( i + 1 ) % 2 )
-                }
-            }
+          for( let l = 0; l < this.array.neighbor[parity].length; l++ ){
+            vec = this.convertIndex( indexs[j] );
+            vec.add( this.array.neighbor[parity][l] );
+            let addIndex = this.convertGrid( vec );
+              if( !indexs.includes( addIndex ) ){
+                indexs.push( addIndex );
+                paritys.push( ( i + 1 ) % 2  );
+              }
           }
-      }
-        //console.log( indexs );
-
-
-        for( let i = 0; i < indexs.length; i++ ){
-          let vec = this.convertIndex( indexs[i] );
-          this.array.rood[f][vec.y][vec.x].var.visiable = true;
-          this.array.rood[f][vec.y][vec.x].var.parity = paritys[i];
-          //console.log( i, paritys[i] )
         }
+      }
+
+      for( let i = 0; i < indexs.length; i++ ){
+        let vec = this.convertIndex( indexs[i] );
+        this.array.rood[f][vec.y][vec.x].var.visiable = true;
+        this.array.rood[f][vec.y][vec.x].var.parity = paritys[i];
+      }
     }
     //    this.array.rood[this.const.size][this.const.size].setStatus( 1 );
   }
@@ -134,7 +128,6 @@ class underworld {
   convertIndex( index ){
     if( index == undefined )
       return null;
-
 
     let f = Math.floor( index / this.const.n / this.const.m );
     let remainder = index % ( this.const.n * this.const.m )
