@@ -1,25 +1,39 @@
 //
 class hall {
-  constructor ( index, center, floors, a ){
+  constructor ( index, center, grid, floors, a ){
     this.const = {
-      index: index,
+      index: index.hall,
       floors: floors,
+      i: grid.x,
+      j: grid.y,
       a: a
     };
     this.var = {
       center: center.copy()
     };
+    this.array = {
+      floor: []
+    };
 
-    this.init();
+    this.init( index.floor );
   }
 
-  init(){
+  initFloors( index ){
+    for( let i = 0; i < this.const.floors; i++ ){
+      let center = createVector( this.var.center.x, this.var.center.y + ( -this.const.floors / 2 + i ) * this.const.a );
+      center.add( this.var.center.copy() );
+      let grid = createVector( this.const.i, this.const.j, i );
 
+      this.array.floor.push( new floor( index + i,  center, grid, this.const.a ) );
+    }
   }
 
-  draw( vec ){
-    let offset = this.var.center.copy()
-    offset.add( vec );
-    ellipse( offset.x, offset.y, this.const.a, this.const.a * this.const.floors );
+  init( index ){
+    this.initFloors( index );
+  }
+
+  draw( offset ){
+    for( let i = 0; i < this.array.floor.length; i++ )
+      this.array.floor[i].draw( offset )
   }
 }
