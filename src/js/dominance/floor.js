@@ -10,17 +10,36 @@ class floor {
     };
     this.var = {
       center: center.copy(),
-      fontSize: 8
+      fontSize: 8,
+      region: null
     };
     this.array = {
       link: [ [], [] ]
     };
-
+    this.color = {
+      bg: {
+        h: 210,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      }
+    };
 
     this.init();
   }
 
+  initHues(){
+    this.array.hue = [
+      52,
+      122,
+      192,
+      262,
+      297,
+      332
+    ];
+  }
+
   init(){
+    this.initHues();
   }
 
   addLink( link ){
@@ -31,11 +50,17 @@ class floor {
     this.array.link[j].push( link );
   }
 
+  setRegion( region ){
+    this.var.region = region;
+
+    this.color.bg.h = this.array.hue[region]
+  }
+
   draw( vec ){
     let offset = this.var.center.copy();
     offset.add( vec );
 
-    fill( 210, COLOR_MAX , COLOR_MAX / 2 );
+    fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
     rect( offset.x - this.const.a / 2, offset.y - 0.5 * this.const.a,
           this.const.a, this.const.a );
 

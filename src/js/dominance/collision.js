@@ -6,6 +6,8 @@ class collision {
     };
     this.var = {
     };
+    this.array = {
+    };
     this.data = {
       arena: null
     }
@@ -15,6 +17,7 @@ class collision {
 
   init(){
     this.data.arena = new arena( this.const.size );
+    this.data.coordinator = new coordinator( this.data.arena );
   }
 
   click( offset ){
