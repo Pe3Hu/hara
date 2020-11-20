@@ -201,9 +201,9 @@ class arena {
       f: null
     };
     middle.i = Math.floor( this.array.hall.length / 2 );
-    /*middle.i = Math.floor( this.array.hall.length / 2 );
+    middle.j = Math.floor( this.array.hall[middle.i].length / 2 );
     middle.f = Math.floor( this.array.hall[middle.i][middle.j].array.floor.length / 2 );
-    let center = this.array.hall[middle.i][middle.j].array.floor[middle.f].const.index;*/
+    let center = this.array.hall[middle.i][middle.j].array.floor[middle.f].const.index;
 
     for( let i = 0; i < this.array.hall[middle.i].length; i++ ){
         let hall = this.array.hall[middle.i][i];
@@ -232,6 +232,11 @@ class arena {
             if( index != -1 ){
               hall = this.convertFloor( neighbor.array.link[j][l] );
               let shift =  Math.abs( hall.i - middle.i ) + 1;
+              //the top and bottom floor of the center
+              let d_center = center - neighbor.array.link[j][l];
+              let d = this.array.hall[middle.i][middle.j].array.floor.length * middle.j +  middle.f;
+              if( d_center == d )
+                shift = d;
               let duplicates = Math.pow( shift, 2 );
 
               for( let d = 0; d < duplicates; d++ )
@@ -252,18 +257,14 @@ class arena {
         else
           console.log( i, 'кончился', this.array.region[i] )
       }
-    console.log( this.array.controversial.floor )
-    console.log( this.array.region )
   }
 
   distributeUnselected(){
-    let unselected = [ this.array.controversial.floor[0] ];
     let clusters = [ [ this.array.controversial.floor[0] ] ];
 
     //distribute unselected floors by clusters
     for( let i = 1; i < this.array.controversial.floor.length; i++ ){
-      unselected.push( this.array.controversial.floor[i] );
-
+      //
       let hall = this.convertFloor( this.array.controversial.floor[i] );
       let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
       let flag = false;
@@ -325,12 +326,11 @@ class arena {
 
     //neighboring regions for clusters
     let regions = [];
-    console.log( clusters );
 
-    for( let i = 0; i < clusters.length ; i++ ){
+    for( let i = 0; i < clusters.length; i++ ){
       regions.push( [] );
 
-      for( let j = 0; j < clusters[i].length ; j++ ){
+      for( let j = 0; j < clusters[i].length; j++ ){
         let hall = this.convertFloor( clusters[i][j] );
         let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
 
@@ -349,32 +349,29 @@ class arena {
       }
     }
 
-    console.log( regions );
-
     //unselected floors adjacent to regions
     let frontiers = [];
 
-    for( let i = 0; i < this.array.region.length ; i++ ){
+    for( let i = 0; i < this.array.region.length; i++ ){
       frontiers.push( [] );
 
-      for( let r = 0; r < regions.length ; r++ ){
+      for( let r = 0; r < regions.length; r++ ){
         let index = regions[r].indexOf( i );
 
         if( index != -1 )
-          for( let c = 0; c < clusters[r].length ; c++ )
+          for( let c = 0; c < clusters[r].length; c++ )
             frontiers[i].push( clusters[r][c] );
       }
     }
 
-    console.log( frontiers );
-    let max = {
+    let association = {
       a: null,
       b: null,
-      length: 0
+      array: []
     }
 
     //find a pair of two regions covering more floors
-    for( let i = 0; i < frontiers.length ; i++ )
+    for( let i = 0; i < frontiers.length; i++ )
       for( let j = i + 1; j < frontiers.length; j++ ){
         let merger = [];
 
@@ -388,16 +385,202 @@ class arena {
             merger.push( frontiers[j][jj] );
         }
 
-        if( merger.length > max.length )
-          max = {
-            a: i,
-            b: j,
-            length: merger.length,
+        let min_length = i;
+        let max_length = j;
+
+        if( frontiers[i].length > frontiers[j].length ){
+          min_length = j;
+          max_length = i;
+        }
+
+        if( merger.length > association.array.length )
+          association = {
+            a: min_length,
+            b: max_length,
             array: merger
           }
       }
 
-    console.log( max )
+    console.log( association )
+
+    //distribute most of the floors
+    for( let i = 0; i < frontiers[association.b].length; i++ ){
+      let hall = this.convertFloor( frontiers[association.b][i] );
+      let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
+      this.array.region[association.b].push( floor );
+      floor.setRegion( association.b );
+
+      let index = frontiers[association.a].indexOf( frontiers[association.b][i] );
+      if( index != -1 )
+        frontiers[association.a].splice( index, 1 );
+    }
+
+    //distribute less of the floors
+    for( let i = 0; i < frontiers[association.a].length; i++ ){
+      let hall = this.convertFloor( frontiers[association.a][i] );
+      let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
+      this.array.region[association.a].push( floor );
+      floor.setRegion( association.a );
+    }
+
+    console.log( this.array.region )
+    let graph = this.collapseGraph();
+
+    console.log( graph.offshoots[association.b] )
+    console.log( graph.neighbors.index[association.b] )
+
+    let unfixed_floors = this.findUnfixed( graph, association );
+
+    console.log( unfixed_floors );
+    //align the number of floors between dominant regions
+    let hegemon_size = 15;
+    let surplus = this.array.region[association.b].length - hegemon_size;
+
+    while( surplus > 0 &&
+           unfixed_floors[0].length > 0 &&
+           unfixed_floors[1].length > 0 ){
+      let i;
+      if( unfixed_floors[0].length > 0 )
+        i = 0;
+      else
+        if( unfixed_floors[1].length > 0 )
+          i = 1;
+
+      for( let j = 0; j < unfixed_floors[i].length; j++ )
+        console.log( unfixed_floors[i][j] );
+
+      let rand = Math.floor( Math.random() * unfixed_floors[i].length );
+      let hall = this.convertFloor( unfixed_floors[i][rand] );
+      let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
+      floor.setRegion( association.a )
+
+      let index = graph.offshoots[association.b].indexOf( unfixed_floors[i][rand] );
+      this.array.region[association.b].splice( index, 1 );
+      this.array.region[association.a].push( floor );
+
+      console.log( surplus, rand, unfixed_floors[i][rand] )
+      console.log( unfixed_floors, this.array.region[association.a].length, this.array.region[association.b].length );
+      unfixed_floors[i].splice( rand, 1 );
+      surplus--;
+
+      if( i == 1 ){
+        console.log( '___________________' )
+        graph = this.collapseGraph();
+        unfixed_floors = this.findUnfixed( graph, association );
+      }
+    }
+
+    console.log( this.array.region );
+  }
+
+  collapseGraph(){
+    //find the foundation of the regions
+    let offshoots = [];
+    let neighbors = {
+      index: [],
+      count: []
+    };
+
+    for( let i = 0; i < this.array.region.length; i++ ){
+      let region = this.array.region[i];
+      offshoots.push( [] );
+      neighbors.index.push( [] );
+      neighbors.count.push( [] );
+
+      for( let j = 0; j < region.length; j++ ){
+        neighbors.index[i].push( [] );
+        neighbors.count[i].push( 0 );
+        offshoots[i].push( region[j].const.index );
+      }
+
+      for( let j = 0; j < region.length; j++ )
+        for( let jj = j + 1; jj < region.length; jj++ )
+          for( let l = 0; l < region[jj].array.link.length; l++ ){
+            let index = region[jj].array.link[l].indexOf( region[j].const.index );
+
+            if( index != -1 ){
+              let duplicate_index = neighbors.index[i][j].indexOf( region[jj].array.link[l][index] );
+              if( true ){
+                neighbors.index[i][j].push( region[jj].const.index );
+                neighbors.index[i][jj].push( region[j].const.index );
+              }
+            }
+          }
+    }
+
+    for( let i = 0; i < this.array.region.length; i++ ){
+      let flag = false;
+      let counter = 0;
+      let stopper = 100;
+
+      while( !flag && counter < stopper ){
+        flag = true;
+
+        for( let n = 0; n < neighbors.index[i].length; n++ )
+          if( neighbors.index[i][n].length == 1 ){
+            let index = offshoots[i].indexOf( neighbors.index[i][n][0] );
+            let index_splice = neighbors.index[i][index].indexOf( offshoots[i][n] );
+            neighbors.index[i][index].splice( index_splice, 1 );
+            neighbors.index[i][n].pop();
+            neighbors.count[i][index]++;
+            if( neighbors.count[i][n] != 0 )
+              neighbors.count[i][index] += neighbors.count[i][n];
+            flag = false;
+          }
+
+        counter++;
+      }
+    }
+
+    return {
+      neighbors: neighbors,
+      offshoots: offshoots
+    }
+  }
+
+  findUnfixed( graph, association ){
+    let unfixed_floors = [ [], [] ];
+    for( let i = 0; i < graph.neighbors.index[association.b].length; i++ )
+      switch (  graph.neighbors.index[association.b][i].length ) {
+        case 0:
+        unfixed_floors[0].push(  graph.offshoots[association.b][i] );
+          break;
+        case 2:
+        unfixed_floors[1].push(  graph.offshoots[association.b][i] );
+          break;
+      }
+
+      console.log( unfixed_floors )
+    //small hegemon frontier
+    let frontier_sh = [];
+    //frontier between small and large hegemon
+    let frontier_bslh = [];
+    let small_region = this.array.region[association.a];
+    let large_region = this.array.region[association.b];
+
+    for( let i = 0; i < small_region.length; i++ )
+      for( let l = 0; l < small_region[i].array.link.length; l++ )
+        for( let ll = 0; ll < small_region[i].array.link[l].length; ll++ ){
+          let index = frontier_sh.indexOf( small_region[i].array.link[l][ll] );
+
+          if( index == -1 )
+            frontier_sh.push( small_region[i].array.link[l][ll] );
+        }
+
+    for( let i = 0; i < large_region.length; i++ ){
+      let index = frontier_sh.indexOf( large_region[i].const.index );
+
+      if( index != -1 )
+        for( let j = 0; j < unfixed_floors.length; j++ ){
+          let unfixed_index = unfixed_floors[j].indexOf( large_region[i].const.index )
+
+          if( unfixed_index != -1 )
+            frontier_bslh.push( large_region[i].const.index );
+        }
+    }
+
+    console.log( frontier_bslh );
+    return unfixed_floors;
   }
 
   initRegions(){
@@ -434,8 +617,6 @@ class arena {
     } );
     this.var.index.link++;
   }
-
-
 
   click(){
 
