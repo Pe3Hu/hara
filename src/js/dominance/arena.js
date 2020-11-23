@@ -18,7 +18,9 @@ class arena {
         hall: [],
         floor: [],
       },
-      region: []
+      region: [],
+      clef: [],
+      seal: []
     };
 
     this.init();
@@ -30,7 +32,7 @@ class arena {
       hall: 0,
       floor: 0
     };
-    let scale = 1.5;
+    let scale = 4 / 3;
     let a = this.const.a * 1.5 * scale;
     let r = this.const.r * 2 * scale;
 
@@ -42,7 +44,7 @@ class arena {
         let y = ( -halls[i] / 2 + j ) * r;
         let dx = Math.floor( halls.length / 2 ) - i;
         if( Math.abs( dx ) == 4 && j != 1 )
-          x -= Math.sign( dx ) * a / 2;
+          x -= Math.sign( dx ) * a / 4;
         let center = createVector( x, y );
         let grid = createVector( i, j );
         let floors = 1;
@@ -50,7 +52,10 @@ class arena {
           let parity = Math.abs( dx + 1 ) % 2;
           floors = parity + 2;
           this.array.controversial.hall.push( index.hall );
-        };
+        }
+
+        if( Math.abs( dx ) > 4 )
+          center.x += Math.sign( dx ) * ( Math.abs( dx ) - 4 ) * a / 2;
 
         this.array.hall[i].push( new hall( index , center, grid, floors, this.const.a ) );
 
@@ -77,26 +82,26 @@ class arena {
       j: 0,
       f: 0
     };
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     a.i = 1;
     b.i = a.i + 1;
-    this.addLink( a, b );
+    this.addLink( a, b, 2 );
     b.j = 1;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     b.j = 2;
-    this.addLink( a, b );
+    this.addLink( a, b, 1 );
     a.i = 2;
     a.j = 1;
     b.i = a.i + 1;
     b.j = 0;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     b.f = 1;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     b.j = 1;
     b.f = 0;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     b.f = 1;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
 
     let begin = 3;
     let end = begin + 6;
@@ -141,9 +146,8 @@ class arena {
                 j: jj,
                 f: ff
               };
-              this.addLink( a, b );
+              this.addLink( a, b, 0 );
             }
-
         }
       }
 
@@ -157,14 +161,14 @@ class arena {
       j: 1,
       f: 0
     };
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     a.f = 1;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     a.j = 1;
     a.f = 0;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     a.f = 1;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     a = {
       i: end + 1,
       j: 0,
@@ -175,11 +179,11 @@ class arena {
       j: 0,
       f: 0
     };
-    this.addLink( a, b );
+    this.addLink( a, b, 1 );
     a.j = 1;
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
     a.j = 2;
-    this.addLink( a, b );
+    this.addLink( a, b, 2 );
     a = {
       i: end + 2,
       j: 0,
@@ -190,7 +194,7 @@ class arena {
       j: 0,
       f: 0
     };
-    this.addLink( a, b );
+    this.addLink( a, b, 0 );
   }
 
   generateBasis(){
@@ -401,7 +405,39 @@ class arena {
           }
       }
 
-    console.log( association )
+    //distribute isolated floors between completed regions (region overload)
+    let overloads = [];
+
+    if( association.array.length < 12 ){
+      let lefts = [];
+
+      for( let i = 0; i < this.array.controversial.floor.length; i++ ){
+        let index = association.array.indexOf( this.array.controversial.floor[i] );
+        if( index == -1 )
+          lefts.push( this.array.controversial.floor[i] );
+      }
+
+      for( let i = 0; i < lefts.length; i++ ){
+        let hall = this.convertFloor( lefts[i] );
+        let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
+        let neighbors = [];
+
+        for( let j = 0; j < floor.array.link.length; j++ )
+          for( let l = 0; l < floor.array.link[j].length; l++ ){
+            let index = this.array.controversial.floor.indexOf( floor.array.link[j][l] );
+
+            neighbors.push( floor.array.link[j][l] );
+          }
+
+        let rand = Math.floor( Math.random() * neighbors.length );
+        let hall_rand = this.convertFloor( neighbors[rand] );
+        let floor_rand = this.array.hall[hall_rand.i][hall_rand.j].array.floor[hall_rand.f];
+        let region = floor_rand.var.region;
+        this.array.region[region].push( floor_rand );
+        floor.setRegion( region );
+        overloads.push( region );
+      }
+    }
 
     //distribute most of the floors
     for( let i = 0; i < frontiers[association.b].length; i++ ){
@@ -423,22 +459,16 @@ class arena {
       floor.setRegion( association.a );
     }
 
-    console.log( this.array.region )
     let graph = this.collapseGraph();
-
-    console.log( graph.offshoots[association.b] )
-    console.log( graph.neighbors.index[association.b] )
-
     let unfixed_floors = this.findUnfixed( graph, association );
 
-    console.log( unfixed_floors );
     //align the number of floors between dominant regions
     let hegemon_size = 15;
     let surplus = this.array.region[association.b].length - hegemon_size;
 
     while( surplus > 0 &&
-           unfixed_floors[0].length > 0 &&
-           unfixed_floors[1].length > 0 ){
+           ( unfixed_floors[0].length > 0 ||
+             unfixed_floors[1].length > 0 ) ){
       let i;
       if( unfixed_floors[0].length > 0 )
         i = 0;
@@ -446,31 +476,74 @@ class arena {
         if( unfixed_floors[1].length > 0 )
           i = 1;
 
-      for( let j = 0; j < unfixed_floors[i].length; j++ )
-        console.log( unfixed_floors[i][j] );
-
       let rand = Math.floor( Math.random() * unfixed_floors[i].length );
       let hall = this.convertFloor( unfixed_floors[i][rand] );
       let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
       floor.setRegion( association.a )
 
       let index = graph.offshoots[association.b].indexOf( unfixed_floors[i][rand] );
+      graph.offshoots[association.b].splice( index, 1 );
       this.array.region[association.b].splice( index, 1 );
       this.array.region[association.a].push( floor );
-
-      console.log( surplus, rand, unfixed_floors[i][rand] )
-      console.log( unfixed_floors, this.array.region[association.a].length, this.array.region[association.b].length );
       unfixed_floors[i].splice( rand, 1 );
       surplus--;
 
-      if( i == 1 ){
-        console.log( '___________________' )
+      if( i == 1 && surplus > 0 ){
         graph = this.collapseGraph();
         unfixed_floors = this.findUnfixed( graph, association );
       }
     }
 
-    console.log( this.array.region );
+    //let shortage = hegemon_size - this.array.region[association.a].length;
+    //unloading floors from overloaded regions to understaffed
+    for( let o = 0; o < overloads.length; o++ ){
+      //indexes of regions adjacent to the completed region of floors
+      //0 - congested region
+      //1 - intermediate regions
+      let adjacent = [ [], [] ];
+
+      for( let i = 0; i < this.array.region[association.a].length; i++ ){
+        let floor = this.array.region[association.a][i];
+
+        for( let j = 0; j < floor.array.link.length; j++ )
+          for( let l = 0; l < floor.array.link[j].length; l++ ){
+            let hall = this.convertFloor( floor.array.link[j][l] );
+            let floor_linked = this.array.hall[hall.i][hall.j].array.floor[hall.f];
+
+            if( floor_linked.var.region == overloads[o] ){
+              let index = adjacent[0].indexOf( floor.array.link[j][l] );
+
+              if( index == -1 )
+                adjacent[0].push( floor.array.link[j][l] );
+            }
+            else{
+              let index = adjacent[1].indexOf( floor.array.link[j][l] );
+
+              if( index == -1 )
+                adjacent[1].push( floor.array.link[j][l] );
+            }
+          }
+      }
+
+      if( adjacent[0].length > 0 ){
+        let rand = Math.floor( Math.random() * adjacent[0].length );
+        let hall_rand = this.convertFloor( adjacent[0][rand] );
+        let floor_rand = this.array.hall[hall_rand.i][hall_rand.j].array.floor[hall_rand.f];
+        let region = floor_rand.var.region;
+
+        for( let i = 0; i < this.array.region[region].length; i++ )
+          if( this.array.region[region][i].const.index == floor_rand.const.index ){
+            this.array.region[region].splice( i, 1 );
+            floor_rand.setRegion( association.a );
+            this.array.region[association.a].push( floor_rand );
+          }
+      }
+      else{
+        //finding an intermediate region ... too difficult
+        //restart
+        this.initRegions();
+      }
+    }
   }
 
   collapseGraph(){
@@ -550,7 +623,6 @@ class arena {
           break;
       }
 
-      console.log( unfixed_floors )
     //small hegemon frontier
     let frontier_sh = [];
     //frontier between small and large hegemon
@@ -579,7 +651,6 @@ class arena {
         }
     }
 
-    console.log( frontier_bslh );
     return unfixed_floors;
   }
 
@@ -596,7 +667,7 @@ class arena {
     this.initRegions();
   }
 
-  addLink( objA, objB ){
+  addLink( objA, objB, type ){
     let begin = this.array.hall[objA.i][objA.j].array.floor[objA.f];
     let end = this.array.hall[objB.i][objB.j].array.floor[objB.f];
     begin.addLink( end.const.index );
@@ -616,6 +687,10 @@ class arena {
       }
     } );
     this.var.index.link++;
+
+    let floors = [ begin, end ];
+
+    this.array.corridor.push( new corridor( floors, type, this.const.a ) );
   }
 
   click(){
@@ -656,15 +731,8 @@ class arena {
     stroke( 0 );
     strokeWeight( 2 );
 
-    for( let i = 0; i < this.array.link.length; i++ ){
-      let a = this.array.link[i].a;
-      let b = this.array.link[i].b;
-      let begin = this.array.hall[a.i][a.j].array.floor[a.f].var.center.copy();
-      let end = this.array.hall[b.i][b.j].array.floor[b.f].var.center.copy();
-      begin.add(offsets[1]);
-      end.add(offsets[1]);
-      line( begin.x + this.const.a  /2, begin.y, end.x - this.const.a  /2, end.y )
-    }
+    for( let i = 0; i < this.array.corridor.length; i++ )
+      this.array.corridor[i].draw( offsets[1] );
 
     noStroke();
     for( let i = 0; i < this.array.hall.length; i++ )

@@ -9,7 +9,8 @@ class collision {
     this.array = {
     };
     this.data = {
-      arena: null
+      arena: null,
+      coordinator: null
     }
 
     this.init();
