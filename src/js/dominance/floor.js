@@ -53,7 +53,7 @@ class floor {
   setRegion( region ){
     this.var.region = region;
 
-    this.color.bg.h = this.array.hue[region]
+    this.color.bg.h = this.array.hue[region];
   }
 
   draw( vec ){
@@ -61,11 +61,10 @@ class floor {
     offset.add( vec );
 
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-    rect( offset.x - this.const.a / 2, offset.y - 0.5 * this.const.a,
+    rect( offset.x - this.const.a * 0.5, offset.y - this.const.a * 0.5,
           this.const.a, this.const.a );
 
     textSize( this.var.fontSize );
-    //stroke( 0 );
     fill( 0 );
     this.var.txt = this.const.index;
     text( this.var.txt, offset.x, offset.y + FONT_SIZE / 3 );

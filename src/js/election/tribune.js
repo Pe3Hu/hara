@@ -270,8 +270,6 @@ class tribune {
 
         xoff += inc.x;
       }
-
-
     }
   }
 

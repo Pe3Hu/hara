@@ -4,6 +4,7 @@ class challenger {
     this.const = {
     };
     this.var = {
+      addition: 9
     };
     this.array = {
     };

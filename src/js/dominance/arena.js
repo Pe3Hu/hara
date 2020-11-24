@@ -459,91 +459,23 @@ class arena {
       floor.setRegion( association.a );
     }
 
-    let graph = this.collapseGraph();
-    let unfixed_floors = this.findUnfixed( graph, association );
-
     //align the number of floors between dominant regions
     let hegemon_size = 15;
     let surplus = this.array.region[association.b].length - hegemon_size;
+    this.balanceTwoRegion( association.a, association.b, surplus );
 
-    while( surplus > 0 &&
-           ( unfixed_floors[0].length > 0 ||
-             unfixed_floors[1].length > 0 ) ){
-      let i;
-      if( unfixed_floors[0].length > 0 )
-        i = 0;
-      else
-        if( unfixed_floors[1].length > 0 )
-          i = 1;
-
-      let rand = Math.floor( Math.random() * unfixed_floors[i].length );
-      let hall = this.convertFloor( unfixed_floors[i][rand] );
-      let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
-      floor.setRegion( association.a )
-
-      let index = graph.offshoots[association.b].indexOf( unfixed_floors[i][rand] );
-      graph.offshoots[association.b].splice( index, 1 );
-      this.array.region[association.b].splice( index, 1 );
-      this.array.region[association.a].push( floor );
-      unfixed_floors[i].splice( rand, 1 );
-      surplus--;
-
-      if( i == 1 && surplus > 0 ){
-        graph = this.collapseGraph();
-        unfixed_floors = this.findUnfixed( graph, association );
-      }
-    }
-
-    //let shortage = hegemon_size - this.array.region[association.a].length;
     //unloading floors from overloaded regions to understaffed
-    for( let o = 0; o < overloads.length; o++ ){
-      //indexes of regions adjacent to the completed region of floors
-      //0 - congested region
-      //1 - intermediate regions
-      let adjacent = [ [], [] ];
+    for( let o = 0; o < overloads.length; o++ )
+      this.balanceTwoRegion( association.a, overloads[o], 1 );
 
-      for( let i = 0; i < this.array.region[association.a].length; i++ ){
-        let floor = this.array.region[association.a][i];
+    //final check length of regions
+    let suzerain_size = 9;
 
-        for( let j = 0; j < floor.array.link.length; j++ )
-          for( let l = 0; l < floor.array.link[j].length; l++ ){
-            let hall = this.convertFloor( floor.array.link[j][l] );
-            let floor_linked = this.array.hall[hall.i][hall.j].array.floor[hall.f];
+    for( let i = 0; i < this.array.region.length; i++ )
+     if( this.array.region[i].length != hegemon_size &&
+         this.array.region[i].length != suzerain_size )
+       this.restart();
 
-            if( floor_linked.var.region == overloads[o] ){
-              let index = adjacent[0].indexOf( floor.array.link[j][l] );
-
-              if( index == -1 )
-                adjacent[0].push( floor.array.link[j][l] );
-            }
-            else{
-              let index = adjacent[1].indexOf( floor.array.link[j][l] );
-
-              if( index == -1 )
-                adjacent[1].push( floor.array.link[j][l] );
-            }
-          }
-      }
-
-      if( adjacent[0].length > 0 ){
-        let rand = Math.floor( Math.random() * adjacent[0].length );
-        let hall_rand = this.convertFloor( adjacent[0][rand] );
-        let floor_rand = this.array.hall[hall_rand.i][hall_rand.j].array.floor[hall_rand.f];
-        let region = floor_rand.var.region;
-
-        for( let i = 0; i < this.array.region[region].length; i++ )
-          if( this.array.region[region][i].const.index == floor_rand.const.index ){
-            this.array.region[region].splice( i, 1 );
-            floor_rand.setRegion( association.a );
-            this.array.region[association.a].push( floor_rand );
-          }
-      }
-      else{
-        //finding an intermediate region ... too difficult
-        //restart
-        this.initRegions();
-      }
-    }
   }
 
   collapseGraph(){
@@ -611,15 +543,15 @@ class arena {
     }
   }
 
-  findUnfixed( graph, association ){
+  findUnfixed( graph, a, b ){
     let unfixed_floors = [ [], [] ];
-    for( let i = 0; i < graph.neighbors.index[association.b].length; i++ )
-      switch (  graph.neighbors.index[association.b][i].length ) {
+    for( let i = 0; i < graph.neighbors.index[b].length; i++ )
+      switch ( graph.neighbors.index[b][i].length ) {
         case 0:
-        unfixed_floors[0].push(  graph.offshoots[association.b][i] );
+        unfixed_floors[0].push( graph.offshoots[b][i] );
           break;
         case 2:
-        unfixed_floors[1].push(  graph.offshoots[association.b][i] );
+        unfixed_floors[1].push( graph.offshoots[b][i] );
           break;
       }
 
@@ -627,9 +559,11 @@ class arena {
     let frontier_sh = [];
     //frontier between small and large hegemon
     let frontier_bslh = [];
-    let small_region = this.array.region[association.a];
-    let large_region = this.array.region[association.b];
+    let small_region = this.array.region[a];
+    let large_region = this.array.region[b];
 
+    //including floors of own region
+    //this is mistake
     for( let i = 0; i < small_region.length; i++ )
       for( let l = 0; l < small_region[i].array.link.length; l++ )
         for( let ll = 0; ll < small_region[i].array.link[l].length; ll++ ){
@@ -639,6 +573,7 @@ class arena {
             frontier_sh.push( small_region[i].array.link[l][ll] );
         }
 
+    //
     for( let i = 0; i < large_region.length; i++ ){
       let index = frontier_sh.indexOf( large_region[i].const.index );
 
@@ -651,7 +586,35 @@ class arena {
         }
     }
 
-    return unfixed_floors;
+    if( frontier_bslh.length == 0 )
+      this.restart();
+
+    return frontier_bslh;
+  }
+
+  balanceTwoRegion( a, b, surplus ){
+    let graph = this.collapseGraph();
+    //shaky rontier between two regions
+    let frontier = this.findUnfixed( graph, a, b );
+
+    while( surplus > 0 && frontier.length > 0 ){
+      let rand = Math.floor( Math.random() * frontier.length );
+      let hall = this.convertFloor( frontier[rand] );
+      let floor = this.array.hall[hall.i][hall.j].array.floor[hall.f];
+      floor.setRegion( a );
+
+      let index = graph.offshoots[b].indexOf( frontier[rand] );
+      graph.offshoots[b].splice( index, 1 );
+      this.array.region[b].splice( index, 1 );
+      this.array.region[a].push( floor );
+      frontier.splice( rand, 1 );
+      surplus--;
+
+      if( surplus > 0 ){
+        graph = this.collapseGraph();
+        frontier = this.findUnfixed( graph, a, b );
+      }
+    }
   }
 
   initRegions(){
@@ -698,6 +661,28 @@ class arena {
   }
 
   key(){
+
+  }
+
+  restart(){
+    this.var.index.link = 0;
+
+    this.array = {
+      hall: [],
+      corridor: [],
+      link: [],
+      controversial: {
+        hall: [],
+        floor: [],
+      },
+      region: [],
+      clef: [],
+      seal: []
+    };
+
+    console.log('restarted')
+
+    this.init();
 
   }
 

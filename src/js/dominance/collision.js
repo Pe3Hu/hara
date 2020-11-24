@@ -21,15 +21,17 @@ class collision {
     this.data.coordinator = new coordinator( this.data.arena );
   }
 
-  click( offset ){
-    this.data.arena.click( offset );
+  click( offsets ){
+    this.data.arena.click( offsets );
+    this.data.coordinator.click( offsets );
   }
 
   key(){
-    this.data.arena.key();
+    this.data.coordinator.key();
   }
 
-  draw( offset ){
-    this.data.arena.draw( offset );
+  draw( offsets ){
+    this.data.arena.draw( offsets );
+    this.data.coordinator.draw( offsets );
   }
 }
