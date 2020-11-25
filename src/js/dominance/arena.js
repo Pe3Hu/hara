@@ -53,11 +53,26 @@ class arena {
           floors = parity + 2;
           this.array.controversial.hall.push( index.hall );
         }
+        let dy = halls[i] / 2 - j;
+        switch ( floors ) {
+          case 1:
+            dy = null;
+            break;
+          case 2:
+          case 3:
+            dy -= 0.5;
+            break;
+        }
 
         if( Math.abs( dx ) > 4 )
           center.x += Math.sign( dx ) * ( Math.abs( dx ) - 4 ) * a / 2;
 
-        this.array.hall[i].push( new hall( index , center, grid, floors, this.const.a ) );
+        let symmetrys = {
+          i: -dx,
+          j: dy
+        };
+
+        this.array.hall[i].push( new hall( index , center, grid, floors, symmetrys, this.const.a ) );
 
         let last = this.array.hall[i].length - 1;
 
@@ -661,6 +676,10 @@ class arena {
   }
 
   key(){
+
+  }
+
+  light(){
 
   }
 

@@ -17,7 +17,7 @@ function preload() {
 }
 
 function setup() {
-  CANVAS_SIZE = createVector( 800, 700 );//800 600
+  CANVAS_SIZE = createVector( 1280, 800 );//800 600
   CANVAS_GRID = createVector( Math.floor( CANVAS_SIZE.x / CELL_SIZE ), Math.floor( CANVAS_SIZE.y / CELL_SIZE ) );
   createCanvas( CANVAS_SIZE.x, CANVAS_SIZE.y );
 
@@ -38,6 +38,10 @@ function draw() {
 
 function mouseClicked() {
   GAME_BOARD.click();
+}
+
+function mouseMoved() {
+  GAME_BOARD.moved();
 }
 
 function keyPressed() {

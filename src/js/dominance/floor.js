@@ -1,11 +1,12 @@
 //
 class floor {
-  constructor ( index, center, grid, a ){
+  constructor ( index, center, grid, symmetrys, a ){
     this.const = {
       index: index,
       i: grid.x,
       j: grid.y,
       f: grid.z,
+      symmetrys: symmetrys,
       a: a
     };
     this.var = {

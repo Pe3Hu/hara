@@ -5,7 +5,7 @@ class clef {
       index: index,
       region: floor.var.region,
       floor: floor,
-      a: floor.const.a * 4
+      a: floor.const.a * 4,
     };
     this.var = {
       center: createVector(),
@@ -37,8 +37,13 @@ class clef {
     this.color.bg.h = this.array.hue[this.const.region];
   }
 
+  convertFloorConst(){
+    this.const.i = 7;
+  }
+
   init(){
     this.initHues();
+    this.convertFloorConst();
   }
 
   setState( state ){
@@ -68,7 +73,13 @@ class clef {
       textSize( this.var.fontSize );
       noStroke();
       fill( 0 );
-      text( this.const.index, offset.x, offset.y + FONT_SIZE / 3 );
+      text( this.const.index, offset.x - this.const.a * 0.25, offset.y + FONT_SIZE / 3 );
+      //text( this.const.floor.const.index, offset.x, offset.y + FONT_SIZE / 3 );
+      text( this.const.floor.const.symmetrys.i, offset.x + this.const.a * 0.25, offset.y - this.const.a * 0.25 + FONT_SIZE / 3 );
+      text( this.const.floor.const.symmetrys.j, offset.x + this.const.a * 0.25, offset.y + FONT_SIZE / 3 );
+      text( this.const.floor.const.symmetrys.f, offset.x + this.const.a * 0.25, offset.y + this.const.a * 0.25 + FONT_SIZE / 3 );
       textSize( FONT_SIZE );
+
+
   }
 }

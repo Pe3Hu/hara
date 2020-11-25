@@ -30,6 +30,10 @@ class collision {
     this.data.coordinator.key();
   }
 
+  moved( offsets ){
+    this.data.coordinator.moved( offsets );
+  }
+
   draw( offsets ){
     this.data.arena.draw( offsets );
     this.data.coordinator.draw( offsets );

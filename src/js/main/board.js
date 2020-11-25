@@ -448,6 +448,10 @@ class board {
     this.array.layer[this.var.layer].key();
   }
 
+  moved(){
+    this.array.layer[this.var.layer].moved( this.array.offset[this.var.layer] );
+  }
+
   switchLayer( buttonID ){
     let buttonOffset = 0;
     this.var.layer = buttonID - buttonOffset;
