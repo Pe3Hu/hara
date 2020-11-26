@@ -76,10 +76,10 @@ class board {
       CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
       CELL_SIZE * Math.floor( this.const.grid.y * 7 / 8 ) ) );
     this.array.offset[layer].push( createVector(
-      CELL_SIZE * Math.floor( this.const.grid.x - 3 ),
+      CELL_SIZE * Math.floor( this.const.grid.x - 5 ),
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
     this.array.offset[layer].push( createVector(
-      CELL_SIZE * Math.floor( 3 ),
+      CELL_SIZE * Math.floor( 5 ),
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
   }
 

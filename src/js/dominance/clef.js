@@ -5,7 +5,7 @@ class clef {
       index: index,
       region: floor.var.region,
       floor: floor,
-      a: floor.const.a * 4,
+      size: createVector( floor.const.a * 2, floor.const.a * 4 )
     };
     this.var = {
       center: createVector(),
@@ -20,6 +20,9 @@ class clef {
         l: COLOR_MAX * 0.5
       }
     };
+    this.flag = {
+      onScreen: false
+    }
 
     this.init();
   }
@@ -59,27 +62,34 @@ class clef {
 
     switch ( state ) {
       case 0:
-
+        this.flag.onSreen = false;
+        break;
+      case 1:
+        this.flag.onSreen = true;
         break;
     }
   }
 
-  draw( offset ){
-    stroke(0);
-    fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-    rect( offset.x - this.const.a * 0.5, offset.y - this.const.a * 0.5,
-          this.const.a, this.const.a );
+  clean(){
+    
+  }
+
+  draw(){
+    if( this.flag.onScreen ){
+      stroke( 0 );
+      fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+      rect( this.var.center.x - this.const.a * 0.5, this.var.center.y - this.const.a * 0.5,
+            this.const.a, this.const.a );
 
       textSize( this.var.fontSize );
       noStroke();
       fill( 0 );
-      text( this.const.index, offset.x - this.const.a * 0.25, offset.y + FONT_SIZE / 3 );
-      //text( this.const.floor.const.index, offset.x, offset.y + FONT_SIZE / 3 );
-      text( this.const.floor.const.symmetrys.i, offset.x + this.const.a * 0.25, offset.y - this.const.a * 0.25 + FONT_SIZE / 3 );
-      text( this.const.floor.const.symmetrys.j, offset.x + this.const.a * 0.25, offset.y + FONT_SIZE / 3 );
-      text( this.const.floor.const.symmetrys.f, offset.x + this.const.a * 0.25, offset.y + this.const.a * 0.25 + FONT_SIZE / 3 );
+      text( this.const.index, this.var.center.x - this.const.a * 0.25, this.var.center.y + FONT_SIZE / 3 );
+      //text( this.const.floor.const.index, this.var.center.x, this.var.center.y + FONT_SIZE / 3 );
+      text( this.const.floor.const.symmetrys.i, this.var.center.x + this.const.a * 0.25, this.var.center.y - this.const.a * 0.25 + FONT_SIZE / 3 );
+      text( this.const.floor.const.symmetrys.j, this.var.center.x + this.const.a * 0.25, this.var.center.y + FONT_SIZE / 3 );
+      text( this.const.floor.const.symmetrys.f, this.var.center.x + this.const.a * 0.25, this.var.center.y + this.const.a * 0.25 + FONT_SIZE / 3 );
       textSize( FONT_SIZE );
-
-
+    }
   }
 }

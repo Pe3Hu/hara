@@ -1,7 +1,9 @@
 //
 class challenger {
-  constructor (  ){
+  constructor ( index, a ){
     this.const = {
+      index: index,
+      a: a
     };
     this.var = {
       addition: 9

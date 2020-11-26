@@ -1,6 +1,6 @@
 //
 class collision {
-  constructor (  ){
+  constructor (){
     this.const = {
       size: 3
     };
@@ -11,12 +11,16 @@ class collision {
     this.data = {
       arena: null,
       coordinator: null
-    }
+    };
+    this.table = {
+    };
 
     this.init();
   }
 
   init(){
+
+      console.log( this.table )
     this.data.arena = new arena( this.const.size );
     this.data.coordinator = new coordinator( this.data.arena );
   }
