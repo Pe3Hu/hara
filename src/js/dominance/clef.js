@@ -5,7 +5,7 @@ class clef {
       index: index,
       region: floor.var.region,
       floor: floor,
-      size: createVector( floor.const.a * 2, floor.const.a * 4 )
+      size: createVector( floor.const.a * 4, floor.const.a * 4 )
     };
     this.var = {
       center: createVector(),
@@ -21,7 +21,10 @@ class clef {
       }
     };
     this.flag = {
-      onScreen: false
+      onScreen: false,
+      player: false,
+      selected: false,
+      shifted: false
     }
 
     this.init();
@@ -62,33 +65,63 @@ class clef {
 
     switch ( state ) {
       case 0:
-        this.flag.onSreen = false;
+        this.flag.onScreen = false;
         break;
       case 1:
-        this.flag.onSreen = true;
+        this.flag.onScreen = true;
+        break;
+      case 2:
+        this.flag.onScreen = true;
+        break;
+      case 3:
+        this.flag.onScreen = true;
         break;
     }
   }
 
-  clean(){
-    
+  setPlayer( flag ){
+    this.flag.player = flag;
   }
 
-  draw(){
-    if( this.flag.onScreen ){
+  setShifted( flag ){
+    this.flag.shifted = flag;
+  }
+
+  setCenter( center ){
+    this.var.center = center;
+  }
+
+  clean(){
+
+  }
+
+  draw( offset ){
+    if( this.flag.onScreen && this.flag.player ){
+      let center = offset.copy();
+      center.add( this.var.center );
       stroke( 0 );
       fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-      rect( this.var.center.x - this.const.a * 0.5, this.var.center.y - this.const.a * 0.5,
-            this.const.a, this.const.a );
+      let x = this.const.size.x * 0.5;
+      let y = this.const.size.y;
+      let shifted = 0;
+
+      if( this.flag.selected )
+        x = this.const.size.x;
+      if( this.flag.shifted )
+        center.x += this.const.size.x / 2;
+
+      rect( center.x - this.const.size.x * 0.5, center.y - this.const.size.y * 0.5, x, y );
 
       textSize( this.var.fontSize );
       noStroke();
       fill( 0 );
-      text( this.const.index, this.var.center.x - this.const.a * 0.25, this.var.center.y + FONT_SIZE / 3 );
-      //text( this.const.floor.const.index, this.var.center.x, this.var.center.y + FONT_SIZE / 3 );
-      text( this.const.floor.const.symmetrys.i, this.var.center.x + this.const.a * 0.25, this.var.center.y - this.const.a * 0.25 + FONT_SIZE / 3 );
-      text( this.const.floor.const.symmetrys.j, this.var.center.x + this.const.a * 0.25, this.var.center.y + FONT_SIZE / 3 );
-      text( this.const.floor.const.symmetrys.f, this.var.center.x + this.const.a * 0.25, this.var.center.y + this.const.a * 0.25 + FONT_SIZE / 3 );
+      text( this.const.index, center.x - this.const.size.x * 0.25, center.y + FONT_SIZE / 3 );
+      //text( this.const.floor.const.index, center.x, center.y + FONT_SIZE / 3 );
+      if( this.flag.selected ){
+        text( this.const.floor.const.symmetrys.i, center.x + this.const.size.x * 0.25, center.y - this.const.size.y * 0.25 + FONT_SIZE / 3 );
+        text( this.const.floor.const.symmetrys.j, center.x + this.const.size.x * 0.25, center.y + FONT_SIZE / 3 );
+        text( this.const.floor.const.symmetrys.f, center.x + this.const.size.x * 0.25, center.y + this.const.size.y * 0.25 + FONT_SIZE / 3 );
+      }
       textSize( FONT_SIZE );
     }
   }

@@ -68,16 +68,21 @@ class board {
     layer = 6;
     this.array.offset[layer].push( createVector( CELL_SIZE * Math.floor( this.const.grid.x / 2 ), CELL_SIZE * 2.5 ) );
     layer = 7;
-    this.array.offset[layer].push( createVector( CELL_SIZE * 2.5, CELL_SIZE * 2.5 ) );
     this.array.offset[layer].push( createVector(
       CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
+      CELL_SIZE * Math.floor( this.const.grid.y * 7 / 24 ) ) );
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x - 6 ),
+      CELL_SIZE * Math.floor( this.const.grid.y / 4 ) ) );
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x - 6 ),
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
     this.array.offset[layer].push( createVector(
       CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
-      CELL_SIZE * Math.floor( this.const.grid.y * 7 / 8 ) ) );
+      CELL_SIZE * Math.floor( this.const.grid.y * 13 / 16 ) ) );
     this.array.offset[layer].push( createVector(
-      CELL_SIZE * Math.floor( this.const.grid.x - 5 ),
-      CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
+      CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
+      CELL_SIZE * Math.floor( this.const.grid.y * 7 / 12 ) ) );
     this.array.offset[layer].push( createVector(
       CELL_SIZE * Math.floor( 5 ),
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );

@@ -13,8 +13,10 @@ class coordinator {
         player: 0
       },
       current: {
-        distribution: {},
-        decree: {}
+        clef: null,
+        distribution: null,
+        decree: null,
+        zone: null
       }
     };
     this.array = {
@@ -40,11 +42,8 @@ class coordinator {
     this.table = {
       size: {
         distribution: null,
-        decree: null
-      },
-      outline: {
-        distribution: [],
-        decree: []
+        decree: null,
+        zone: []
       }
     };
 
@@ -78,21 +77,37 @@ class coordinator {
   initSizes(){
     this.table.size.distribution = this.array.clef[0].const.size;
     this.table.size.decree = this.array.decree[this.var.index.player][0].const.size;
+
+    let size = createVector( this.data.arena.const.a * 61, this.data.arena.const.a * 31 );
+    this.table.size.zone.push( size );
+
+    size = createVector( this.array.clef[0].const.size.x * 3, this.array.clef[0].const.size.y * 5 );
+    this.table.size.zone.push( size );
+
+    size = createVector( this.array.clef[0].const.size.x * 2, this.array.clef[0].const.size.y * 3 );
+    this.table.size.zone.push( size );
+
+    size = createVector( this.array.clef[0].const.size.x * 8, this.array.clef[0].const.size.y * 4.5 );
+    this.table.size.zone.push( size );
+
+    size = createVector( this.array.clef[0].const.size.x * 16, this.array.clef[0].const.size.y * 2 );
+    this.table.size.zone.push( size );
+
+    size = createVector( this.array.clef[0].const.size.x * 2, this.array.clef[0].const.size.y * 14 );
+    this.table.size.zone.push( size );
   }
 
-  initOutlines(){
-    this.table.outline.decree = [];
+  initDecrees(){
     let size = this.table.size.decree;
     let scale = 1.25;
 
     for( let i = 0; i < this.array.decree.length; i++ ){
-      this.table.outline.decree.push( [] );
-
       for( let j = 0; j < this.array.decree[i].length; j++ ){
-        let x = -i;
-        let y = j - this.array.decree[i].length;
+        let x = i - this.array.decree.length / 2 + 0.5;
+        let y = j - this.array.decree[i].length / 2  + 0.5;
         let vec = createVector( x * size.x * scale, y * size.y * scale );
-        this.table.outline.decree[i].push( vec );
+
+        this.array.decree[i][j].setCenter( vec );
       }
     }
   }
@@ -101,7 +116,7 @@ class coordinator {
     this.iniClefs();
     this.iniChallengers();
     this.initSizes();
-    this.initOutlines();
+    this.initDecrees();
 
     this.handOverClefs();
   }
@@ -112,7 +127,10 @@ class coordinator {
     this.var.index.clef++;
   }
 
+  //first distribution
   handOverClefs(){
+    this.array.addon = [];
+
     for( let i = 0; i < this.array.clef.length; i++ )
       this.array.addon.push( this.array.clef[i].const.index );
 
@@ -123,17 +141,33 @@ class coordinator {
     for( let i = 0; i < this.array.challenger.length; i++ )
       this.pickUpClefs( i );
 
-    this.flag.outline.distribution = true;
+    this.updateDistribution();
+    //this.flag.distribution = true;
     console.log( this.array.addon )
     console.log( this.array.distribution )
   }
 
   pickUpClefs( challenger ){
     for( let i = 0; i < this.array.challenger[challenger].var.addition; i++ ){
+      if( this.array.addon.length == 0 )
+        this.reshuffle();
+
       let index = this.array.addon.pop();
       this.array.distribution[challenger][0].push( index );
       this.array.clef[index].setState( 1 );
+
+      if( challenger == this.var.index.player )
+        this.array.clef[index].setPlayer( true );
     }
+  }
+
+  reshuffle(){
+    if( this.array.discard.length == 0 )
+        console.log( 'Колода добора пуста' )
+    for( let i = 0; i < this.array.discard.length; i++ )
+      this.array.addon.push( this.array.discard.pop() );
+
+    this.array.addon.shuffle();
   }
 
   activeDecree(){
@@ -154,8 +188,6 @@ class coordinator {
         break;
     }
 
-    let decree = decrees[0].splice( this.var.current.decree, 1 );
-    decrees[1].push( decree.pop() );
     this.pickUpClefs( this.var.index.player );
   }
 
@@ -194,29 +226,13 @@ class coordinator {
 
   click( offsets ){
     //
-    let offset = offsets[2];
-    let current = {
-      clef: null,
-      d: INFINITY
-    };
-
-    for( let obj in this.var.current ) {
-
-      this.clean( obj );
-      let current = this.var.current[obj];
-          console.log( obj, current )
-      if( current != null )
-        switch ( obj ) {
-          case 'decree':
-            current.switchSelection();
-            break;
-        }
-    }
-
-    if( current.clef != null ){
+    if( this.var.current.clef != null ){
       let plus, minus, shift;
+      let distributions = this.array.distribution[this.var.index.player];
+      let offset = offsets[2];
+      let clef = this.array.clef[this.var.current.clef];
 
-      switch ( current.clef.var.state ) {
+      switch ( clef.var.state ) {
         case 1:
           plus = 1;
           minus = 0;
@@ -229,41 +245,28 @@ class coordinator {
           break;
       }
 
-      this.shiftState( current.clef, shift );
-      let index = distributions[minus].indexOf( current.clef.const.index );
-      let clef = distributions[minus].splice( index, 1 );
-      distributions[plus].push( clef.pop() );
+      this.shiftState( clef, shift );
+      let index = distributions[minus].indexOf( clef.const.index );
+      let add = distributions[minus].splice( index, 1 );
+      distributions[plus].push( add.pop() );
+      this.array.clef[clef.const.index].flag.selected = false;
+      this.update();
+      this.moved( offsets );
 
-      this.flag.outline.distribution = true;
+      this.decectDecree();
     }
   }
 
   moved( offsets ){
-    if( this.flag.outline.distribution )
-      this.updateDistribution( offsets );
+    //
+    this.detectZone( offsets );
 
-    let mouse = createVector( mouseX, mouseY );
-
-    for( let obj in this.table.outline ){
-      let outlines = this.table.outline[obj];
-      let size = this.table.size[obj];
-      this.var.current[obj] = null;
-
-      for( let i = 0; i < outlines.length; i++ )
-        for( let j = 0; j < outlines[i].length; j++ ){
-          let vec = mouse.copy();
-          vec.sub( outlines[i][j] );
-          vec.sub( offsets[3] );
-          let x = size.x / 2 - Math.abs( vec.x );
-          let y = size.y / 2 - Math.abs( vec.y );
-          let flag = ( Math.sign( x ) >= 0 && Math.sign( y ) >= 0 );
-
-          if( flag ){
-            this.var.current[obj] = this.array[obj][i][j];
-          }
-        }
+    if( this.var.current.zone != null )
+      switch ( this.var.current.zone ) {
+        case 3:
+          this.detectDistribution( offsets[this.var.current.zone] );
+          break;
       }
-
   }
 
   key(){
@@ -276,38 +279,178 @@ class coordinator {
   }
 
   updateDecree(){
-    let distributions = this.array.distribution[this.var.index.player][1];
-    let decrees = this.array.decree[this.var.index.player][0];
-    this.var.current.decree = null;
+    if( this.var.current.decree != null ){
+      let decrees = this.array.decree[this.var.index.player];
 
-    for( let i = 0; i < decrees.length; i++ )
-      if( decrees[i].const.length == distributions.length )
-        this.var.current.decree = i;
+            console.log(decrees, this.var.current.decree)
+      for( let i = 0; i < decrees.length; i++ )
+        decrees[i].setSelected( false );
+
+      decrees[this.var.current.decree].setSelected( true );
+    }
   }
 
-  updateDistribution( offsets ){
+  updateDistribution(){
     //
-    let offset = offsets[2];
+    this.sortDistribution();
     let distributions = this.array.distribution[this.var.index.player];
-    this.table.outline.distribution = [];
-    let outlines = this.table.outline.distribution;
+    let max = 14;
 
     for( let i = 0; i < distributions.length; i++ ){
-      outlines.push( [] );
+      let index = distributions[i].indexOf( this.var.current.clef );
+
       for( let j = 0; j < distributions[i].length; j++ ){
         let clef = this.array.clef[distributions[i][j]];
-        let a = clef.const.a;
-        let x = 0.5 - distributions[i].length / 2 + j - 0.5;
-        let y = 1.25 * ( 1 - clef.var.state );
-        let vec = createVector( x * a * 0.5, y * a );
-        vec.add( offset );
-        outlines[i].push( vec );
+        let size = clef.const.size;
+        let l = -distributions[i].length / 2;
+        if( distributions[i].length > max )
+          l = -max / 2;
+        let x = l + j + 0.5;
+        let y;
+        switch ( clef.var.state ) {
+          case 1:
+            y = 0.25;
+            break;
+          case 2:
+            y = - 1.25;
+            break;
+        }
+        let shifted = false;
+        if( index != -1 )
+          shifted = index < j;
+
+        if( j >= max ){
+          shifted = false;
+          let jj = j - max;
+          x = -( distributions[i].length - max ) / 2 + jj + 0.5;
+          y++;
+
+          if( index != -1 && index >= max  )
+            shifted = index < j;
+        }
+
+        let vec = createVector( x * size.x * 0.5, y * size.y );
+        clef.setCenter( vec );
+        clef.setShifted( shifted );
       }
     }
 
-    console.log( outlines )
-    this.data.arena.light(  )
-    this.flag.outline.distribution = false;
+    this.data.arena.light()
+    this.flag.distribution = false;
+  }
+
+  update( offsets ){
+    //
+    if( this.var.current.zone != null )
+      switch ( this.var.current.zone ) {
+        case 3:
+          this.updateDistribution();
+          break;
+      }
+  }
+
+  sortDistribution(){
+    //
+    let distributions = this.array.distribution[this.var.index.player][0];
+    let regions = [];
+
+    for( let i = 0; i < this.data.arena.array.region.length; i++ )
+      regions.push( [] );
+
+    for( let i = 0; i < distributions.length; i++ ){
+      regions[this.array.clef[distributions[i]].const.region].push( distributions[i] );
+    }
+
+    this.array.distribution[this.var.index.player][0] = [];
+
+    for( let i = 0; i < regions.length; i++ ){
+      regions[i].sort();
+
+      for( let j = 0; j < regions[i].length; j++ )
+        this.array.distribution[this.var.index.player][0].push( regions[i][j] )
+    }
+  }
+
+  decectDecree(){
+    //
+    let l = this.array.distribution[this.var.index.player][1].length;
+
+    let decrees = this.array.decree[this.var.index.player];
+    this.var.current.decree = null;
+
+    for( let i = 0; i < decrees.length; i++ )
+        if( decrees[i].const.length == l )
+          this.var.current.decree = i;
+
+    //same but with switch
+    /*switch ( l ) {
+      case 3:
+        this.var.current.decree = 0;
+        break;
+      case 4:
+        this.var.current.decree = 1;
+        break;
+      case 6:
+        this.var.current.decree = 2;
+        break;
+      case 8:
+        this.var.current.decree = 3;
+        break;
+      case 9:
+        this.var.current.decree = 4;
+        break;
+      default:
+        this.var.current.decree = null;
+    }*/
+
+    this.updateDecree();
+
+    console.log( this.var.current.decree );
+  }
+
+  detectDistribution( offset ){
+    //
+    let mouse = createVector( mouseX, mouseY );
+    let clef = {
+      flag: false,
+      index: null
+    };
+
+    for( let i = 0; i < this.array.clef.length; i++ )
+      if( this.array.clef[i].flag.onScreen && this.array.clef[i].flag.player ){
+          let vec = mouse.copy();
+          vec.sub( this.array.clef[i].var.center );
+          vec.sub( offset );
+          vec.x += this.array.clef[i].const.size.y / 4;
+          let x = this.array.clef[i].const.size.x / 4 - Math.abs( vec.x );
+          let y = this.array.clef[i].const.size.y / 2 - Math.abs( vec.y );
+          let flag = ( Math.sign( x ) >= 0 && Math.sign( y ) >= 0 );
+          this.array.clef[i].flag.selected = false;
+
+          if( flag ){
+            clef.flag = true;
+            clef.index = i;
+            this.array.clef[i].flag.selected = true;
+          }
+      }
+
+    this.var.current.clef = clef.index;
+  }
+
+  detectZone( offsets ){
+    this.var.current.zone = null;
+    let mouse = createVector( mouseX, mouseY );
+
+    for( let i = 0; i < this.table.size.zone.length; i++ ){
+      let vec = offsets[i].copy();
+      vec.sub( mouse );
+      let x = this.table.size.zone[i].x / 2 - Math.abs( vec.x );
+      let y = this.table.size.zone[i].y / 2 - Math.abs( vec.y );
+      let flag = ( Math.sign( x ) >= 0 && Math.sign( y ) >= 0 );
+
+      if( flag )
+        this.var.current.zone = i;
+    }
   }
 
   shiftState( clef, shift ){
@@ -334,40 +477,35 @@ class coordinator {
 
   }
 
+  compareIndexs( a, b ) {
+    return a - b;
+  }
+
+  drawZones( offsets ){
+    noFill();
+    stroke( 0 );
+    for( let i = 0; i < this.table.size.zone.length; i++ )
+      rect( offsets[i].x - this.table.size.zone[i].x / 2, offsets[i].y - this.table.size.zone[i].y / 2,
+        this.table.size.zone[i].x, this.table.size.zone[i].y );
+  }
+
   draw( offsets ){
-    let offset = offsets[2];
+    this.update( offsets );
+    this.drawZones( offsets );
+
+    let offset = offsets[3];
+
     for( let i = 0; i < this.array.clef.length; i++ )
       this.array.clef[i].draw( offset );
-    /*
-    let distributions = this.array.distribution[this.var.index.player];
-    for( let i = 0; i < outlines.length; i++ )
-      for( let j = 0; j < outlines[i].length; j++ ){
-        let vec = outlines[i][j].copy();
-      }
 
-        //move over
-        if( this.var.current.outline != null ){
-          if( this.var.current.outline.j < j && this.var.current.outline.i == i )
-            vec.x += a * 0.5;
-        }
-
-        clef.draw( vec );
-      }*/
-
-    fill( 0 );
-    ellipse( offset.x, offset.y, this.const.a, this.const.a );
-
-
-    offset = offsets[3];
+    offset = offsets[1];
 
     for( let i = 0; i < this.array.decree.length; i++ )
-      for( let j = 0; j < this.array.decree[i].length; j++ ){
-        let vec = this.table.outline.decree[i][j].copy();
-        vec.add( offset );
-        this.array.decree[i][j].draw( vec );
-      }
+      for( let j = 0; j < this.array.decree[i].length; j++ )
+          this.array.decree[i][j].draw( offset );
 
-    fill( 0 );
-    ellipse( offset.x, offset.y, this.const.a, this.const.a );
+    textSize( 40 );
+    for( let i = 0; i < this.table.size.zone.length; i++ )
+      text( i, offsets[i].x, offsets[i].y + 40 / 3 );
   }
 }

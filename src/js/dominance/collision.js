@@ -19,8 +19,6 @@ class collision {
   }
 
   init(){
-
-      console.log( this.table )
     this.data.arena = new arena( this.const.size );
     this.data.coordinator = new coordinator( this.data.arena );
   }
@@ -40,6 +38,6 @@ class collision {
 
   draw( offsets ){
     this.data.arena.draw( offsets );
-    this.data.coordinator.draw( offsets );
+      this.data.coordinator.draw( offsets );
   }
 }

@@ -32,7 +32,7 @@ class arena {
       hall: 0,
       floor: 0
     };
-    let scale = 4 / 3;
+    let scale = 2;
     let a = this.const.a * 1.5 * scale;
     let r = this.const.r * 2 * scale;
 
@@ -40,8 +40,8 @@ class arena {
       this.array.hall.push( [] );
 
       for( let j = 0; j < halls[i]; j++ ){
-        let x = ( -halls.length / 2 + i ) * a;
-        let y = ( -halls[i] / 2 + j ) * r;
+        let x = ( -halls.length / 2 + i + 0.5 ) * a;
+        let y = ( -halls[i] / 2 + j + 0.5 ) * r + this.const.a / 4;
         let dx = Math.floor( halls.length / 2 ) - i;
         if( Math.abs( dx ) == 4 && j != 1 )
           x -= Math.sign( dx ) * a / 4;
@@ -734,13 +734,14 @@ class arena {
   draw( offsets ){
     stroke( 0 );
     strokeWeight( 2 );
+    let offset = offsets[0];
 
     for( let i = 0; i < this.array.corridor.length; i++ )
-      this.array.corridor[i].draw( offsets[1] );
+      this.array.corridor[i].draw( offset );
 
     noStroke();
     for( let i = 0; i < this.array.hall.length; i++ )
       for( let j = 0; j < this.array.hall[i].length; j++ )
-        this.array.hall[i][j].draw( offsets[1] );
+        this.array.hall[i][j].draw( offset );
   }
 }

@@ -6,6 +6,9 @@ class decree {
       challenger: challenger,
       size: createVector( challenger.const.a * 4.5, challenger.const.a * 3 )
     };
+    this.var = {
+      center: createVector()
+    }
     this.array = {
       clef: []
     };
@@ -73,7 +76,7 @@ class decree {
 
     if( this.flag.active ){
       if( this.array.hue.length > this.const.challenger.const.index )
-        this.color.b = {
+        this.color.bg = {
           h: this.array.hue[this.const.challenger.const.index],
           s: COLOR_MAX * 0.75,
           l: COLOR_MAX * 0.5
@@ -93,22 +96,15 @@ class decree {
       };
   }
 
-  switchSelection(){
-    this.flag.selected = !this.flag.selected;
+  setSelected( flag ){
+    this.flag.selected = flag;
 
     if( !this.flag.selected )
-      if( this.array.hue.length > this.const.challenger.const.index )
-        this.color.b = {
-          h: this.array.hue[this.const.challenger.const.index],
-          s: COLOR_MAX * 0.75,
-          l: COLOR_MAX * 0.5
-        }
-      else
-        this.color.bg = {
-          h: 0,
-          s: 0,
-          l: 0
-        };
+      this.color.bg = {
+        h: this.array.hue[this.const.challenger.const.index],
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      }
     else
       this.color.bg = {
         h: COLOR_MAX * 1,
@@ -127,13 +123,18 @@ class decree {
     this.initHues();
   }
 
+  setCenter( center ){
+    this.var.center = center;
+  }
+
   draw( offset ){
+    let center = offset.copy();
+    center.add( this.var.center );
 
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-    rect( offset.x - this.const.size.x / 2, offset.y - this.const.size.y / 2, this.const.size.x, this.const.size.y );
-
+    rect( center.x - this.const.size.x / 2, center.y - this.const.size.y / 2, this.const.size.x, this.const.size.y );
 
     fill( 0 );
-    text( this.const.name, offset.x, offset.y + FONT_SIZE / 3 );
+    text( this.const.name, center.x, center.y + FONT_SIZE / 3 );
   }
 }

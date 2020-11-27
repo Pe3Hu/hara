@@ -1,12 +1,9 @@
 //
-class challenger {
-  constructor ( index, a ){
+class zone {
+  constructor (  ){
     this.const = {
-      index: index,
-      a: a
     };
     this.var = {
-      addition: 28
     };
     this.array = {
     };
