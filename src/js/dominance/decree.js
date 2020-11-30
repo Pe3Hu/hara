@@ -71,29 +71,24 @@ class decree {
     this.array.clef = array;
   }
 
-  switchActivion(){
-    this.flag.actived = !this.flag.actived;
+  setActived( flag ){
+    this.flag.actived = flag;
+    this.flag.selected = false;
 
-    if( this.flag.active ){
-      if( this.array.hue.length > this.const.challenger.const.index )
-        this.color.bg = {
-          h: this.array.hue[this.const.challenger.const.index],
-          s: COLOR_MAX * 0.75,
-          l: COLOR_MAX * 0.5
-        }
-      else
-        this.color.bg = {
-          h: 0,
-          s: 0,
-          l: 0
-        };
-    }
+    if( !this.flag.actived )
+      this.color.bg = {
+        h: this.array.hue[this.const.challenger.const.index],
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      }
     else
       this.color.bg = {
-        h: COLOR_MAX * 0.5,
-        s: COLOR_MAX * 0.5,
-        l: COLOR_MAX * 0.5
+        h: COLOR_MAX * 0,
+        s: COLOR_MAX * 0,
+        l: COLOR_MAX * 0
       };
+
+    console.log(   this.color.bg )
   }
 
   setSelected( flag ){
@@ -111,11 +106,6 @@ class decree {
         s: COLOR_MAX * 1,
         l: COLOR_MAX * 1
       };
-  }
-
-  clean(){
-    if( this.flag.selected )
-     this.switchSelection();
   }
 
   init(){

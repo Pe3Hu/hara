@@ -6,7 +6,8 @@ class challenger {
       a: a
     };
     this.var = {
-      addition: 28
+      addition: 3,
+      start: 15
     };
     this.array = {
     };

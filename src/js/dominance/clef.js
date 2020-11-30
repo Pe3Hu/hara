@@ -9,7 +9,9 @@ class clef {
     };
     this.var = {
       center: createVector(),
-      state: null
+      state: null,
+      shifted: 0,
+      zone: null
     };
     this.array = {
     };
@@ -23,8 +25,7 @@ class clef {
     this.flag = {
       onScreen: false,
       player: false,
-      selected: false,
-      shifted: false
+      selected: false
     }
 
     this.init();
@@ -65,38 +66,46 @@ class clef {
 
     switch ( state ) {
       case 0:
+      case 7:
+        this.var.zone = 2;
         this.flag.onScreen = false;
         break;
       case 1:
-        this.flag.onScreen = true;
-        break;
       case 2:
+      case 5:
+      case 6:
+        this.var.zone = 3;
         this.flag.onScreen = true;
         break;
       case 3:
+        this.var.zone = 4;
+        this.flag.onScreen = true;
+        break;
+      case 4:
+        this.var.zone = 5;
         this.flag.onScreen = true;
         break;
     }
+    
+    this.var.center = createVector();
   }
 
   setPlayer( flag ){
     this.flag.player = flag;
   }
 
-  setShifted( flag ){
-    this.flag.shifted = flag;
+  setShifted( shifted ){
+    this.var.shifted = shifted;
+    this.var.center.x += this.var.shifted * this.const.size.x * 0.5;
   }
 
   setCenter( center ){
     this.var.center = center;
   }
 
-  clean(){
-
-  }
-
-  draw( offset ){
+  draw( offsets ){
     if( this.flag.onScreen && this.flag.player ){
+      let offset = offsets[this.var.zone];
       let center = offset.copy();
       center.add( this.var.center );
       stroke( 0 );
@@ -107,8 +116,6 @@ class clef {
 
       if( this.flag.selected )
         x = this.const.size.x;
-      if( this.flag.shifted )
-        center.x += this.const.size.x / 2;
 
       rect( center.x - this.const.size.x * 0.5, center.y - this.const.size.y * 0.5, x, y );
 

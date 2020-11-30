@@ -64,9 +64,9 @@ class coordinator {
         this.array.challenger.push( new challenger( i, this.const.a ) );
         //0 - before, 1 - during
         this.array.distribution.push( [ [], [] ] );
-        //0 - before, 1 - during
         this.array.activation.push( [ [], [] ] );
-        this.array.selection.push( [] );
+        //0 - during, 1 - after
+        this.array.selection.push( [ [], [] ] );
         this.array.decree.push( [] );
 
         for( let j = 0; j < this.const.decrees; j++ )
@@ -87,7 +87,7 @@ class coordinator {
     size = createVector( this.array.clef[0].const.size.x * 2, this.array.clef[0].const.size.y * 3 );
     this.table.size.zone.push( size );
 
-    size = createVector( this.array.clef[0].const.size.x * 8, this.array.clef[0].const.size.y * 4.5 );
+    size = createVector( this.array.clef[0].const.size.x * 8, this.array.clef[0].const.size.y * 4);
     this.table.size.zone.push( size );
 
     size = createVector( this.array.clef[0].const.size.x * 16, this.array.clef[0].const.size.y * 2 );
@@ -119,6 +119,19 @@ class coordinator {
     this.initDecrees();
 
     this.handOverClefs();
+    this.startGame( 2 );
+  }
+
+  startGame( decree ){
+    //
+    /*
+    for( let i = 1; i < this.array.decree.length; i++ ){
+      let rand = 2;
+      let decree = this.array.decree[i][decree];
+      this.activeDecree( decree );
+
+    }*/
+      //for( let j = 0; j < this.array.decree[i].length; j++ )
   }
 
   addClef( floor ){
@@ -139,7 +152,7 @@ class coordinator {
     this.array.discard.push( last )
 
     for( let i = 0; i < this.array.challenger.length; i++ )
-      this.pickUpClefs( i );
+      this.pickUpClefs( i, true );
 
     this.updateDistribution();
     //this.flag.distribution = true;
@@ -147,8 +160,14 @@ class coordinator {
     console.log( this.array.distribution )
   }
 
-  pickUpClefs( challenger ){
-    for( let i = 0; i < this.array.challenger[challenger].var.addition; i++ ){
+  pickUpClefs( challenger, flag ){
+    let l = this.array.challenger[challenger].var.addition;
+
+    //if first pick-up
+    if( flag )
+     l += this.array.challenger[challenger].var.start;
+
+    for( let i = 0; i < l; i++ ){
       if( this.array.addon.length == 0 )
         this.reshuffle();
 
@@ -170,49 +189,65 @@ class coordinator {
     this.array.addon.shuffle();
   }
 
-  activeDecree(){
-    let distributions = this.array.distribution[this.var.index.player][1];
-    let decrees = this.array.decree[this.var.index.player];
+  activeDecree( challenger ){
+    //
+    let distributions = this.array.distribution[challenger][1];
+    let decrees = this.array.decree[challenger];
 
     switch ( this.var.current.decree ) {
       case 0:
-        this.keep();
+        this.keep( challenger );
         break;
       case 1:
-        this.burn();
+        this.burn( challenger );
         break;
       case 2:
       case 3:
       case 4:
-        this.give();
+        this.give( challenger );
         break;
     }
+    decrees[this.var.current.decree].setActived( true );
 
-    this.pickUpClefs( this.var.index.player );
+    this.var.current.decree = null;
+    this.updateDecree();
+    this.pickUpClefs( this.var.index.player, false );
   }
 
-  keep(){
-    let distributions = this.array.distribution[this.var.index.player][1];
-    let activation = this.array.activation[this.var.index.player][0];
+  keep( challenger ){
+    let distributions = this.array.distribution[challenger][1];
+    let selections = this.array.selection[challenger][1];
 
-    while( distributions.length > 0 )
-      activation.push( distributions.pop() );
+    while( distributions.length > 0 ){
+      let index = distributions.pop();
+      this.array.clef[index].setState( 4 );
+      selections.push( index );
+    };
+
+    this.updateSelection();
   }
 
-  burn(){
-    let distributions = this.array.distribution[this.var.index.player][1];
-    let activation = this.array.activation[this.var.index.player][0];
+  burn( challenger ){
+    let distributions = this.array.distribution[challenger][1];
+    let discards = this.array.discard;
 
-    while( distributions.length > 0 )
-      activation.push( distributions.pop() );
+    while( distributions.length > 0 ){
+      let index = distributions.pop();
+      this.array.clef[index].setState( 7 );
+      discards.push( index );
+    };
   }
 
-  give(){
-    switch ( this.var.current.decree ) {
-      case 2:
-      case 3:
+  give( challenger ){
+    let sender = challenger;
+    let recipient = ( challenger + 1 + this.const.challengers ) % this.const.challengers;
+    let distributions = this.array.distribution[sender][1];
+    let activations = this.array.selection[recipient][0];
 
-        break;
+    while( distributions.length > 0 ){
+      let index = distributions.pop();
+      this.array.clef[index].setState( 3 );
+      selections.push( index );
     };
   }
 
@@ -261,38 +296,52 @@ class coordinator {
     //
     this.detectZone( offsets );
 
-    if( this.var.current.zone != null )
-      switch ( this.var.current.zone ) {
-        case 3:
-          this.detectDistribution( offsets[this.var.current.zone] );
-          break;
+    if( this.var.current.zone != null ){
+      this.detectClef( offsets, this.var.current.zone );
+
+      if( this.var.current.clef == null ){
+        switch ( this.var.current.zone ) {
+          case 3:
+            this.updateDistribution();
+          case 5:
+            this.updateSelection();
+            break;
+        }
+        this.detectClef( offsets, this.var.current.zone );
       }
+
+    }
+
   }
 
   key(){
+    let challenger = this.var.index.player;
     switch ( keyCode ) {
       case 32:
         if( this.var.current.decree != null)
-          this.activeDecree();
+          this.activeDecree( challenger );
         break;
     }
   }
 
   updateDecree(){
-    if( this.var.current.decree != null ){
-      let decrees = this.array.decree[this.var.index.player];
+    let decrees = this.array.decree[this.var.index.player];
 
-            console.log(decrees, this.var.current.decree)
-      for( let i = 0; i < decrees.length; i++ )
+    for( let i = 0; i < decrees.length; i++ )
+      if( !decrees[i].flag.actived )
         decrees[i].setSelected( false );
 
+    if( this.var.current.decree != null && !decrees[this.var.current.decree].flag.actived )
       decrees[this.var.current.decree].setSelected( true );
-    }
   }
 
   updateDistribution(){
     //
-    this.sortDistribution();
+    let obj = {
+      name: 'distribution',
+      id: 0
+    }
+    this.sortClefs( obj );
     let distributions = this.array.distribution[this.var.index.player];
     let max = 14;
 
@@ -302,31 +351,55 @@ class coordinator {
       for( let j = 0; j < distributions[i].length; j++ ){
         let clef = this.array.clef[distributions[i][j]];
         let size = clef.const.size;
-        let l = -distributions[i].length / 2;
-        if( distributions[i].length > max )
-          l = -max / 2;
-        let x = l + j + 0.5;
         let y;
+
         switch ( clef.var.state ) {
           case 1:
-            y = 0.25;
+            y = 0.75;
             break;
           case 2:
-            y = - 1.25;
+            y = -1.25;
             break;
         }
-        let shifted = false;
-        if( index != -1 )
-          shifted = index < j;
+
+        let l = -distributions[i].length / 2;
+        if( distributions[i].length > max ){
+          l = -max / 2;
+          y = 0.25;
+        }
+        let x = l + j + 0.5;
+
+        let shifted = 0;
+        if( index != -1 && index < j)
+          shifted = 1;
 
         if( j >= max ){
-          shifted = false;
+          shifted = 0;
           let jj = j - max;
           x = -( distributions[i].length - max ) / 2 + jj + 0.5;
           y++;
 
-          if( index != -1 && index >= max  )
-            shifted = index < j;
+          if( index != -1 && index >= max && index < j )
+            shifted = 1;
+        }
+
+        if( i == 1 ){
+          let l = null;
+          let n = null;
+          switch ( this.var.current.decree ) {
+            case 2:
+              l = 4;
+              break;
+            case 3:
+              l = 3;
+              break;
+          }
+
+          if( l != null ){
+            n = Math.floor( j / l );
+            shifted += n;
+            shifted -= 0.25;
+          }
         }
 
         let vec = createVector( x * size.x * 0.5, y * size.y );
@@ -334,9 +407,46 @@ class coordinator {
         clef.setShifted( shifted );
       }
     }
+  }
 
-    this.data.arena.light()
-    this.flag.distribution = false;
+  updateSelection(){
+
+    //
+    let obj = {
+      name: 'selection',
+      id: 1
+    }
+
+    this.sortClefs( obj );
+
+    //update already selected clefs
+    let selections = this.array.selection[this.var.index.player][1];
+    let index = selections.indexOf( this.var.current.clef );
+    let max = 14;
+
+    for( let j = 0; j < selections.length; j++ ){
+      let clef = this.array.clef[selections[j]];
+      let size = clef.const.size;
+      let x = 0;
+      let l = -max / 2;
+      if( selections.length > max )
+        x = -0.5;
+      let y = l + j + 0.5;
+      let shifted = 0;
+
+      if( j >= max ){
+        let jj = j - max;
+        if( jj == index )
+          shifted = 1;
+        y -= max;
+        x++;
+      }
+
+      let vec = createVector( x * size.x * 0.5, y * size.y );
+      clef.setCenter( vec );
+      clef.setShifted( shifted );
+    }
+
   }
 
   update( offsets ){
@@ -346,70 +456,51 @@ class coordinator {
         case 3:
           this.updateDistribution();
           break;
+        case 5:
+          this.updateSelection();
+          break;
       }
   }
 
-  sortDistribution(){
+  sortClefs( obj ){
     //
-    let distributions = this.array.distribution[this.var.index.player][0];
+    let challenger = this.var.index.player;
+    let array = this.array[obj.name][challenger][obj.id];
     let regions = [];
 
     for( let i = 0; i < this.data.arena.array.region.length; i++ )
       regions.push( [] );
 
-    for( let i = 0; i < distributions.length; i++ ){
-      regions[this.array.clef[distributions[i]].const.region].push( distributions[i] );
+    for( let i = 0; i < array.length; i++ ){
+      regions[this.array.clef[array[i]].const.region].push( array[i] );
     }
 
-    this.array.distribution[this.var.index.player][0] = [];
+    this.array[obj.name][challenger][obj.id] = [];
 
     for( let i = 0; i < regions.length; i++ ){
       regions[i].sort();
 
       for( let j = 0; j < regions[i].length; j++ )
-        this.array.distribution[this.var.index.player][0].push( regions[i][j] )
+        this.array[obj.name][challenger][obj.id].push( regions[i][j] )
     }
   }
 
   decectDecree(){
     //
     let l = this.array.distribution[this.var.index.player][1].length;
-
     let decrees = this.array.decree[this.var.index.player];
     this.var.current.decree = null;
 
     for( let i = 0; i < decrees.length; i++ )
-        if( decrees[i].const.length == l )
-          this.var.current.decree = i;
-
-    //same but with switch
-    /*switch ( l ) {
-      case 3:
-        this.var.current.decree = 0;
-        break;
-      case 4:
-        this.var.current.decree = 1;
-        break;
-      case 6:
-        this.var.current.decree = 2;
-        break;
-      case 8:
-        this.var.current.decree = 3;
-        break;
-      case 9:
-        this.var.current.decree = 4;
-        break;
-      default:
-        this.var.current.decree = null;
-    }*/
+      if( decrees[i].const.length == l )
+        this.var.current.decree = i;
 
     this.updateDecree();
-
-    console.log( this.var.current.decree );
   }
 
-  detectDistribution( offset ){
+  detectClef( offsets, zone ){
     //
+    let offset = offsets[zone];
     let mouse = createVector( mouseX, mouseY );
     let clef = {
       flag: false,
@@ -417,7 +508,7 @@ class coordinator {
     };
 
     for( let i = 0; i < this.array.clef.length; i++ )
-      if( this.array.clef[i].flag.onScreen && this.array.clef[i].flag.player ){
+      if( this.array.clef[i].flag.onScreen && this.array.clef[i].flag.player && this.array.clef[i].var.zone == zone ){
           let vec = mouse.copy();
           vec.sub( this.array.clef[i].var.center );
           vec.sub( offset );
@@ -458,25 +549,6 @@ class coordinator {
     clef.setState( state );
   }
 
-  clean( obj ){
-    switch ( obj ) {
-      case 0://'distribution':
-      console.log( obj,this.array[obj][0][0][0] )
-        for( let i = 0; i < this.array[obj].length; i++ )
-          for( let j = 0; j < this.array[obj][i].length; j++ )
-            for( let l = 0; l < this.array[obj][i][j].length; l++ )
-             this.array[obj][i][j][l].clean();
-        break;
-      case 'decree':
-        for( let i = 0; i < this.array[obj].length; i++ )
-          for( let j = 0; j < this.array[obj][i].length; j++ )
-             this.array[obj][i][j].clean();
-        break;
-
-    }
-
-  }
-
   compareIndexs( a, b ) {
     return a - b;
   }
@@ -493,16 +565,14 @@ class coordinator {
     this.update( offsets );
     this.drawZones( offsets );
 
-    let offset = offsets[3];
-
     for( let i = 0; i < this.array.clef.length; i++ )
-      this.array.clef[i].draw( offset );
+      this.array.clef[i].draw( offsets );
 
-    offset = offsets[1];
+    let offset = offsets[1];
 
     for( let i = 0; i < this.array.decree.length; i++ )
       for( let j = 0; j < this.array.decree[i].length; j++ )
-          this.array.decree[i][j].draw( offset );
+        this.array.decree[i][j].draw( offset );
 
     textSize( 40 );
     for( let i = 0; i < this.table.size.zone.length; i++ )
