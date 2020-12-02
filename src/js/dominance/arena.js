@@ -2,7 +2,8 @@
 class arena {
   constructor (  ){
     this.const = {
-      a: CELL_SIZE * 0.5
+      a: CELL_SIZE * 0.5,
+      regions: 5
     };
     this.var = {
       center: null,
@@ -84,6 +85,20 @@ class arena {
         index.floor += floors;
       }
     }
+
+    //start states
+    let challenger = 0;
+    let value = 100;
+    this.array.hall[1][0].array.floor[0].setRegion( challenger + this.const.regions );
+    this.array.hall[1][0].array.floor[0].captureBanner( challenger, value );
+    this.array.hall[2][1].array.floor[0].setRegion( challenger + this.const.regions );
+    this.array.hall[2][1].array.floor[0].captureBanner( challenger, value );
+    let l = this.array.hall.length - 3;
+    challenger++;
+    this.array.hall[l][1].array.floor[0].setRegion( challenger + this.const.regions );
+    this.array.hall[l][1].array.floor[0].captureBanner( challenger, value );
+    this.array.hall[l + 1][0].array.floor[0].setRegion( challenger + this.const.regions );
+    this.array.hall[l + 1][0].array.floor[0].captureBanner( challenger, value );
   }
 
   ininCorridors(){
@@ -210,6 +225,18 @@ class arena {
       f: 0
     };
     this.addLink( a, b, 0 );
+
+    let challenger = 0;
+    this.array.corridor[0].setState( 1 );
+    this.array.corridor[1].setState( 1 );
+    this.array.corridor[2].addKnowledgeable( challenger );
+    this.array.corridor[3].setState( 1 );
+    challenger++;
+    let l = this.array.corridor.length - 4;
+    this.array.corridor[l].setState( 1 );
+    this.array.corridor[l + 1].addKnowledgeable( challenger );
+    this.array.corridor[l + 2].setState( 1 );
+    this.array.corridor[l + 3].setState( 1 );
   }
 
   generateBasis(){
@@ -664,11 +691,10 @@ class arena {
         f: objB.f
       }
     } );
-    this.var.index.link++;
-
     let floors = [ begin, end ];
 
-    this.array.corridor.push( new corridor( floors, type, this.const.a ) );
+    this.array.corridor.push( new corridor( this.var.index.link, floors, type, this.const.a ) );
+    this.var.index.link++;
   }
 
   click(){

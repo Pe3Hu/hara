@@ -1,15 +1,18 @@
 //
 class corridor {
-  constructor ( floors, type, a ){
+  constructor ( index, floors, type, a ){
     this.const = {
+      index: index,
       a: a
     };
     this.var = {
-      type: type
+      type: type,
+      state: 0
     };
     this.array = {
       floor: floors,
-      shift: []
+      shift: [],
+      knowledgeable: []
     }
 
     this.init();
@@ -37,8 +40,27 @@ class corridor {
     this.array.shift = [ a, b ];
   }
 
+  initHues(){
+    this.array.hue = [
+      210,
+      0
+   ];
+  }
+
   init(){
     this.initShifts();
+    this.initHues();
+  }
+
+  setState( state ){
+    //0 - clear passage
+    //1 - password pass
+    //2 - collapsed
+    this.var.state = state;
+  }
+
+  addKnowledgeable( challenger ){
+    this.array.knowledgeable.push( challenger );
   }
 
   draw( offset ){
@@ -46,6 +68,17 @@ class corridor {
     let end = this.array.shift[1].copy();
     begin.add( offset );
     end.add( offset );
+    stroke( 0 );
+    //weight = 1
+    strokeWeight( 1 )
     line( begin.x, begin.y, end.x, end.y );
+
+    for( let i = 0; i < this.array.knowledgeable.length; i++ ){
+      let superstructure = createVector( 0, i * 1 );
+      begin.add( superstructure );
+      end.add( superstructure );
+      stroke( this.array.hue[this.array.knowledgeable[i]], COLOR_MAX * 0.75, COLOR_MAX * 0.5 )
+      line( begin.x, begin.y, end.x, end.y );
+    }
   }
 }

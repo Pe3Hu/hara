@@ -478,7 +478,7 @@ class coordinator {
     this.array[obj.name][challenger][obj.id] = [];
 
     for( let i = 0; i < regions.length; i++ ){
-      regions[i].sort();
+      regions[i].sort( (a, b) => a - b );
 
       for( let j = 0; j < regions[i].length; j++ )
         this.array[obj.name][challenger][obj.id].push( regions[i][j] )
@@ -547,10 +547,6 @@ class coordinator {
   shiftState( clef, shift ){
     let state = clef.var.state + shift;
     clef.setState( state );
-  }
-
-  compareIndexs( a, b ) {
-    return a - b;
   }
 
   drawZones( offsets ){

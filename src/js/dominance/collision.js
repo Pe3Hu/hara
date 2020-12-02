@@ -21,6 +21,7 @@ class collision {
   init(){
     this.data.arena = new arena( this.const.size );
     this.data.coordinator = new coordinator( this.data.arena );
+    this.data.counselor = new counselor( this.data.coordinator );
   }
 
   click( offsets ){
