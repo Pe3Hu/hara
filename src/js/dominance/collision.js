@@ -5,6 +5,7 @@ class collision {
       size: 3
     };
     this.var = {
+      timer: 0
     };
     this.array = {
     };
@@ -19,6 +20,14 @@ class collision {
   }
 
   init(){
+    this.data.arena = new arena( this.const.size );
+    this.data.coordinator = new coordinator( this.data.arena );
+    this.data.counselor = new counselor( this.data.coordinator );
+
+    this.start();
+  }
+
+  start(){
     this.data.arena = new arena( this.const.size );
     this.data.coordinator = new coordinator( this.data.arena );
     this.data.counselor = new counselor( this.data.coordinator );
@@ -37,8 +46,16 @@ class collision {
     this.data.coordinator.moved( offsets );
   }
 
+  update(){
+    this.var.timer++;
+
+    if( this.var.timer % FRAME_RATE == 0 )
+      this.data.counselor.nextDecision();
+  }
+
   draw( offsets ){
+    this.update();
     this.data.arena.draw( offsets );
-      this.data.coordinator.draw( offsets );
+    this.data.coordinator.draw( offsets );
   }
 }

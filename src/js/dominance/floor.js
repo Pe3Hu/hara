@@ -12,14 +12,17 @@ class floor {
     this.var = {
       center: center.copy(),
       fontSize: 8,
-      region: null
+      region: null,
+      outflow: 1,
+      coverage: 1
     };
     this.array = {
-      link: [ [], [] ]
+      link: [ [], [] ],
+      borderlands: []
     };
     this.color = {
       bg: {
-        h: 210,
+        h: 30,
         s: COLOR_MAX * 0.75,
         l: COLOR_MAX * 0.5
       },

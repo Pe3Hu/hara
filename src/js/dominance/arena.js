@@ -226,17 +226,24 @@ class arena {
     };
     this.addLink( a, b, 0 );
 
+    //start states
     let challenger = 0;
-    this.array.corridor[0].setState( 1 );
-    this.array.corridor[1].setState( 1 );
-    this.array.corridor[2].addKnowledgeable( challenger );
-    this.array.corridor[3].setState( 1 );
+    let l = 0;
+    this.array.corridor[l].setState( 1 );
+    this.array.corridor[l + 1].setState( 1 );
+    this.array.corridor[l + 2].addKnowledgeable( challenger );
+    this.array.corridor[l + 3].setState( 1 );
+    let rand = Math.floor( Math.random() * 4 );
+    this.array.corridor[l + 4 + rand].addKnowledgeable( challenger );
     challenger++;
-    let l = this.array.corridor.length - 4;
+    l = this.array.corridor.length - 4;
     this.array.corridor[l].setState( 1 );
     this.array.corridor[l + 1].addKnowledgeable( challenger );
     this.array.corridor[l + 2].setState( 1 );
     this.array.corridor[l + 3].setState( 1 );
+    rand = Math.floor( Math.random() * 4 );
+    this.array.corridor[l - 4 + rand].addKnowledgeable( challenger );
+
   }
 
   generateBasis(){
@@ -755,6 +762,30 @@ class arena {
       j: j,
       f: f
     };
+  }
+
+  convertLink( floor_a, floor_b ){
+    let begin = floor_a;
+    let end = floor_b;
+
+    if( begin > end ){
+      begin = floor_b;
+      end = floor_a;
+    }
+    let result = null;
+    //console.log( begin, end )
+
+    for( let i = 0; i < this.array.corridor.length; i++ ){
+      let floors = this.array.corridor[i].array.floor;
+      //console.log( floors[0].const.index, floors[1].const.index  )
+
+      if( floors[0].const.index == begin && floors[1].const.index == end ){
+        result = this.array.corridor[i];
+        return result;
+      }
+    }
+
+    return result;
   }
 
   draw( offsets ){

@@ -7,9 +7,16 @@ class challenger {
     };
     this.var = {
       addition: 3,
-      start: 15
+      start: 15,
+      banner: {
+        index: null,
+        growth: 0
+      }
     };
     this.array = {
+      floor: [],
+      corridor: [],
+      borderlands: []
     };
 
     this.init();
