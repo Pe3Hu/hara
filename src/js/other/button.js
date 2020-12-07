@@ -103,6 +103,12 @@ class button {
       case 6:
         this.color.bg.h = 180;
         break;
+      case 7:
+        this.color.bg.h = 30;
+        break;
+      case 8:
+        this.color.bg.h = 120;
+        break;
       case 10:
         this.color.bg.h = 330;
         break;

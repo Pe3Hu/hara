@@ -16,7 +16,7 @@ class collision {
     this.table = {
     };
 
-    this.init();
+    //this.init();
   }
 
   init(){
@@ -54,8 +54,8 @@ class collision {
   }
 
   draw( offsets ){
-    this.update();
+    /*this.update();
     this.data.arena.draw( offsets );
-    this.data.coordinator.draw( offsets );
+    this.data.coordinator.draw( offsets );*/
   }
 }

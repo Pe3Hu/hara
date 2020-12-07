@@ -54,7 +54,6 @@ class counselor {
         }
     }
 
-
     //console.log( challenger.array.borderlands )
   }
 
@@ -121,7 +120,19 @@ class counselor {
   }
 
   choseBlur(){
+    let index = 0;
+    let challenger = this.data.coordinator.array.challenger[index];
+    if( challenger.var.banner == null ){
+      let rand = Math.floor( Math.random() * challenger.array.borderlands.length );
+      let hall = this.convertFloor( challenger.array.borderlands[rand] );
+      let floor = this.data.arena.array.hall[hall.i][hall.j].array.floor[hall.f];
+      challenger.var.banner = floor;
+      challenger.var.growth = 0;
 
+
+      for( let i = 0; i < challenger.array.floor.length; i++ )
+      outflow
+    }
   }
 
   draw(  ){

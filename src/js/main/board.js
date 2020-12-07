@@ -19,7 +19,7 @@ class board {
       }
     }
     this.var = {
-      layer: 7,
+      layer: 8,
       id: {
         button: 0,
         border: 0,
@@ -86,6 +86,10 @@ class board {
     this.array.offset[layer].push( createVector(
       CELL_SIZE * Math.floor( 5 ),
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
+    layer = 8;
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
+      CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
   }
 
   initLayers(){
@@ -97,6 +101,7 @@ class board {
     this.array.layer.push( new isle() );
     this.array.layer.push( new debate() );
     this.array.layer.push( new collision() );
+    this.array.layer.push( new grappled() );
   }
 
   initBorders(){
@@ -221,6 +226,11 @@ class board {
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToDominance';
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
+    this.addButton( layer, name, type, vec.copy() );
+
+    name = 'switchToSkirmish';
     type++;
     vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
