@@ -2,7 +2,7 @@
 class grappled {
   constructor (){
     this.const = {
-      a: CELL_SIZE
+      a: CELL_SIZE * 3
     };
     this.var = {
     };
