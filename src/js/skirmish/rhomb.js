@@ -5,9 +5,9 @@ class rhomb {
       index: index
     };
     this.data = {
-      penta: {
-        a: a.penta,
-        b: b.penta
+      face: {
+        a: a.face,
+        b: b.face
       },
       edge: {
         a: a.edge,

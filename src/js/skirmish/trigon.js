@@ -1,11 +1,11 @@
 //
-class pentahedron {
+class trigon {
   constructor ( index, center, parity, R ){
     this.const = {
       index: index,
       center: center.copy(),
       R: R,
-      n: 5
+      n: 3
     };
     this.var = {
       parity: parity
@@ -31,13 +31,13 @@ class pentahedron {
 
   setParity( parity ){
     let n = 0.5 * parity;
-    let angle =  ( Math.PI - Math.PI * 2 / this.const.n ) - Math.PI / 2 - n * Math.PI * 2 / this.const.n;
+    let angle = ( 7/4 - n ) * Math.PI * 2 / this.const.n;
     this.array.vertex = [];
 
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
-        Math.sin( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) + angle ) * this.const.R,
-        Math.cos( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) + angle ) * this.const.R );
+        Math.sin( Math.PI * 2 / this.const.n * ( - i  ) + angle ) * this.const.R,
+        Math.cos( Math.PI * 2 / this.const.n * ( - i  ) + angle ) * this.const.R );
       vec.add( this.const.center );
 
       this.array.vertex.push( vec );
@@ -50,11 +50,20 @@ class pentahedron {
       this.array.hue[edge] = hue;
   }
 
-  draw( offset ){
+  draw( offset, layer ){
 
     for( let i = 0; i < this.array.vertex.length; i++ ){
       let ii = ( i + 1 ) % this.array.vertex.length;
-      fill( this.color.bg.h/*array.hue[i]*/, this.color.bg.s, this.color.bg.l );
+      let h;
+      switch ( layer ) {
+        case 0:
+          h = this.array.hue[i];
+          break;
+        case 1:
+          h = this.color.bg.h;
+          break;
+      }
+      fill( h, this.color.bg.s, this.color.bg.l );
 
       triangle( this.const.center.x + offset.x, this.const.center.y + offset.y,
                 this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,

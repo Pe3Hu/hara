@@ -74,56 +74,56 @@ class dodecahedron {
   }
 
   connectEdges(){
-    let penta_a = 0, edge_a = 1, penta_b = 3, edge_b = 3;
+    let face_a = 0, edge_a = 1, face_b = 3, edge_b = 3;
 
     while( this.var.index.rhomb < 10 ){
-      this.addRhomb( penta_a + 1, edge_a, penta_b + 7, edge_b );
+      this.addRhomb( face_a + 1, edge_a, face_b + 7, edge_b );
       if( this.var.index.rhomb % 2 == 1 ){
-        penta_a = ( penta_a + 1 ) % this.const.n;
+        face_a = ( face_a + 1 ) % this.const.n;
         edge_b = ( edge_b - 1 + this.const.n ) % this.const.n;
       }
       else{
         edge_a = ( edge_a + 1 ) % this.const.n;
-        penta_b = ( penta_b - 1 + this.const.n ) % this.const.n;
+        face_b = ( face_b - 1 + this.const.n ) % this.const.n;
       }
     }
 
-    penta_a = 0, edge_a = 0, penta_b = 0, edge_b = 3;
+    face_a = 0, edge_a = 0, face_b = 0, edge_b = 3;
 
     while( this.var.index.rhomb < 15 ){
-      this.addRhomb( penta_a, edge_a, penta_b + 1, edge_b );
+      this.addRhomb( face_a, edge_a, face_b + 1, edge_b );
       edge_b = ( edge_b + 1 ) % this.const.n;
       edge_a = ( edge_a + 1 ) % this.const.n;
-      penta_b = ( penta_b + 1 ) % this.const.n;
+      face_b = ( face_b + 1 ) % this.const.n;
     }
 
-    penta_a = 0, edge_a = 0, penta_b = 0, edge_b = 2;
+    face_a = 0, edge_a = 0, face_b = 0, edge_b = 2;
 
     while( this.var.index.rhomb < 20 ){
-      this.addRhomb( penta_a  + 6, edge_a, penta_b + 7, edge_b );
+      this.addRhomb( face_a  + 6, edge_a, face_b + 7, edge_b );
       edge_b = ( edge_b + 1 ) % this.const.n;
       edge_a = ( edge_a + 1 ) % this.const.n;
-      penta_b = ( penta_b + 1 ) % this.const.n;
+      face_b = ( face_b + 1 ) % this.const.n;
     }
 
-    penta_a = 0, edge_a = 2, penta_b = 1, edge_b = 0;
+    face_a = 0, edge_a = 2, face_b = 1, edge_b = 0;
 
     while( this.var.index.rhomb < 25 ){
-      this.addRhomb( penta_a + 1, edge_a, penta_b + 1, edge_b );
+      this.addRhomb( face_a + 1, edge_a, face_b + 1, edge_b );
       edge_b = ( edge_b + 1 ) % this.const.n;
       edge_a = ( edge_a + 1 ) % this.const.n;
-      penta_a = ( penta_a + 1 ) % this.const.n;
-      penta_b = ( penta_b + 1 ) % this.const.n;
+      face_a = ( face_a + 1 ) % this.const.n;
+      face_b = ( face_b + 1 ) % this.const.n;
     }
 
-    penta_a = 0, edge_a = 1, penta_b = 1, edge_b = 4;
+    face_a = 0, edge_a = 1, face_b = 1, edge_b = 4;
 
     while( this.var.index.rhomb < 30 ){
-      this.addRhomb( penta_a + 7, edge_a, penta_b + 7, edge_b );
+      this.addRhomb( face_a + 7, edge_a, face_b + 7, edge_b );
       edge_b = ( edge_b + 1 ) % this.const.n;
       edge_a = ( edge_a + 1 ) % this.const.n;
-      penta_a = ( penta_a + 1 ) % this.const.n;
-      penta_b = ( penta_b + 1 ) % this.const.n;
+      face_a = ( face_a + 1 ) % this.const.n;
+      face_b = ( face_b + 1 ) % this.const.n;
     }
 
     console.log( this.array.rhomb )
@@ -133,8 +133,8 @@ class dodecahedron {
     let h = COLOR_MAX/ this.array.rhomb.length;
     for( let i = 0; i < this.array.rhomb.length; i++ ){
       let hue = h * i;
-      this.array.pentahedron[this.array.rhomb[i].data.penta.a].setEdgeHue( this.array.rhomb[i].data.edge.a, hue );
-      this.array.pentahedron[this.array.rhomb[i].data.penta.b].setEdgeHue( this.array.rhomb[i].data.edge.b, hue );
+      this.array.pentahedron[this.array.rhomb[i].data.face.a].setEdgeHue( this.array.rhomb[i].data.edge.a, hue );
+      this.array.pentahedron[this.array.rhomb[i].data.face.b].setEdgeHue( this.array.rhomb[i].data.edge.b, hue );
     }
   }
 
@@ -145,16 +145,16 @@ class dodecahedron {
     this.initNeighbors();
     this.initPentahedrons();
     this.connectEdges();
-    this.fillEdges();
+    //    this.fillEdges();
   }
 
-  addRhomb( penta_a, edge_a, penta_b, edge_b ){
+  addRhomb( face_a, edge_a, face_b, edge_b ){
     let a = {
-      penta: penta_a,
+      penta: face_a,
       edge: edge_a
     };
     let b = {
-      penta: penta_b,
+      penta: face_b,
       edge: edge_b
     };
     this.array.rhomb.push( new rhomb( this.var.index.rhomb, a, b ) );
