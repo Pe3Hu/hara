@@ -64,8 +64,6 @@ class tetrahedron {
         this.array.neighbor[parity].push( vec );
       }
     }
-
-    console.log( this.array.neighbor )
   }
 
   connectEdges(){
@@ -76,8 +74,6 @@ class tetrahedron {
     this.addRhomb( 1, 1, 2, 1 );
     this.addRhomb( 1, 2, 3, 0 );
     this.addRhomb( 2, 0, 3, 1 );
-
-    console.log( this.array.rhomb )
   }
 
   fillEdges(){
@@ -112,8 +108,8 @@ class tetrahedron {
     this.var.index.rhomb++;
   }
 
-  draw( offsets ){
-    let offset = offsets[0].copy();
+  draw( vec ){
+    let offset = vec.copy();
 
     for( let i = 0; i < this.array.trigon.length; i++ )
       this.array.trigon[i].draw( offset, this.var.layer )
