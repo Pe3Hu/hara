@@ -45,7 +45,7 @@ class satellite {
     this.LemniscataBernoulli( this.var.t );
   }
 
-  LemniscataBernoulli( t ){
+  LemniscataBernoulli( t, scale ){
     let x = this.const.c * Math.sqrt( 2 ) * Math.cos( t ) / ( 1 + Math.pow( Math.sin( t ) ), 2 );
     let y = x * Math.sin( t );
     this.var.lb = createVector( x, y );

@@ -53,29 +53,7 @@ class segment {
     triangle( this.array.vertex[3].x + offset.x, this.array.vertex[3].y + offset.y,
               this.array.vertex[2].x + offset.x, this.array.vertex[2].y + offset.y,
               this.array.vertex[1].x + offset.x, this.array.vertex[1].y + offset.y );
-
-      if( this.const.index == 0 )
-        triangle( this.array.vertex[0].x + offset.x, this.array.vertex[0].y + this.const.scale + offset.y,
-                  this.array.vertex[2].x + offset.x, this.array.vertex[2].y + offset.y,
-                  this.array.vertex[1].x + offset.x, this.array.vertex[1].y + offset.y );
-
-      if( this.const.index == this.const.l / 2  )
-        triangle( this.array.vertex[0].x + offset.x, this.array.vertex[0].y + offset.y,
-                  this.array.vertex[3].x + offset.x, this.array.vertex[3].y + offset.y,
-                  this.array.vertex[1].x + offset.x, this.array.vertex[1].y + this.const.scale + offset.y );
-
-      if( this.const.index == this.const.l - 1 - 2 * this.const.n )
-        triangle( this.array.vertex[0].x + offset.x, this.array.vertex[0].y + offset.y,
-                  this.array.vertex[2].x + offset.x, this.array.vertex[2].y - this.const.scale + offset.y,
-                  this.array.vertex[3].x + offset.x, this.array.vertex[3].y + offset.y );
-
-      if( this.const.index == this.const.l / 2 - 1- 2 * this.const.n )
-        triangle( this.array.vertex[2].x + offset.x, this.array.vertex[2].y  + offset.y,
-                  this.array.vertex[1].x + offset.x, this.array.vertex[1].y + offset.y,
-                  this.array.vertex[3].x + offset.x, this.array.vertex[3].y - this.const.scale+ offset.y );
-
-
-
+              
     fill(0)
     text( this.const.index, this.const.center.x+ offset.x, this.const.center.y + offset.y+ FONT_SIZE / 3 );
   }

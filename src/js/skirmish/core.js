@@ -20,6 +20,7 @@ class core {
   }
 
   draw( offset ){
+    noStroke();
     this.data.tetrahedron.draw( offset );
   }
 }
