@@ -1,13 +1,14 @@
 //
 class tetrahedron {
-  constructor ( a ){
+  constructor ( a, parent ){
     this.const = {
       a: a,
       r: null,
       R: null,
       n: 3,
       faces: 6,
-      edges: 4
+      edges: 4,
+      parent: parent
     };
     this.var = {
       index: {
@@ -25,26 +26,39 @@ class tetrahedron {
   }
 
   initTrigons(){
+    let moves = [];
+    switch ( this.const.parent ) {
+      case 0:
+        moves = [ 1, 0 ]
+        break;
+      case 1:
+        moves = [ 2, 1 ]
+        break;
+    }
     let parity = 1;
     let index = 0;
     let offset = createVector( -this.const.r, 0 );
-    this.array.trigon.push( new trigon( index, offset, parity, this.const.R ) );
+    let hue = ( this.const.parent + index * 2 ) * COLOR_MAX / this.const.edges / 2;
+    this.array.trigon.push( new trigon( index, offset, parity, this.const.R, hue ) );
+    index++;
 
-    let center = this.array.neighbor[parity][1].copy();
+    let center = this.array.neighbor[parity][moves[0]].copy();
     parity = ( parity + 1 ) % 2;
     center.add( offset );
+    hue = ( this.const.parent + index * 2 ) * COLOR_MAX / this.const.edges / 2;
+    this.array.trigon.push( new trigon( index, center, parity, this.const.R, hue ) );
     index++;
-    this.array.trigon.push( new trigon( index, center, parity, this.const.R ) );
 
     offset.add( this.array.neighbor[( parity + 1 ) % 2][0] );
+    hue = ( this.const.parent + index * 2 ) * COLOR_MAX / this.const.edges / 2;
+    this.array.trigon.push( new trigon( index, offset, parity, this.const.R, hue ) );
     index++;
-    this.array.trigon.push( new trigon( index, offset, parity, this.const.R ) );
 
     parity = ( parity + 1 ) % 2;
-    center = this.array.neighbor[( parity + 1 ) % 2][0].copy();
+    center = this.array.neighbor[( parity + 1 ) % 2][moves[1]].copy();
     center.add( offset );
-    index++;
-    this.array.trigon.push( new trigon( index, center, parity, this.const.R ) );
+    hue = ( this.const.parent + index * 2 ) * COLOR_MAX / this.const.edges / 2;
+    this.array.trigon.push( new trigon( index, center, parity, this.const.R, hue ) );
   }
 
   initNeighbors(){
@@ -67,22 +81,35 @@ class tetrahedron {
   }
 
   connectEdges(){
-    //
-    this.addRhomb( 0, 0, 2, 2 );
-    this.addRhomb( 0, 1, 1, 0 );
-    this.addRhomb( 0, 2, 3, 2 );
-    this.addRhomb( 1, 1, 2, 1 );
-    this.addRhomb( 1, 2, 3, 0 );
-    this.addRhomb( 2, 0, 3, 1 );
-  }
+    for( let i = 0; i < this.array.trigon.length; i++ )
+      for( let j = 0; j < this.const.n; j++ ){
+        let jj = ( j + 1 ) % this.const.n
+        this.addRhomb( i, j, i, jj );
+      }
 
-  fillEdges(){
-    let h = COLOR_MAX/ this.array.rhomb.length;
-    for( let i = 0; i < this.array.rhomb.length; i++ ){
-      let hue = h * i;
-      this.array.trigon[this.array.rhomb[i].data.face.a].setEdgeHue( this.array.rhomb[i].data.edge.a, hue );
-      this.array.trigon[this.array.rhomb[i].data.face.b].setEdgeHue( this.array.rhomb[i].data.edge.b, hue );
+    //0 - core
+    //1 - satellite
+    let type;
+    switch ( this.const.parent ) {
+      case 0:
+        this.addRhomb( 0, 0, 2, 2 );
+        this.addRhomb( 0, 1, 1, 0 );
+        this.addRhomb( 0, 2, 3, 2 );
+        this.addRhomb( 1, 1, 2, 1 );
+        this.addRhomb( 1, 2, 3, 0 );
+        this.addRhomb( 2, 0, 3, 1 );
+        break;
+      case 1:
+        this.addRhomb( 0, 0, 2, 2 );
+        this.addRhomb( 2, 1, 3, 2 );
+        this.addRhomb( 1, 0, 2, 0 );
+        this.addRhomb( 0, 1, 3, 1 );
+        this.addRhomb( 1, 2, 3, 0 );
+        this.addRhomb( 1, 1, 0, 2 );
+        break;
     }
+
+    //console.log( this.array.rhomb )
   }
 
   init(){
@@ -92,7 +119,6 @@ class tetrahedron {
     this.initNeighbors();
     this.initTrigons();
     this.connectEdges();
-    this.fillEdges();
   }
 
   addRhomb( face_a, edge_a, face_b, edge_b ){
@@ -104,6 +130,7 @@ class tetrahedron {
       face: face_b,
       edge: edge_b
     };
+
     this.array.rhomb.push( new rhomb( this.var.index.rhomb, a, b ) );
     this.var.index.rhomb++;
   }
@@ -113,7 +140,5 @@ class tetrahedron {
 
     for( let i = 0; i < this.array.trigon.length; i++ )
       this.array.trigon[i].draw( offset, this.var.layer )
-
-    ellipse( offset.x, offset.y, 10, 10 )
   }
 }

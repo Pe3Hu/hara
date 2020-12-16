@@ -1,7 +1,8 @@
 //
 class core {
-  constructor ( a ){
+  constructor ( index, a, recognition, influence ){
     this.const = {
+      index: index,
       a: a
     };
     this.var = {
@@ -9,14 +10,19 @@ class core {
     this.array = {
     };
     this.data = {
-      tetrahedron: null
+      tetrahedron: null,
+      range: {
+        recognition: recognition,
+        influence: influence
+      }
     };
 
     this.init();
   }
 
   init(){
-    this.data.tetrahedron = new tetrahedron( this.const.a );
+    let parent = 0;
+    this.data.tetrahedron = new tetrahedron( this.const.a, parent );
   }
 
   draw( offset ){

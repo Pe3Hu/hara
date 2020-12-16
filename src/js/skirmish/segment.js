@@ -53,7 +53,7 @@ class segment {
     triangle( this.array.vertex[3].x + offset.x, this.array.vertex[3].y + offset.y,
               this.array.vertex[2].x + offset.x, this.array.vertex[2].y + offset.y,
               this.array.vertex[1].x + offset.x, this.array.vertex[1].y + offset.y );
-              
+
     fill(0)
     text( this.const.index, this.const.center.x+ offset.x, this.const.center.y + offset.y+ FONT_SIZE / 3 );
   }

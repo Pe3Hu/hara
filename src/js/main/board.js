@@ -96,6 +96,12 @@ class board {
     this.array.offset[layer].push( createVector(
       CELL_SIZE * Math.floor( this.const.grid.x * 3 / 4 ),
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
+      this.array.offset[layer].push( createVector(
+        CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
+        CELL_SIZE * Math.floor( this.const.grid.y * 3 / 8 ) ) );
+        this.array.offset[layer].push( createVector(
+          CELL_SIZE * Math.floor( this.const.grid.x / 2  ),
+          CELL_SIZE * Math.floor( this.const.grid.y * 5 / 8 ) ) );
   }
 
   initLayers(){
