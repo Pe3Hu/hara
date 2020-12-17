@@ -1,6 +1,6 @@
 //
 class satellite {
-  constructor ( index, core, a, c, angle ){
+  constructor ( index, core, a, c, angle, recognition, influence ){
     this.const = {
       index: index,
       core: core,
@@ -10,7 +10,14 @@ class satellite {
     this.var = {
       lb: createVector(),
       t: angle,
-      interacts: null
+      interact: {
+        core: null,
+        well: null
+      },
+      segment: {
+        current: null,
+        next: null
+      }
     };
     this.array = {
     };
@@ -22,6 +29,10 @@ class satellite {
       speed: {
         value: 0.005,
         scale: 1
+      },
+      range: {
+        recognition: recognition,
+        influence: influence
       }
     };
 
@@ -57,8 +68,8 @@ class satellite {
       next: ( this.var.t + this.data.speed.value * this.data.speed.scale + Math.PI * 2 ) % ( Math.PI * 2 ),
     };
     let index = {
-      current: -1,
-      next: -1
+      current: null,
+      next: null
     };
 
     for( let i = 0; i < segments.length; i++ ){
@@ -75,6 +86,8 @@ class satellite {
           index.next = i;
       }
     }
+
+    this.var.segment.current = index.current;
   }
 
   detectTrigon( offsets ){
@@ -86,7 +99,28 @@ class satellite {
     let trigons = this.data.tetrahedron.array.trigon;
 
     for( let i = 0; i < trigons.length; i++ ){
-      
+
+    }
+
+  }
+
+  setInteract( type, index ){
+    //0 - well
+    //1 - core
+    switch ( type ) {
+
+      case -1:
+        this.var.interact.well = null;
+        this.var.interact.core = null;
+        break;
+      case 0:
+        this.var.interact.well = index;
+        if( this.const.index == 0 )
+          console.log( this.const.index, index )
+        break;
+      case 1:
+        this.var.interact.core = index;
+        break;
     }
 
   }
