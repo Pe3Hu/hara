@@ -42,7 +42,8 @@ class segment {
       this.const.center.y -= this.const.scale/2;
   }
 
-  draw( offset ){
+  draw( offsets ){
+    let offset = offsets[0].copy();
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
     strokeWeight( 0.2 );
     stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );

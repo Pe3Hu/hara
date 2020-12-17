@@ -98,10 +98,10 @@ class board {
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
       this.array.offset[layer].push( createVector(
         CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
-        CELL_SIZE * Math.floor( this.const.grid.y * 3 / 8 ) ) );
+        CELL_SIZE * Math.floor( this.const.grid.y * 5 / 16 ) ) );
         this.array.offset[layer].push( createVector(
           CELL_SIZE * Math.floor( this.const.grid.x / 2  ),
-          CELL_SIZE * Math.floor( this.const.grid.y * 5 / 8 ) ) );
+          CELL_SIZE * Math.floor( this.const.grid.y * 11 / 16 ) ) );
   }
 
   initLayers(){
@@ -114,6 +114,7 @@ class board {
     this.array.layer.push( new debate() );
     this.array.layer.push( new collision() );
     this.array.layer.push( new grappled() );
+    this.array.layer[this.array.layer.length - 1].setOffsets( this.array.offset[this.array.layer.length - 1] );
   }
 
   initBorders(){

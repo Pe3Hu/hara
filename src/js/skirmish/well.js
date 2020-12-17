@@ -1,8 +1,10 @@
 //
 class well {
-  constructor ( index, anchors ){
+  constructor ( index, center, anchors ){
     this.const = {
-      index: index
+      index: index,
+      center: center,
+      type: 0
     };
     this.var = {
     };
@@ -16,7 +18,12 @@ class well {
   init(){
   }
 
-  draw( offset ){
-    ellipse( offset.x, offset.y, 10, 10 )
+  draw( offsets ){
+    let offset = this.const.center.copy();
+    offset.add( offsets[0] );
+
+    fill( 'green' )
+
+    ellipse( offset.x, offset.y, 10, 10 );
   }
 }

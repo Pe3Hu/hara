@@ -1,9 +1,11 @@
 //
 class core {
-  constructor ( index, a, anchors, recognition, influence ){
+  constructor ( index, a, center, anchors, recognition, influence ){
     this.const = {
       index: index,
-      a: a
+      a: a,
+      center: center,
+      type: 1
     };
     this.var = {
       interact: {
@@ -29,20 +31,26 @@ class core {
     this.data.tetrahedron = new tetrahedron( this.const.a, parent );
   }
 
-  setInteract( type, index ){
+  setInteract( type, index, anchor ){
     //0 - setellite
     switch ( type ) {
       case -1:
         this.var.interact.setellite = null;
+        this.var.interact.anchor = null;
         break;
       case 0:
         this.var.interact.setellite = index;
+        this.var.interact.anchor = anchor;
         break;
     }
   }
 
-  draw( offset ){
+  draw( offsets ){
+    let offset = this.const.center.copy();
+    offset.add( offsets[0] );
     noStroke();
     this.data.tetrahedron.draw( offset );
+    /*ill( 'blue' )
+    ellipse( offset.x, offset.y, 10, 10 )*/
   }
 }

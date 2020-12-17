@@ -73,9 +73,6 @@ class trigon {
                 this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
     }
 
-
-
-
     fill( 0 );
 
     for( let i = 0; i < this.array.module.length; i++ )

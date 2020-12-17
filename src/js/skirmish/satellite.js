@@ -1,18 +1,25 @@
 //
 class satellite {
-  constructor ( index, core, a, c, angle, recognition, influence ){
+  constructor ( index, core, a, c, ellipse, center, angle, recognition, influence ){
     this.const = {
       index: index,
       core: core,
       a: a,
-      c: c
+      c: c,
+      ellipse: {
+        x: ellipse.x,
+        y: ellipse.y
+      },
+      center: center,
+      type: 2
     };
     this.var = {
       lb: createVector(),
       t: angle,
       interact: {
         core: null,
-        well: null
+        well: null,
+        anchor: null
       },
       segment: {
         current: null,
@@ -55,10 +62,9 @@ class satellite {
   }
 
   ellipse_func( t, scale ){
-    let a =  this.const.c * 0.8 * scale;
-    let b =  this.const.c * 0.4 * scale;
-    let x = a * Math.cos( t );
-    let y = b * Math.sin( t );
+    //
+    let x = this.const.ellipse.x * Math.cos( t ) * scale;
+    let y = this.const.ellipse.y * Math.sin( t ) * scale;
     this.var.lb = createVector( x, y );
   }
 
@@ -104,7 +110,7 @@ class satellite {
 
   }
 
-  setInteract( type, index ){
+  setInteract( type, index, anchor ){
     //0 - well
     //1 - core
     switch ( type ) {
@@ -112,28 +118,39 @@ class satellite {
       case -1:
         this.var.interact.well = null;
         this.var.interact.core = null;
+        this.var.interact.anchor = null;
         break;
       case 0:
         this.var.interact.well = index;
-        if( this.const.index == 0 )
-          console.log( this.const.index, index )
+        this.var.interact.anchor = anchor;
         break;
       case 1:
         this.var.interact.core = index;
+        this.var.interact.anchor = anchor;
         break;
     }
-
   }
 
-  draw( offsets, time ){
+  draw( offsets, time  ){
     if( time )
       this.update();
 
     noStroke();
-    this.data.tetrahedron.draw( offsets[3 + this.const.index] );
-
-    let offset = offsets[0].copy();
-    offset.add( this.var.lb )
+    let offset = this.const.center.copy();
+    offset.add( offsets[0] );
+    this.data.tetrahedron.draw( offset );
+    /*
+    fill( 'white' )
     ellipse( offset.x, offset.y, 10, 10 )
+
+    fill( 'black' )
+    text( this.const.index,offset.x, offset.y + FONT_SIZE / 3 );
+    fill( 'white' )*/
+
+    offset = offsets[0].copy();
+    offset.add( this.var.lb );
+    ellipse( offset.x, offset.y, 10, 10 )
+    /*fill( 'black' )
+    text( this.const.index, offset.x, offset.y + FONT_SIZE / 3 );*/
   }
 }
