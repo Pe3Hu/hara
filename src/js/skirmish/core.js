@@ -17,7 +17,7 @@ class core {
     };
     this.data = {
       tetrahedron: null,
-      range: {
+      interaction: {
         recognition: recognition,
         influence: influence
       }
@@ -50,7 +50,7 @@ class core {
     offset.add( offsets[0] );
     noStroke();
     this.data.tetrahedron.draw( offset );
-    /*ill( 'blue' )
+     /*ill( 'blue' )
     ellipse( offset.x, offset.y, 10, 10 )*/
   }
 }

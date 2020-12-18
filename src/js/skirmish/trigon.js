@@ -13,7 +13,7 @@ class trigon {
     this.array = {
       vertex: [],
       hue: [],
-      module: []
+      modulus: []
     };
     this.color = {
       bg: {
@@ -28,7 +28,7 @@ class trigon {
 
   init(){
     this.setParity( this.var.parity );
-    this.initModules();
+    this.initModuluss();
   }
 
   setParity( parity ){
@@ -47,7 +47,7 @@ class trigon {
     }
   }
 
-  initModules(){
+  initModuluss(){
     for( let i = 0; i < this.const.n; i++ ){
       let ii = ( i + 1 ) % this.const.n;
 
@@ -56,7 +56,7 @@ class trigon {
         ( ( this.array.vertex[i].y +this.array.vertex[ii].y ) / 2 + this.const.center.y ) / 2 );
 
       let index = this.const.index * this.const.n + i;
-      this.array.module.push( new module( index, center ) );
+      this.array.modulus.push( new modulus( index, center ) );
     }
   }
 
@@ -67,6 +67,8 @@ class trigon {
       let ii = ( i + 1 ) % this.array.vertex.length;
       let h = this.color.bg.h;
       fill( h, this.color.bg.s, this.color.bg.l );
+      stroke( h, this.color.bg.s, this.color.bg.l );
+      strokeWeight( 0.3 );
 
       triangle( this.const.center.x + offset.x, this.const.center.y + offset.y,
                 this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
@@ -75,9 +77,9 @@ class trigon {
 
     fill( 0 );
 
-    for( let i = 0; i < this.array.module.length; i++ )
-      text( i, this.array.module[i].const.center.x + offset.x,
-               this.array.module[i].const.center.y + offset.y + FONT_SIZE / 3 );
+    for( let i = 0; i < this.array.modulus.length; i++ )
+      text( i, this.array.modulus[i].const.center.x + offset.x,
+               this.array.modulus[i].const.center.y + offset.y + FONT_SIZE / 3 );
 
     text( this.const.index, this.const.center.x + offset.x, this.const.center.y + offset.y + FONT_SIZE / 3 );
 

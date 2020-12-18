@@ -15,7 +15,11 @@ class satellite {
     };
     this.var = {
       lb: createVector(),
-      t: angle,
+      angle: {
+        current: 0,
+        start: angle
+      },
+      time: 0,
       interact: {
         core: null,
         well: null,
@@ -34,10 +38,10 @@ class satellite {
     this.data = {
       tetrahedron: null,
       speed: {
-        value: 0.005,
+        value: 0.015,
         scale: 1
       },
-      range: {
+      interaction: {
         recognition: recognition,
         influence: influence
       }
@@ -54,11 +58,13 @@ class satellite {
 
   update(){
     this.updatePosition();
-    this.var.t += this.data.speed.value * this.data.speed.scale;
+    this.var.time++;
   }
 
   updatePosition(){
-    this.ellipse_func( this.var.t, 1 );
+    let t = this.var.time * this.data.speed.value * this.data.speed.scale;
+    this.var.angle.current =  ( this.var.angle.start + t ) % ( Math.PI * 2 );
+    this.ellipse_func( this.var.angle.current, 1 );
   }
 
   ellipse_func( t, scale ){
@@ -69,31 +75,17 @@ class satellite {
   }
 
   detectSegment( segments ){
-    let angle = {
-      current: ( this.var.t + Math.PI * 2 ) % ( Math.PI * 2 ),
-      next: ( this.var.t + this.data.speed.value * this.data.speed.scale + Math.PI * 2 ) % ( Math.PI * 2 ),
-    };
-    let index = {
-      current: null,
-      next: null
-    };
-
     for( let i = 0; i < segments.length; i++ ){
-      if( segments[i].array.angle[0] < angle.current && segments[i].array.angle[1] >= angle.current )
-        index.current = i;
-      if( segments[i].array.angle[0] < angle.next && segments[i].array.angle[1] >= angle.next )
-        index.next = i;
-
-      //processing the transition to a new round
-      if( segments[i].array.angle[0] > Math.PI && segments[i].array.angle[1] < Math.PI ){
-        if( ( segments[i].array.angle[0] < angle.current && Math.PI * 2 >= angle.current ) || segments[i].array.angle[1] >= angle.current )
-          index.current = i;
-        if( ( segments[i].array.angle[0] < angle.next && Math.PI * 2 >= angle.next ) || segments[i].array.angle[1] >= angle.next )
-          index.next = i;
+      if( segments[i].array.angle[0] < this.var.angle.current && segments[i].array.angle[1] >= this.var.angle.current ){
+        this.var.segment.current = i;
+        break;
       }
-    }
+      //processing the transition to a new round
+      /*if( Math.PI && i == segments.length - 1 )
+        if( ( segments[i].array.angle[0] < this.var.angle.current && Math.PI * 2 >= this.var.angle.current ) || segments[i].array.angle[1] >= this.var.angle.current )
+          index = i;*/
 
-    this.var.segment.current = index.current;
+    }
   }
 
   detectTrigon( offsets ){
@@ -107,7 +99,6 @@ class satellite {
     for( let i = 0; i < trigons.length; i++ ){
 
     }
-
   }
 
   setInteract( type, index, anchor ){
@@ -131,7 +122,7 @@ class satellite {
     }
   }
 
-  draw( offsets, time  ){
+  draw( offsets, time ){
     if( time )
       this.update();
 
@@ -139,18 +130,9 @@ class satellite {
     let offset = this.const.center.copy();
     offset.add( offsets[0] );
     this.data.tetrahedron.draw( offset );
-    /*
-    fill( 'white' )
-    ellipse( offset.x, offset.y, 10, 10 )
-
-    fill( 'black' )
-    text( this.const.index,offset.x, offset.y + FONT_SIZE / 3 );
-    fill( 'white' )*/
 
     offset = offsets[0].copy();
     offset.add( this.var.lb );
-    ellipse( offset.x, offset.y, 10, 10 )
-    /*fill( 'black' )
-    text( this.const.index, offset.x, offset.y + FONT_SIZE / 3 );*/
+    ellipse( offset.x, offset.y, 10, 10 );
   }
 }

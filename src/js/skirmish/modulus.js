@@ -1,5 +1,5 @@
 //
-class module {
+class modulus {
   constructor ( index, center ){
     this.const = {
       index: index,

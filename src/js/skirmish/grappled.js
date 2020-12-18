@@ -17,14 +17,16 @@ class grappled {
         core: 0,
         satellite: 0,
         connection: 0
-      }
+      },
+      layer: 0
     };
     this.array = {
       core: [],
       satellite: [],
       segment: [],
       well: [],
-      connection: []
+      connection: [],
+      hue: []
     };
     this.data = {
       dodecahedron: null,
@@ -80,6 +82,7 @@ class grappled {
     let anchors = [];
     let center = createVector();
     let n = 2;
+
     for( let i = 0; i < n; i++ )
       anchors.push( this.const.l * i );
 
@@ -108,11 +111,24 @@ class grappled {
     }
   }
 
+  initHues(){
+    this.array.hue = [
+      60,
+      120,
+      210,
+      225,
+      0,
+      15
+    ]
+  }
+
   init(){
     //
+    this.initHues();
     this.initSegments();
     this.initCreatures();
     this.initWells();
+    this.determineSegmentsStatus();
     this.initConnections();
 
     console.log( this.array.connection )
@@ -123,8 +139,15 @@ class grappled {
   }
 
   addCreatures(){
-    let recognition = 5;
-    let influence = 4;
+    let index = this.var.index.core * this.const.cores + 2;
+    let recognition = {
+      range: 1,
+      hue: this.array.hue[index]
+    };
+    let influence = {
+      range: 3,
+      hue: this.array.hue[index + 1]
+    };
     let angle = Math.PI +  ( this.var.index.core * this.const.cores ) * ( Math.PI / this.const.cores );
     let anchors = [ this.const.l * ( this.var.index.core + 0.5 ) ];
     let scale = 0.55;
@@ -135,12 +158,19 @@ class grappled {
     this.array.core.push( new core( this.var.index.core, this.const.a, center, anchors,
       recognition, influence ) );
 
-    recognition = 3;
-    influence = 3;
+    recognition = {
+      range: 3,
+      hue: this.array.hue[0]
+    };
+    influence = {
+      range: 2,
+      hue: this.array.hue[1]
+    };
     angle = ( 1 + this.var.index.core * this.const.cores ) * ( Math.PI / this.const.cores );
     x = this.const.ellipse.x * Math.cos( angle ) * scale;
     y = this.const.ellipse.y * Math.sin( angle ) * scale;
     center = createVector( x, y );
+
     this.array.satellite.push( new satellite( this.var.index.satellite, this.var.index.core,
       this.const.a, this.const.c, this.const.ellipse, center, angle, recognition, influence ) );
 
@@ -159,6 +189,43 @@ class grappled {
     let y = this.const.ellipse.y * Math.sin( t ) * scale;
 
     return createVector( x, y );
+  }
+
+  determineSegmentsStatus(){
+    //
+    for( let segment of this.array.segment ){
+      for( let core of this.array.core )
+        for( let anchor of core.array.anchor )
+          for( let what in core.data.interaction ) {
+            if( segment.const.index < anchor + core.data.interaction[what].range &&
+                segment.const.index > anchor - core.data.interaction[what].range )
+                  segment.addStatus( core, what );
+
+            for( let satellite of this.array.satellite )
+              if( segment.const.index < anchor + satellite.data.interaction[what].range &&
+                  segment.const.index > anchor - satellite.data.interaction[what].range )
+                    segment.addStatus( satellite, what );
+        }
+
+
+      for( let well of this.array.well )
+        for( let anchor of well.array.anchor )
+          for( let satellite of this.array.satellite )
+            for( let what in satellite.data.interaction ){
+              let max = segment.const.index + satellite.data.interaction[what].range;
+              let min = segment.const.index - satellite.data.interaction[what].range;
+
+              if( max > this.array.segment.length ){
+                max -= this.array.segment.length;
+                min -= this.array.segment.length;
+              }
+
+              if( anchor < max && anchor > min )
+                segment.addStatus( satellite, what );
+          }
+    }
+
+    this.flag.time = false;
   }
 
   enableConnection( parent, child ){
@@ -195,48 +262,14 @@ class grappled {
   }
 
   update(){
-    for( let i = 0; i < this.array.connection.length; i++ )
-      this.array.connection[i].flag.enable = false;
-
-    for( let s = 0; s < this.array.satellite.length; s++ ){
-      let satellite = this.array.satellite[s];
-      satellite.detectSegment( this.array.segment );
-      let segment = satellite.var.segment.current;
-
-      for( let c = 0; c < this.array.core.length; c++ ){
-        let core = this.array.core[c];
-
-        for( let a = 0; a < core.array.anchor.length; a++ ){
-          if( segment < core.array.anchor[a] + core.data.range.influence &&
-              segment > core.array.anchor[a] - core.data.range.influence )
-            core.setInteract( 0, s, a );
-
-          if( segment < core.array.anchor[a] + satellite.data.range.influence &&
-              segment > core.array.anchor[a] - satellite.data.range.influence ){
-                satellite.setInteract( 1, c, a );
-                this.enableConnection( satellite, core );
-              }
-        }
-      }
-
-      for( let w = 0; w < this.array.well.length; w++ ){
-        let well = this.array.well[w];
-
-        for( let a = 0; a < well.array.anchor.length; a++ ){
-            if( segment < well.array.anchor[a] + satellite.data.range.influence &&
-                segment > well.array.anchor[a] - satellite.data.range.influence ){
-                  satellite.setInteract( 0, w, a );
-                  this.enableConnection( satellite, well );
-                }
-        }
-      }
-    }
   }
 
   draw( offsets ){
     //
+    let types = [ 2 ];
+
     for( let i = 0; i < this.array.segment.length; i++ )
-      this.array.segment[i].draw( offsets );
+      this.array.segment[i].draw( offsets, types, this.flag.time );
 
     for( let i = 0; i < this.array.satellite.length; i++ ){
       if( this.flag.time )
