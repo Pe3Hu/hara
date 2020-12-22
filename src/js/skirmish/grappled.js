@@ -25,7 +25,6 @@ class grappled {
       satellite: [],
       segment: [],
       well: [],
-      connection: [],
       hue: []
     };
     this.data = {
@@ -90,27 +89,6 @@ class grappled {
     this.var.index.well++;
   }
 
-  initConnections(){
-    //
-    let parent, child, begin, end;
-
-    for( let s = 0; s < this.array.satellite.length; s++ ){
-      let satellite = this.array.satellite[s];
-
-      for( let c = 0; c < this.array.core.length; c++ ){
-        let core = this.array.core[c];
-
-        this.addConnection( satellite, core );
-      }
-
-      for( let w = 0; w < this.array.well.length; w++ ){
-        let well = this.array.well[w];
-
-        this.addConnection( satellite, well );
-      }
-    }
-  }
-
   initHues(){
     this.array.hue = [
       60,
@@ -129,7 +107,6 @@ class grappled {
     this.initCreatures();
     this.initWells();
     this.determineSegmentsStatus();
-    this.initConnections();
 
     console.log( this.array.connection )
   }
@@ -178,8 +155,8 @@ class grappled {
     this.var.index.satellite++;
   }
 
-  addConnection( parent, child ){
-    this.array.connection.push( new connection( this.var.index.connection, parent, child) );
+  addConnection( parent, child, what ){
+    this.array.connection.push( new connection( this.var.index.connection, parent, child, what ) );
     this.var.index.connection++;
   }
 
@@ -195,18 +172,22 @@ class grappled {
     //
     for( let segment of this.array.segment ){
       for( let core of this.array.core )
-        for( let anchor of core.array.anchor )
-          for( let what in core.data.interaction ) {
-            if( segment.const.index < anchor + core.data.interaction[what].range &&
-                segment.const.index > anchor - core.data.interaction[what].range )
-                  segment.addStatus( core, what );
+        for( let anchor of core.array.anchor ){
+          for( let satellite of this.array.satellite )
+            for( let what in core.data.interaction ){
 
-            for( let satellite of this.array.satellite )
-              if( segment.const.index < anchor + satellite.data.interaction[what].range &&
-                  segment.const.index > anchor - satellite.data.interaction[what].range )
-                    segment.addStatus( satellite, what );
+              if( segment.const.index < anchor + core.data.interaction[what].range &&
+                  segment.const.index > anchor - core.data.interaction[what].range )
+                    segment.addStatus( core, what );
+
+
+              for( let satellite of this.array.satellite )
+                if( segment.const.index < anchor + satellite.data.interaction[what].range &&
+                    segment.const.index > anchor - satellite.data.interaction[what].range )
+                      segment.addStatus( satellite, what );
+
+          }
         }
-
 
       for( let well of this.array.well )
         for( let anchor of well.array.anchor )
@@ -225,7 +206,7 @@ class grappled {
           }
     }
 
-    this.flag.time = false;
+    //this.flag.time = false;
   }
 
   enableConnection( parent, child ){
@@ -262,29 +243,45 @@ class grappled {
   }
 
   update(){
+    if( this.flag.time )
+      this.updateConnections();
+  }
+
+  updateConnections(){
+
+    for( let satellite of this.array.satellite ){
+      satellite.detectSegment( this.array.segment );
+      let segment = this.array.segment[satellite.var.segment.current];
+
+      /*for( let connection of this.array.connection )
+        if( satellite.const.index == connection.const.parent.const.index )
+          for( let what in connection.data.segments ){
+            console.log( connection.const.index, connection.data.segments[what]  )
+              if( connection.data.interaction[what] )
+                for( let index of connection.data.segments[what] )
+                  if( index == segment.const.index )
+                  console.log( satellite.const.index, connection.const.index, what, segment.const.index, satellite.const.index )
+
+          }*/
+        }
+    this.flag.time = false;
   }
 
   draw( offsets ){
     //
-    let types = [ 2 ];
+    this.update();
+    let types = [ 0 ];
 
     for( let i = 0; i < this.array.segment.length; i++ )
       this.array.segment[i].draw( offsets, types, this.flag.time );
 
-    for( let i = 0; i < this.array.satellite.length; i++ ){
-      if( this.flag.time )
-        this.update();
-
+    for( let i = 0; i < this.array.satellite.length; i++ )
       this.array.satellite[i].draw( offsets, this.flag.time );
-    }
 
     for( let i = 0; i < this.array.core.length; i++ )
      this.array.core[i].draw( offsets );
 
    for( let i = 0; i < this.array.well.length; i++ )
       this.array.well[i].draw( offsets )
-
-   for( let i = 0; i < this.array.connection.length; i++ )
-      this.array.connection[i].draw( offsets )
   }
 }

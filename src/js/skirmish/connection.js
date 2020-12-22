@@ -1,6 +1,6 @@
 //
 class connection {
-  constructor ( index, parent, child ){
+  constructor ( index, parent, child, what ){
     this.const = {
       index: index,
       parent: parent,
@@ -22,6 +22,18 @@ class connection {
         l: COLOR_MAX * 0.5
       }
     };
+    this.data = {
+      interaction: {
+        recognition: false,
+        influence: false
+      },
+      segments: {
+        recognition: [],
+        influence: []
+      }
+    }
+
+    this.data.interaction[what] = true;
 
     this.init();
   }

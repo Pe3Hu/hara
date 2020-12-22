@@ -33,12 +33,11 @@ class satellite {
     this.array = {
     };
     this.flag = {
-      move: true
     }
     this.data = {
       tetrahedron: null,
       speed: {
-        value: 0.015,
+        value: 0.0015,
         scale: 1
       },
       interaction: {
