@@ -6,6 +6,7 @@ class satellite {
       core: core,
       a: a,
       c: c,
+      n: 3,
       ellipse: {
         x: ellipse.x,
         y: ellipse.y
@@ -15,6 +16,9 @@ class satellite {
     };
     this.var = {
       lb: createVector(),
+      index: {
+        modulus: 0
+      },
       angle: {
         current: 0,
         start: angle
@@ -31,6 +35,7 @@ class satellite {
       }
     };
     this.array = {
+      modulus: []
     };
     this.flag = {
     }
@@ -49,10 +54,46 @@ class satellite {
     this.init();
   }
 
+  initModuluss(){
+    let trigons = this.data.tetrahedron.array.trigon;
+
+    for( let trigon of trigons )
+      for( let i = 0; i < trigon.const.n; i++ ){
+        let ii = ( i + 1 ) % trigon.const.n;
+        let center = createVector(
+          ( ( trigon.array.vertex[i].x + trigon.array.vertex[ii].x ) / 2 + trigon.const.center.x ) / 2,
+          ( ( trigon.array.vertex[i].y + trigon.array.vertex[ii].y ) / 2 + trigon.const.center.y ) / 2 );
+
+        this.array.modulus.push( new modulus( this.var.index.modulus, center, this.const.r ) );
+        this.var.index.modulus++;
+      }
+
+    let index = 0;
+    this.array.modulus[index].setType( 0, 0 );
+    index++;
+    this.array.modulus[index].setType( 0, 1 );
+    index++;
+    this.array.modulus[index].setType( 0, 2 );
+    index++;
+    this.array.modulus[index].setType( 1, 0 );
+    index++;
+    this.array.modulus[index].setType( 1, 1 );
+    index++;
+    this.array.modulus[index].setType( 2, 0 );
+    index++;
+    this.array.modulus[index].setType( 2, 1 );
+    index++;
+    this.array.modulus[index].setType( 3, 0 );
+  }
+
   init(){
     let parent = 1;
+    this.const.R = this.const.a / ( 2 * Math.sin( Math.PI / this.const.n ) );
+    this.const.r = this.const.a / ( 2 * Math.tan( Math.PI / this.const.n ) );
+
     this.data.tetrahedron = new tetrahedron( this.const.a, parent );
-      this.updatePosition();
+    this.updatePosition();
+    this.initModuluss();
   }
 
   update(){
@@ -87,17 +128,32 @@ class satellite {
     }
   }
 
-  detectTrigon( offsets ){
-    let offset = offsets[3 + this.const.index];
-
+  detectModulus( offsets ){
+    let min = {
+      d: INFINITY,
+      index: null
+    };
+    let offset = offsets[0];
     let mouse = createVector( mouseX, mouseY );
     mouse.sub( offset );
+    mouse.add( this.const.center );
 
-    let trigons = this.data.tetrahedron.array.trigon;
+    //console.log( '___', mouse.x ,mouse.y )
 
-    for( let i = 0; i < trigons.length; i++ ){
+    for( let modulus of this.array.modulus )
+      if( !modulus.flag.free ){
+        let d = modulus.const.center.dist( mouse );
+        //console.log( this.const.index,   modulus.const.index, d, modulus.const.center.x ,modulus.const.center.y )
 
-    }
+        if( d < this.const.R && d < min.d )
+          min = {
+            d: d,
+            index: modulus.const.index
+          }
+      }
+
+    if( min.index != null )
+      console.log( min.index )
   }
 
   setInteract( type, index, anchor ){
@@ -129,6 +185,9 @@ class satellite {
     let offset = this.const.center.copy();
     offset.add( offsets[0] );
     this.data.tetrahedron.draw( offset );
+
+    for( let modulus of this.array.modulus )
+      modulus.draw( offset );
 
     offset = offsets[0].copy();
     offset.add( this.var.lb );

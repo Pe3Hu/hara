@@ -7,6 +7,7 @@ class grappled {
       cores: 2,
       segments: 32,
       l: null,
+      n: 3,
       ellipse: {
         x: null,
         y: null
@@ -81,11 +82,15 @@ class grappled {
     let anchors = [];
     let center = createVector();
     let n = 2;
+    let eradiation = {
+      range: 5,
+      hue: this.array.hue[0]
+    }
 
     for( let i = 0; i < n; i++ )
       anchors.push( this.const.l * i );
 
-    this.array.well.push( new well( this.var.index.well, center, anchors ) );
+    this.array.well.push( new well( this.var.index.well, center, anchors, eradiation ) );
     this.var.index.well++;
   }
 
@@ -102,13 +107,16 @@ class grappled {
 
   init(){
     //
+    this.const.R = this.const.a / ( 2 * Math.sin( Math.PI / this.const.n ) );
+    this.const.r = this.const.a / ( 2 * Math.tan( Math.PI / this.const.n ) );
+
     this.initHues();
     this.initSegments();
     this.initCreatures();
     this.initWells();
     this.determineSegmentsStatus();
 
-    console.log( this.array.connection )
+    console.log( this.array.satellite[0].array.modulus )
   }
 
   setOffsets( offsets ){
@@ -153,11 +161,6 @@ class grappled {
 
     this.var.index.core++;
     this.var.index.satellite++;
-  }
-
-  addConnection( parent, child, what ){
-    this.array.connection.push( new connection( this.var.index.connection, parent, child, what ) );
-    this.var.index.connection++;
   }
 
   ellipse_func( t, scale ){
@@ -237,9 +240,9 @@ class grappled {
 
   moved( offsets ){
     //let offset = offsets[1];
-
+    if( this.flag.time )
     for( let i = 0; i < this.array.satellite.length; i++ )
-      this.array.satellite[i].detectTrigon( offsets );
+      this.array.satellite[i].detectModulus( offsets );
   }
 
   update(){
@@ -264,7 +267,7 @@ class grappled {
 
           }*/
         }
-    this.flag.time = false;
+    //this.flag.time = false;
   }
 
   draw( offsets ){

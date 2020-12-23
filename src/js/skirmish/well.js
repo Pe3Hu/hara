@@ -1,6 +1,6 @@
 //
 class well {
-  constructor ( index, center, anchors ){
+  constructor ( index, center, anchors, eradiation ){
     this.const = {
       index: index,
       center: center,
@@ -11,6 +11,11 @@ class well {
     this.array = {
       anchor: anchors
     };
+    this.data = {
+      interaction: {
+        eradiation: eradiation
+      }
+    }
 
     this.init();
   }

@@ -1,158 +1,155 @@
 //
 class modulus {
-  constructor ( index, center ){
+  constructor ( index, center, r ){
     this.const = {
       index: index,
       center: center,
-      type: {
-
-      }
+      r: r
     };
     this.var = {
     };
     this.array = {
     };
+    this.flag = {
+      free: true,
+      enable: false
+    }
+    this.data = {
+      destination: null,
+      specialization: null,
+      creator: null,
+      inflow: null,
+      outflow: null,
+      impasse: null,
+      rapids: null,
+      flow: null
+    }
 
     this.init();
   }
 
   init(){
+    this.const.r = this.const.a / ( 2 * Math.tan( Math.PI / this.const.n ) );
   }
 
   setType( destination, specialization ){
-    this.const.type.index = type;
+    if( destination != undefined && destination != null &&
+        specialization != undefined && specialization != null ){
+      this.flag.free = false;
 
-    switch ( destination ) {
-      case 0:
-        this.const.type.specialization = 'founder';
-        switch ( specialization ) {
-          case 0:
-            this.const.type.specialization = 'motherboard';
-            break;
-          case 1:
-            this.const.type.specialization = 'carcass';
-            break;
-          }
-        break;
-      case 1:
-        this.const.type.specialization = 'keeper';
-        switch ( specialization - 2 ) {
-          case 0:
-            this.const.type.specialization = 'accumulator';
-            break;
-          case 1:
-            this.const.type.specialization = 'entrepot';
-            break;
-          case 2:
-            this.const.type.specialization = 'warehouse';
-            break;
-          case 3:
-            this.const.type.specialization = 'library';
-            break;
-          case 4:
-            this.const.type.specialization = 'protector';
-            break;
-          }
-        break;
-      case 2:
-        this.const.type.specialization = 'executor';
-        switch ( specialization - 6 ) {
-          case 0:
-            this.const.type.specialization = 'extractor';
-            break;
-          case 1:
-            this.const.type.specialization = 'builder';
-            break;
-          case 2:
-            this.const.type.specialization = 'repairer';
-            break;
-          case 3:
-            this.const.type.specialization = 'carrier';
-            break;
-          case 4:
-            this.const.type.specialization = 'conveyor';
-            break;
-          }
-        break;
-      case 3:
-        this.const.type.specialization = 'surfer';
-        switch ( specialization - 10 ) {
-          case 0:
-            this.const.type.specialization = 'photocell';
-            break;
-          case 1:
-            this.const.type.specialization = 'destroyer';
-            break;
-          case 2:
-            this.const.type.specialization = 'observer';
-            break;
-          case 3:
-            this.const.type.specialization = 'encoder';
-            break;
-          case 4:
-            this.const.type.specialization = 'emitter';
-            break;
-          }
-        break;
-      case 4:
-        this.const.type.specialization = 'transformer';
-        switch ( specialization - 14 ) {
-          case 0:
-            this.const.type.specialization = 'manufacturer';
-            break;
-          case 1:
-            this.const.type.specialization = 'reactor';
-            break;
-          case 2:
-            this.const.type.specialization = 'concentrator';
-            break;
-          case 3:
-            this.const.type.specialization = 'designer';
-            break;
-          }
-        break;
+      switch ( destination ) {
+        case 0:
+          this.data.destination = 'founder';
+
+          switch ( specialization ) {
+            case 0:
+              this.data.specialization = 'motherboard';
+              break;
+            case 1:
+              this.data.specialization = 'carcass';
+              break;
+            case 2:
+              this.data.specialization = 'engine';
+              break;
+            }
+          break;
+        case 1:
+          this.data.destination = 'keeper';
+
+          switch ( specialization ) {
+            case 0:
+              this.data.specialization = 'accumulator';
+              break;
+            case 1:
+              this.data.specialization = 'entrepot';
+              break;
+            case 2:
+              this.data.specialization = 'warehouse';
+              break;
+            case 3:
+              this.data.specialization = 'library';
+              break;
+            case 4:
+              this.data.specialization = 'protector';
+              break;
+            }
+          break;
+        case 2:
+          this.data.destination = 'executor';
+
+          switch ( specialization ) {
+            case 0:
+              this.data.specialization = 'extractor';
+              break;
+            case 1:
+              this.data.specialization = 'builder';
+              break;
+            case 2:
+              this.data.specialization = 'repairer';
+              break;
+            case 3:
+              this.data.specialization = 'carrier';
+              break;
+            case 4:
+              this.data.specialization = 'conveyor';
+              break;
+            }
+          break;
+        case 3:
+          this.data.destination = 'surfer';
+
+          switch ( specialization ) {
+            case 0:
+              this.data.specialization = 'photocell';
+              break;
+            case 1:
+              this.data.specialization = 'destroyer';
+              break;
+            case 2:
+              this.data.specialization = 'observer';
+              break;
+            case 3:
+              this.data.specialization = 'encoder';
+              break;
+            case 4:
+              this.data.specialization = 'emitter';
+              break;
+            }
+          break;
+        case 4:
+          this.data.destination = 'transformer';
+
+          switch ( specialization ) {
+            case 0:
+              this.data.specialization = 'manufacturer';
+              break;
+            case 1:
+              this.data.specialization = 'reactor';
+              break;
+            case 2:
+              this.data.specialization = 'concentrator';
+              break;
+            case 3:
+              this.data.specialization = 'designer';
+              break;
+            }
+          break;
       }
-
-      /*
-      case 18:
-        this.const.type.specialization = 'helmsman';
-        break;
-      case 19:
-        this.const.type.specialization = 'closer';
-        break;
-      case 20:
-        this.const.type.specialization = 'afterburner';
-        break;
-      case 21:
-        this.const.type.specialization = 'cooler';
-        break;*/
-      /*case 22:
-        this.const.type.specialization = 'scheduler';
-        break;
-      case 23:
-        this.const.type.specialization = 'observer';
-        break;
-      case 24:
-        this.const.type.specialization = 'encoder';
-        break;
-      case 25:
-        this.const.type.specialization = 'destroyer';
-        break;
-      case 26:
-        this.const.type.specialization = 'protector';
-        break;
-      case 27:
-        this.const.type.specialization = 'helmsman';
-        break;
-      case 28:
-        this.const.type.specialization = 'concentrator';
-        break;
-      case 29:
-        this.const.type.specialization = 'designer';
-        break;*/
+    }
+    else{
+      this.flag.free = true;
+      this.data.destination = null;
+      this.data.specialization = null;
+      this.data.creator = null;
+    }
 
   }
 
-  draw(  ){
+  draw( offset ){
+    let center = this.const.center.copy();
+    center.add( offset );
+
+    if( !this.flag.free )
+      text( this.data.specialization.charAt( 0 ), this.const.center.x + offset.x, this.const.center.y + offset.y + FONT_SIZE / 3 );
   }
 }

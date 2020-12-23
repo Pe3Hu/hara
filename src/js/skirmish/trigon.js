@@ -28,7 +28,6 @@ class trigon {
 
   init(){
     this.setParity( this.var.parity );
-    this.initModuluss();
   }
 
   setParity( parity ){
@@ -44,19 +43,6 @@ class trigon {
 
       this.array.vertex.push( vec );
       this.array.hue.push( 0 );
-    }
-  }
-
-  initModuluss(){
-    for( let i = 0; i < this.const.n; i++ ){
-      let ii = ( i + 1 ) % this.const.n;
-
-      let center = createVector(
-        ( ( this.array.vertex[i].x +this.array.vertex[ii].x ) / 2 + this.const.center.x ) / 2,
-        ( ( this.array.vertex[i].y +this.array.vertex[ii].y ) / 2 + this.const.center.y ) / 2 );
-
-      let index = this.const.index * this.const.n + i;
-      this.array.modulus.push( new modulus( index, center ) );
     }
   }
 
