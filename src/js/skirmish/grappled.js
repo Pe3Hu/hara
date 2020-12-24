@@ -38,6 +38,9 @@ class grappled {
     this.table = {
       offsets: null
     }
+    this.ui = {
+
+    }
 
     this.init();
   }
@@ -105,6 +108,9 @@ class grappled {
     ]
   }
 
+  initUI(){
+  }
+
   init(){
     //
     this.const.R = this.const.a / ( 2 * Math.sin( Math.PI / this.const.n ) );
@@ -114,9 +120,8 @@ class grappled {
     this.initSegments();
     this.initCreatures();
     this.initWells();
+    this.initUI();
     this.determineSegmentsStatus();
-
-    console.log( this.array.satellite[0].array.modulus )
   }
 
   setOffsets( offsets ){
@@ -268,6 +273,17 @@ class grappled {
           }*/
         }
     //this.flag.time = false;
+  }
+
+  drawUI(){
+    /*let offset = createVector( CELL_SIZE, CELL_SIZE );
+    let shift = FONT_SIZE * 1.2;
+
+    for( let satellite of this.array.satellite )
+      for( let modulus of satellite.array.modulus ){
+
+      }*/
+
   }
 
   draw( offsets ){

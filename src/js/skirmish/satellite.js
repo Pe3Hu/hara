@@ -42,7 +42,7 @@ class satellite {
     this.data = {
       tetrahedron: null,
       speed: {
-        value: 0.0015,
+        value: 0.005,
         scale: 1
       },
       interaction: {

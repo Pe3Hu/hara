@@ -19,7 +19,7 @@ class board {
       }
     }
     this.var = {
-      layer: 8,
+      layer: 9,
       id: {
         button: 0,
         border: 0,
@@ -115,6 +115,7 @@ class board {
     this.array.layer.push( new collision() );
     this.array.layer.push( new grappled() );
     this.array.layer[this.array.layer.length - 1].setOffsets( this.array.offset[this.array.layer.length - 1] );
+    this.array.layer.push( new joust() );
   }
 
   initBorders(){
