@@ -96,12 +96,16 @@ class board {
     this.array.offset[layer].push( createVector(
       CELL_SIZE * Math.floor( this.const.grid.x * 3 / 4 ),
       CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
-      this.array.offset[layer].push( createVector(
-        CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
-        CELL_SIZE * Math.floor( this.const.grid.y * 5 / 16 ) ) );
-        this.array.offset[layer].push( createVector(
-          CELL_SIZE * Math.floor( this.const.grid.x / 2  ),
-          CELL_SIZE * Math.floor( this.const.grid.y * 11 / 16 ) ) );
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
+      CELL_SIZE * Math.floor( this.const.grid.y * 5 / 16 ) ) );
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x / 2  ),
+      CELL_SIZE * Math.floor( this.const.grid.y * 11 / 16 ) ) );
+    layer = 9;
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x * 3 / 4 ),
+      CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
   }
 
   initLayers(){
@@ -245,6 +249,11 @@ class board {
     this.addButton( layer, name, type, vec.copy() );
 
     name = 'switchToSkirmish';
+    type++;
+    vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
+    this.addButton( layer, name, type, vec.copy() );
+
+    name = 'switchToTourney';
     type++;
     vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 1.25 ), CELL_SIZE * ( 1.5 + type ) );
     this.addButton( layer, name, type, vec.copy() );
