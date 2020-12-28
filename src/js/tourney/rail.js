@@ -19,17 +19,22 @@ class rail {
   }
 
   init(){
-    this.initMilestone();
+
   }
 
-  initMilestone(){
-    for( let j = 0; j < this.const.milestones * 2; j++ ){
-      let x = this.const.center.x;
-      let y = this.const.center.y + ( -this.const.milestones + j + 0.5 ) * this.const.side * this.const.a;
-      let center = createVector( x, y );
-      let index = j;
+  setRoute( route ){
+    let sections = route.array.section;
+    let x = this.const.center.x;
+    let y = this.const.center.y + ( -this.const.milestones ) * this.const.side * this.const.a;
 
-      this.array.section.push( new section( index, center, this.const.a ) );
+    for( let obj of route.array.section ){
+      y += this.const.side * obj.y / 2;
+      let center = createVector( x, y );
+      let dimensions = createVector( this.const.a, obj.y );
+
+      this.array.section.push( new section( obj.index, center.copy(), dimensions.copy(), obj.extent, obj.slope ) );
+
+      y += this.const.side * obj.y / 2;
     }
   }
 

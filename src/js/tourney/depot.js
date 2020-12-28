@@ -1,6 +1,6 @@
 //
-class trolley {
-  constructor ( ){
+class depot {
+  constructor (  ){
     this.const = {
     };
     this.var = {
