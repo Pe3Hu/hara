@@ -76,11 +76,10 @@ class altar {
     this.var.index.port++;
   }
 
-  draw( offsets ){
-    let offset = offsets[0];
+  draw( offset ){
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
     stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-    strokeWeight( 0.2 );
+    strokeWeight( 1 );
 
     let index = 0;
     triangle( this.array.vertex[index].x + offset.x, this.array.vertex[index].y + offset.y,
@@ -92,6 +91,6 @@ class altar {
 
 
     for( let port of this.array.port )
-      port.draw( offsets );
+      port.draw( offset );
   }
 }

@@ -5,7 +5,8 @@ class ristaly {
       rails: 3,
       milestones: 3,
       gap: 2,
-      spread: 1200,
+      spread: 12000,
+      zoom: null,
       a: a
     };
     this.var = {
@@ -34,7 +35,7 @@ class ristaly {
         let y = ( this.const.milestones + 1 ) * side * this.const.a;
         let center = createVector( x, y );
 
-        this.array.rail.push( new rail( this.var.index.rail, center, this.const.milestones, this.const.spread, side, this.const.a ) );
+        this.array.rail.push( new rail( this.var.index.rail, center, side, this.const.milestones, this.const.spread, this.const.zoom, this.const.a ) );
         this.array.rail[this.var.index.rail].setRoute( route );
         this.var.index.rail++;
       }
@@ -54,20 +55,19 @@ class ristaly {
   }
 
   init(){
-    this.data.rollercoaster = new rollercoaster( this.const.milestones, this.const.gap, this.const.spread, this.const.a );
-    this.data.depot = new depot();
+    this.const.zoom = this.const.spread / ( this.const.milestones * this.const.gap * this.const.a );
+    this.data.rollercoaster = new rollercoaster( this.const.milestones, this.const.gap, this.const.spread, this.const.zoom, this.const.a );
 
     this.initAltars();
     this.initRails();
-
   }
 
-  draw( offsets ){
+  draw( offset ){
 
     for( let rail of this.array.rail )
-      rail.draw( offsets );
+      rail.draw( offset );
 
     for( let altar of this.array.altar )
-      altar.draw( offsets );
+      altar.draw( offset );
   }
 }

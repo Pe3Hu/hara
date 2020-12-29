@@ -1,10 +1,11 @@
 //
 class rollercoaster {
-  constructor ( milestones, gap, spread, a ){
+  constructor ( milestones, gap, spread, zoom, a ){
     this.const = {
       milestones: milestones,
       gap: gap,
       spread: spread,
+      zoom: zoom,
       a: a
     };
     this.var = {
@@ -29,9 +30,18 @@ class rollercoaster {
       spread: null
     };
     sections.push( section );
+
     /*section = {
       slope: 0,
       extent: 5,
+      index: null,
+      y: null,
+      spread: null
+    };
+    sections.push( section );
+    section = {
+      slope: 0,
+      extent: 3,
       index: null,
       y: null,
       spread: null
@@ -47,8 +57,6 @@ class rollercoaster {
 
     for( let section of sections )
       sum += section.extent;
-
-    console.log( sum )
 
     let unit = total / sum;
     let index = 0;

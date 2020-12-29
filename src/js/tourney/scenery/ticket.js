@@ -14,6 +14,6 @@ class ticket {
   init(){
   }
 
-  draw( offsets ){
+  draw( offset ){
   }
 }

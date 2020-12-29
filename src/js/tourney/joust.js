@@ -13,7 +13,8 @@ class joust {
       knight: []
     };
     this.data = {
-      ristaly: null
+      ristaly: null,
+      depot: null
     }
 
     this.init();
@@ -21,13 +22,14 @@ class joust {
 
   initKnights(){
     for( let side = 1; side >= -1; side-=2 ){
-      this.array.knight.push( new knight( this.var.index.knight, side ) );
+      this.array.knight.push( new knight( this.var.index.knight, side, this.data.ristaly, this.data.depot ) );
       this.var.index.knight++;
     }
   }
 
   init(){
     this.data.ristaly = new ristaly( this.const.a );
+    this.data.depot = new depot();
 
     this.initKnights();
   }
@@ -52,7 +54,11 @@ class joust {
 
   draw( offsets ){
     this.update();
+    let offset = offsets[0];
 
-    this.data.ristaly.draw( offsets );
+    this.data.ristaly.draw( offset );
+
+    for( let knight of this.array.knight )
+      knight.draw( offset );
   }
 }

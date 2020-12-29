@@ -1,9 +1,7 @@
-//
-class knight {
-  constructor ( index, side ){
+//baggage train
+class baggage {
+  constructor (  ){
     this.const = {
-      index: index,
-      side: side
     };
     this.var = {
     };
