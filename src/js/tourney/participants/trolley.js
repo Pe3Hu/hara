@@ -2,7 +2,8 @@
 class trolley {
   constructor( index, knight, rail, mule ){
     this.const = {
-      index: index
+      index: index,
+      indicator: null
     };
     this.var = {
       current: {
@@ -37,6 +38,8 @@ class trolley {
     this.var.current.section = this.data.rail.array.section.length;
     this.nextSection( 0 );
 
+    this.const.indicator = this.var.position.copy();
+
     this.data.mule.onYourMark();
     this.flag.rest = false;
     this.flag.maintaining = true;
@@ -48,8 +51,8 @@ class trolley {
     if( this.flag.rest )
       return;
 
-    if( this.const.index == 0 && this.data.knight.const.index == 0 )
-      console.log( this.var.current.section )
+    /*if( this.const.index == 0 && this.data.knight.const.index == 0 )
+      console.log( this.var.current.section )*/
 
     let v = this.data.mule.var.current.speed / this.data.rail.const.zoom;
     this.var.position.y -= this.data.rail.const.side * v;
@@ -79,9 +82,28 @@ class trolley {
     //this.data.mule.data.motion.consumption = this
   }
 
+  drawIndicators( offset ){
+    fill( 0 );
+    noStroke();
+    let x = 0, y = 0;
+    let a = this.data.rail.const.a;
+    let shift = this.const.indicator.copy();
+    shift.add( offset );
+    shift.y += this.data.rail.const.side * a;
+
+    let value = this.data.mule.var.current.speed.toFixed( 0 );
+    text( value, shift.x, shift.y + FONT_SIZE / 3 );
+
+    shift.y += this.data.rail.const.side * a;
+    value = this.data.mule.data.weight.fuel.toFixed( 0 );
+    text( value, shift.x, shift.y + FONT_SIZE / 3 );
+   }
+
+
   draw( offset ){
 
     this.updatePosition();
+    //this.drawIndicators( offset );
     fill(COLOR_MAX);
     ellipse( this.var.position.x + offset.x, this.var.position.y + offset.y, 10, 10 );
   }
