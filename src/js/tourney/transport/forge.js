@@ -1,5 +1,5 @@
 //
-class depot {
+class forge {
   constructor (  ){
     this.const = {
     };
@@ -37,7 +37,7 @@ class depot {
       safety: null,
       efficiency: null,
       gravity: 9.8
-    }
+    };
 
     //weight in tons
     weight.own = 140;
@@ -59,11 +59,53 @@ class depot {
 
   init(){
     this.initMules();
-
   }
 
   addMule( weight, motion, factor ){
-    this.array.mule.push( new mule( this.var.index.mule, weight, motion, factor ) );
+    let imprint = {
+      mk: 0,
+      weight: weight,
+      motion: motion,
+      factor: factor
+    };
+    this.array.mule.push( imprint );
     this.var.index.mule++;
+  }
+
+  makeAnImpression( type, index ){
+    /*let impression = Object.assign({}, this.array[type][index] );
+    console.log( impression )*/
+
+    let imprint = this.array[type][index];
+
+    let weight = {
+      own: imprint.weight.own,
+      container: imprint.weight.container,
+      cargo: imprint.weight.cargo,
+      fuel: imprint.weight.fuel
+    };
+    let motion = {
+      acceleration_time: imprint.motion.acceleration_time,
+      acceleration: imprint.motion.acceleration,
+      deceleration: imprint.motion.deceleration,
+      speed: imprint.motion.speed,
+      consumption: imprint.motion.consumption
+    };
+    let factor = {
+      safety: imprint.factor.safety,
+      efficiency: imprint.factor.efficiency,
+      gravity: imprint.factor.gravity
+    };
+
+    let impression = {
+      mk: imprint.mk,
+      weight: weight,
+      motion: motion,
+      factor: factor,
+    };
+
+    this.array[type][index].mk++;
+
+    return impression;
   }
 }

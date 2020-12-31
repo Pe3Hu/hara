@@ -1,8 +1,8 @@
 //
 class mule {
-  constructor ( index, weight, motion, factor ){
+  constructor ( imprint ){
     this.const = {
-      index: index
+      mk: imprint.mk
     };
     this.var = {
       current: {
@@ -14,10 +14,9 @@ class mule {
     this.array = {
     };
     this.data = {
-      weight: weight,
-      motion: motion,
-      factor: factor,
-
+      weight: imprint.weight,
+      motion: imprint.motion,
+      factor: imprint.factor,
     };
 
     this.init();

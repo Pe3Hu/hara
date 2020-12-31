@@ -1,6 +1,6 @@
 //
 class knight {
-  constructor ( index, side, ristaly, depot ){
+  constructor ( index, side, ristaly, forge ){
     this.const = {
       index: index,
       side: side
@@ -15,28 +15,39 @@ class knight {
     };
     this.data = {
       ristaly: ristaly,
-      depot: depot
-    }
+      forge: forge,
+      depot: null
+    };
 
     this.init();
   }
 
+  initMules(){
+    this.data.depot = new depot( this.data.forge );
+    this.data.depot.forgeBaseTransport( this.data.ristaly.const.rails );
+  }
+
   initTrolleys(){
-    let mule = this.data.depot.array.mule[0];
     let ristaly = this.data.ristaly;
     let index = 0;
     if( this.const.side > 0 )
       index = ristaly.const.rails;
 
     for( let i = 0; i < ristaly.const.rails; i++ ){
+      let mules = this.data.depot.array.mule.garage.splice( 0, 1 );
+      let mule = mules[0];
       let rail = ristaly.array.rail[index + i];
       this.array.trolley.push( new trolley( this.var.index.trolley, this, rail, mule ) );
+      this.array.trolley[this.var.index.trolley].data.mule.var.current.speed += i * 5;
       this.var.index.trolley++;
+
+      this.data.depot.array.mule.stand.push( mule );
     }
   }
 
   init(){
 
+    this.initMules();
     this.initTrolleys();
   }
 
