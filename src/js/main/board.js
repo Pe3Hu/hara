@@ -19,7 +19,7 @@ class board {
       }
     }
     this.var = {
-      layer: 9,
+      layer: 0,
       id: {
         button: 0,
         border: 0,
@@ -60,10 +60,15 @@ class board {
   initOffsets(){
     this.array.offset = [];
 
-    for ( let i = 0; i < this.var.layer + 1; i++ )
+    for( let i = 0; i < this.array.layer.length; i++ )
       this.array.offset.push( [] );
 
-    let layer = 3;
+
+    let layer = 0;
+    this.array.offset[layer].push( createVector(
+      CELL_SIZE * Math.floor( this.const.grid.x / 4 ),
+      CELL_SIZE * Math.floor( this.const.grid.y / 4 ) ) );
+    layer = 3;
     this.array.offset[layer].push( createVector( CELL_SIZE * 0.5, CELL_SIZE * 0.5 ) );
     layer = 6;
     this.array.offset[layer].push( createVector( CELL_SIZE * Math.floor( this.const.grid.x / 2 ), CELL_SIZE * 2.5 ) );
@@ -112,13 +117,17 @@ class board {
   }
 
   initLayers(){
-    this.array.layer.push( new settlement( 4 ) );
+    //this layer has no meaning
+    //this.array.layer.push( new settlement( 4 ) );
+    this.array.layer.push( new mechanism() );
     this.array.layer.push( new square( 2 ) );
     this.array.layer.push( new scroll() );
     this.array.layer.push( new blend( this.const.blend.size, this.const.blend.shread, this.const.blend.a ) );
+    //this layer has no meaning
     this.array.layer.push( new carpet() );
     this.array.layer.push( new isle() );
     this.array.layer.push( new debate() );
+      //this layer has no meaning
     this.array.layer.push( new collision() );
     this.array.layer.push( new grappled() );
     this.array.layer[this.array.layer.length - 1].setOffsets( this.array.offset[this.array.layer.length - 1] );
@@ -182,7 +191,7 @@ class board {
   }
 
   cleanBorders(){
-    for ( let i = 0; i < this.array.border.length; i++ )
+    for( let i = 0; i < this.array.border.length; i++ )
       if( this.array.border[i].const.layer != MENU_LAYER )
         this.array.border[i].var.onScreen = false;
   }
@@ -305,7 +314,7 @@ class board {
     vec = createVector( CELL_SIZE * ( CANVAS_GRID.x - 3.25 ), CELL_SIZE * 2.5 );
     this.addButton( layer, name, type, vec.copy() );
 
-    for ( let i = 0; i < this.array.button.length; i++ )
+    for( let i = 0; i < this.array.button.length; i++ )
       if( this.array.button[i].const.layer == MENU_LAYER )
         this.array.button[i].var.onScreen = true;
 
