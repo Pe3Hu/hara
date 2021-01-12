@@ -1,6 +1,6 @@
 //
 class hypothesis {
-  constructor (  ){
+  constructor ( answer, guess ){
     this.const = {
     };
     this.var = {

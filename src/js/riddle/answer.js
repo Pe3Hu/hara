@@ -1,6 +1,6 @@
 //
 class answer {
-  constructor ( option ){
+  constructor ( option, result ){
     this.const = {
       option: option
     };
@@ -11,35 +11,39 @@ class answer {
       value: []
     };
 
-    this.init();
+    this.init( result );
   }
 
-  init(){
-    this.var.value = 0;
-    this.generateAnswer();
+  init( result ){
+    this.generateAnswer( result );
   }
 
-  generateAnswer(){
+  generateAnswer( result ){
     let flag = false;
     let counter = 0;
     let stop = 100;
 
     while( !flag && counter < stop ){
       let value = 0;
-      let digit = 1;
-      let options = [];
 
-      for( let i = 0; i < this.const.option.base; i++ )
-        options.push( i );
+      if( result == undefined ){
+        let digit = 1;
+        let options = [];
 
-      for( let i = 0; i < this.const.option.length; i++ ){
-        let rand = Math.floor( Math.random() * options.length );
-        value += options[rand] * digit;
-        digit *= this.const.option.base;
+        for( let i = 0; i < this.const.option.base; i++ )
+          options.push( i );
 
-        if( this.const.option.unique == true )
-          options.splice( rand, 1 );
+        for( let i = 0; i < this.const.option.length; i++ ){
+          let rand = Math.floor( Math.random() * options.length );
+          value += options[rand] * digit;
+          digit *= this.const.option.base;
+
+          if( this.const.option.unique == true )
+            options.splice( rand, 1 );
+        }
       }
+      else
+        value = result;
 
       if( this.var.value != value ){
         this.var.value = value;
@@ -52,14 +56,13 @@ class answer {
         }
         while( value >= 1 )
 
-        if( this.array.value.length != this.const.option.length )
+        while( this.const.option.length > this.array.value.length )
           this.array.value.push( 0 );
         return;
       }
-      else
-        counter++;
-    }
 
+      counter++;
+    }
   }
 
   draw( offset ){
@@ -67,7 +70,7 @@ class answer {
     fill( 0 );
 
     for( let i = 0; i < this.array.value.length; i++ ){
-      let x = this.array.value.length / 2 - i - 0.5;
+      let x = -this.array.value.length / 2 + i + 0.5;
       let txt = this.array.value[i];
       text( txt, offset.x + x * CELL_SIZE, offset.y + FONT_SIZE / 3 );
     }
