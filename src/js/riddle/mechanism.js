@@ -3,20 +3,22 @@ class mechanism {
   constructor (  ){
     this.const = {
       option: {
-        base: 10,
+        base: 6,
         unique: true,
-        length: 4
+        length: 2
       }
     };
     this.var = {
       index: {
         guess: 0,
-        fact: 0
+        fact: 0,
+        hypothesis: 0
       }
     };
     this.array = {
       guess: [],
       option: [],
+      notOption: [],
       input: [],
       fact: [],
       hypothesis: [],
@@ -69,6 +71,17 @@ class mechanism {
   }
 
   startGuessing(){
+    let a = new answer( this.const.option );
+    let g = new guess( this.var.index.guess, a.array.value );
+    this.array.guess.push( g );
+    console.log( a.array.value)
+    this.var.index.guess++;
+
+    this.updateGuess();
+    this.addFacts();
+
+    let facts = this.array.fact;
+    this.initHypothesis( g, facts );
   }
 
   enterGuess(){
@@ -102,14 +115,70 @@ class mechanism {
 
     this.array.fact.push( new fact( this.var.index.fact, guess.array.value, guess.data ) );
     this.var.index.fact++;
-    this.updateCorrects( this.array.fact[this.array.fact.length - 1] );
+    //this.updateCorrects( this.array.fact[this.array.fact.length - 1] );
     this.array.fact.push( new fact( this.var.index.fact, values, data ) );
     this.var.index.fact++;
     //this.updateCorrects( this.array.fact[this.array.fact.length - 1] );
     //console.log( this.array.fact )
-    console.log( this.array.correct );
+    //console.log( this.array.correct );
     /*if( this.array.correct.length > 0 );
       console.log( this.array.correct[this.array.correct.length - 1].array.value )*/
+  }
+
+  initHypothesis( guess, facts ){
+    //
+    let alternatives  = [];
+    let successes = [];
+    let values = [];
+    let fact = facts[0];
+
+    for( let value of guess.array.value )
+      values.push( value );
+
+    for( let value of this.array.option ){
+      let positions = [];
+
+    for( let i = 0; i < this.const.option.length; i++ )
+      positions.push( true );
+
+      alternatives.push( positions );
+    }
+
+    for( let i = 0; i < fact.data.bs; i++ ){
+      let rand = Math.floor( Math.random() * values.length );
+      let value = values[rand];
+      let index = guess.array.value.indexOf( value );
+
+      alternatives[value] = [ index ];
+      for( let alternative of alternatives )
+        alternative[index] = false;
+
+      successes.push( value );
+      values.splice( rand, 1 );
+    }
+
+    for( let i = 0; i < fact.data.ss; i++ ){
+      let rand = Math.floor( Math.random() * values.length );
+      let value = values[rand];
+      let index = guess.array.value.indexOf( value );
+
+      alternatives[value][index] = false;
+      successes.push( value );
+      values.splice( rand, 1 );
+    }
+
+    if( fact.data.s == 0 )
+      for( let value of guess.array.value ){
+        let index = this.array.option.indexOf( value );
+        let option = this.array.option.splice( index, 1 );
+        this.array.notOption.push( option[0] )
+      }
+
+
+    fact = facts[1];
+
+    this.data.hypothesis = new hypothesis( this.const.length, alternatives, successes );
+    console.log( this.array.option, this.array.notOption )
   }
 
   updateGuess(){
@@ -137,10 +206,12 @@ class mechanism {
     guess.data.f = fails;
   }
 
-  updateHypothesis(){
-    if( this.array.hypothesis.length == 0 ){
-      //this.array.guess[0]
-    }
+  updateHypothesis( guess, facts ){
+    /*if( this.data.hypothesis == null )
+      this.initHypothesis( guess, facts );
+    else{
+
+    }*/
   }
 
   updateCorrects( fact ){
@@ -173,8 +244,8 @@ class mechanism {
         }
 
         flag = ( ss == fact.data.ss ) && ( bs == fact.data.bs );
-        if( i > 4000 )
-        console.log( answer.array.value, fact.data.ss, ss,fact.data.bs, bs, flag  )
+        /*if( i > 4000 )
+          console.log( answer.array.value, fact.data.ss, ss,fact.data.bs, bs, flag  )*/
       }
 
       if( !flag )
@@ -235,6 +306,21 @@ class mechanism {
   }
 
   moved( offsets ){
+  }
+
+  number_of_k_combinations( n, k ){
+    let result = 1;
+
+    for( let i =  1; i < n + 1; i++ )
+        result *= i;
+
+    for( let i = 1; i < n - k + 1; i++ )
+        result /= i;
+
+    for( let i = 1; i < k + 1; i++ )
+        result /= i;
+
+    return result;
   }
 
   draw( offsets ){

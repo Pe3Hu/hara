@@ -1,19 +1,14 @@
 //
 class hypothesis {
-  constructor ( answer, guess ){
+  constructor ( length, alternatives, successes ){
     this.const = {
+      length: length
     };
     this.var = {
     };
     this.array = {
+      alternative: alternatives,
+      success: successes
     };
-
-    this.init();
-  }
-
-  init(){
-  }
-
-  draw( offset ){
   }
 }
