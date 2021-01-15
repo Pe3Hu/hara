@@ -1,5 +1,5 @@
 //
-class test {
+class quotation {
   constructor (  ){
     this.const = {
     };
@@ -14,6 +14,6 @@ class test {
   init(){
   }
 
-  draw( offsets ){
+  draw( offset ){
   }
 }

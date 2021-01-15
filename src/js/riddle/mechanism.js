@@ -38,7 +38,7 @@ class mechanism {
 
   initAnswers(){
     this.data.answer = new answer( this.const.option );
-    console.log( this.data.answer.array.value )
+    //console.log( this.data.answer.array.value )
 
     let max = Math.pow( this.const.option.base, this.const.option.length );
 
@@ -74,7 +74,7 @@ class mechanism {
     let a = new answer( this.const.option );
     let g = new guess( this.var.index.guess, a.array.value );
     this.array.guess.push( g );
-    console.log( a.array.value)
+    //console.log( a.array.value)
     this.var.index.guess++;
 
     this.updateGuess();
@@ -178,7 +178,7 @@ class mechanism {
     fact = facts[1];
 
     this.data.hypothesis = new hypothesis( this.const.length, alternatives, successes );
-    console.log( this.array.option, this.array.notOption )
+    //console.log( this.array.option, this.array.notOption )
   }
 
   updateGuess(){
