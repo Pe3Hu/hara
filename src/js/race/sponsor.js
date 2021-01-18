@@ -8,15 +8,25 @@ class sponsor {
     this.var = {
     };
     this.array = {
+      panout: [],
+      dice: [ dice ],
+      criterion: []
     };
     this.data = {
-      dice
-    }
+    };
 
     this.init();
   }
 
   init(){
+  }
+
+  cleanCriterions(){
+    this.array.criterion = [];
+  }
+
+  addCriterion( criterion ){
+    this.array.criterion.push( criterion.duplicate() );
   }
 
   draw( offset ){

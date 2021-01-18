@@ -7,8 +7,8 @@ class dice {
       a: a
     };
     this.var = {
-      edge: {
-        current: null
+      current: {
+        edge: null
       }
     };
     this.array = {
@@ -19,12 +19,15 @@ class dice {
   }
 
   init(){
-    for( let i = 0; i < this.const.edges; i ++ )
+    for( let i = 0; i < this.const.edges / 2; i++ )
+      this.array.edge.push( i );
+
+    for( let i = this.const.edges - 1; i > this.const.edges / 2 - 1; i-- )
       this.array.edge.push( i );
   }
 
   roll(){
-    this.var.edge.current = Math.floor( Math.random() * this.array.edge.length );
+    this.var.current.edge = Math.floor( Math.random() * this.array.edge.length );
   }
 
   draw( offset ){
@@ -34,7 +37,7 @@ class dice {
 
     fill( 0 );
     noStroke();
-    let txt = this.array.edge[this.var.edge.current];
+    let txt = this.array.edge[this.var.current.edge];
     text( txt, offset.x, offset.y + FONT_SIZE / 3 );
   }
 }

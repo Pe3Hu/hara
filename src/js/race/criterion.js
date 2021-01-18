@@ -1,8 +1,9 @@
 //
 class criterion {
-  constructor ( index, branch, type ){
+  constructor ( index, branch, type, parent ){
     this.const = {
-      index: index
+      index: index,
+      parent: parent
     };
     this.var = {
     };
@@ -35,7 +36,10 @@ class criterion {
             this.data.type.name = 'reflection';
             break;
           case 1:
-            this.data.type.name = 'consection';
+            this.data.type.name = 'distortion';
+            break;
+          case 2:
+            this.data.type.name = 'echelon';
             break;
         }
         break;
@@ -68,6 +72,10 @@ class criterion {
         }
         break;
     }
+  }
+
+  duplicate(){
+    return new criterion( null, this.data.branch.id, this.data.type.id, this.const.index );
   }
 
   draw( offset ){

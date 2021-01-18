@@ -37,22 +37,24 @@ class rialto {
         Math.sin( angle * i - Math.PI / 2 ) * scale
       );
 
-      this.array.dice[0].push( new dice( i, edges, this.const.a / 2 ) );
-      this.array.dice[1].push( new dice( i + this.const.n, edges, this.const.a / 2 ) );
+      this.array.dice[1].push( new dice( i, edges, this.const.a / 2 ) );
       this.array.sponsor.push( new sponsor( i, vec, this.array.dice[1][i] ) );
+
+      for( let criterion of this.array.criterion )
+        this.array.sponsor[i].addCriterion( criterion );
     }
+
+    this.array.dice[0].push( new dice( this.const.n, edges, this.const.a / 2 ) );
   }
 
   initCriterions(){
-    let types = [ [ 0, 1 ], [ 0, 1, 2, 3 ], [ 0, 1 ] ];
-
+    let types = [ [ 0, 1, 2 ], [ 0, 1, 2, 3 ], [ 0, 1 ] ];
 
     for( let branch = 0; branch < types.length; branch++ )
       for( let type of types[branch] ){
         this.array.criterion.push( new criterion( this.var.index.criterion, branch, type ) );
         this.var.index.criterion++;
       }
-
   }
 
   init(){
@@ -68,8 +70,16 @@ class rialto {
     for( let dices of this.array.dice )
       for( let dice of dices )
         dice.roll();
-  }
 
+
+    for( let sponsor of this.array.sponsor ){
+      sponsor.array.panout = [];
+
+      for( let dice1 of sponsor.array.dice )
+        for( let dice2 of this.array.dice[0] )
+          sponsor.array.panout.push( new panout( sponsor, [ dice1, dice2 ] ) );
+    }
+  }
 
   click( offsets ){
     //
@@ -102,8 +112,12 @@ class rialto {
     for( let sponsor of this.array.sponsor ){
       let vec = offset.copy();
       vec.add( sponsor.const.center );
+      vec.x += ( -sponsor.array.dice.length / 2 - 0.5 ) * this.const.a;
 
-      sponsor.data.dice.draw( vec );
+      for( let i = 0; i < sponsor.array.dice.length; i ++ ){
+        vec.x += this.const.a;
+        sponsor.array.dice[i].draw( vec );
+      }
     }
 
     offset = offsets[1];

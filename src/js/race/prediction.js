@@ -1,11 +1,15 @@
 //
 class prediction {
-  constructor (  ){
+  constructor ( criterion, dices ){
     this.const = {
     };
     this.var = {
     };
     this.array = {
+      dice: dices
+    };
+    this.data = {
+      criterion: criterion
     };
 
     this.init();
