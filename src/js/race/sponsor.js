@@ -29,6 +29,10 @@ class sponsor {
     this.array.criterion.push( criterion.duplicate() );
   }
 
+  contribute( criterion, panout ){
+
+  }
+
   draw( offset ){
   }
 }

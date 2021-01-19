@@ -18,6 +18,9 @@ class criterion {
         id: type,
         name: null
       },
+      chance:{
+        value: null
+      }
     };
 
     this.init();
@@ -67,6 +70,9 @@ class criterion {
             this.data.type.name = 'less';
             break;
           case 1:
+            this.data.type.name = 'balance';
+            break;
+          case 2:
             this.data.type.name = 'more';
             break;
         }

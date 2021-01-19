@@ -48,7 +48,7 @@ class rialto {
   }
 
   initCriterions(){
-    let types = [ [ 0, 1, 2 ], [ 0, 1, 2, 3 ], [ 0, 1 ] ];
+    let types = [ [ 0, 1, 2 ], [ 0, 1, 2, 3 ], [ 0, 1, 2 ] ];
 
     for( let branch = 0; branch < types.length; branch++ )
       for( let type of types[branch] ){
