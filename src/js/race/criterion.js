@@ -1,94 +1,49 @@
 //
 class criterion {
-  constructor ( index, branch, type, parent ){
+  constructor ( index, data, promotions ){
     this.const = {
       index: index,
       parent: parent
     };
-    this.var = {
-    };
     this.array = {
+      promotion: promotions
     };
-    this.data = {
-      branch: {
-        id: branch,
-        name: null
-      },
-      type: {
-        id: type,
-        name: null
-      },
-      chance:{
-        value: null
-      }
-    };
-
-    this.init();
-  }
-
-  init(){
-    this.updateData();
-  }
-
-  updateData(){
-    switch ( this.data.branch.id ) {
-      case 0:
-        this.data.branch.name = '-';
-        switch ( this.data.type.id ) {
-          case 0:
-            this.data.type.name = 'reflection';
-            break;
-          case 1:
-            this.data.type.name = 'distortion';
-            break;
-          case 2:
-            this.data.type.name = 'echelon';
-            break;
-        }
-        break;
-      case 1:
-        this.data.branch.name = '=';
-        switch ( this.data.type.id ) {
-          case 0:
-            this.data.type.name = 'even';
-            break;
-          case 1:
-            this.data.type.name = 'odd';
-            break;
-          case 2:
-            this.data.type.name = 'min';
-            break;
-          case 3:
-            this.data.type.name = 'max';
-            break;
-        }
-        break;
-      case 2:
-        this.data.branch.name = '+';
-        switch ( this.data.type.id ) {
-          case 0:
-            this.data.type.name = 'less';
-            break;
-          case 1:
-            this.data.type.name = 'balance';
-            break;
-          case 2:
-            this.data.type.name = 'more';
-            break;
-        }
-        break;
-    }
+    this.data = data;
   }
 
   duplicate(){
-    return new criterion( null, this.data.branch.id, this.data.type.id, this.const.index );
+    let data = {
+      branch: {
+        id: this.data.branch.id,
+        name: this.data.branch.name
+      },
+      ramus: {
+        id: this.data.ramus.id,
+        name: this.data.ramus.name
+      },
+      chance: {
+        value: this.data.chance.value,
+        growth: this.data.chance.growth
+      }
+    };
+
+    let c = new criterion( null, data, this.array.promotion );
+    return c;
+  }
+
+  updateGrowth(){
+
+    for( let promotion of this.array.promotion )
+      if( promotion.data.begin < this.data.chance.value && promotion.data.end >= this.data.chance.value )
+        this.data.chance.growth = promotion.data.growth;
+
+
   }
 
   draw( offset ){
-
     fill( 0 );
     noStroke();
-    let txt = this.data.type.name;
+    let txt = this.data.ramus.name;
     text( txt, offset.x, offset.y + FONT_SIZE / 3 );
   }
 }
