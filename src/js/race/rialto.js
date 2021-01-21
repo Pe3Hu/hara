@@ -53,7 +53,7 @@ class rialto {
   }
 
   initCriterions(){
-    this.table.ramus = [ [ 0, 1, 2 ], [ 0, 1, 2, 3 ], [ 0, 1, 2 ] ];
+    this.table.ramus = [ [ 0, 1, 2, 3, 4 ], [ 0, 1, 2 ], [ 0, 1 ] ];
 
     for( let branch = 0; branch < this.table.ramus.length; branch++ )
       for( let ramus of this.table.ramus[branch] ){
@@ -194,10 +194,16 @@ class rialto {
             data.ramus.name = 'iteration';
             break;
           case 1:
-            data.ramus.name = 'reverse';
+            data.ramus.name = 'echelon';
             break;
           case 2:
-            data.ramus.name = 'echelon';
+            data.ramus.name = 'min';
+            break;
+          case 3:
+            data.ramus.name = 'balance';
+            break;
+          case 4:
+            data.ramus.name = 'max';
             break;
         }
         break;
@@ -211,10 +217,7 @@ class rialto {
             data.ramus.name = 'odd';
             break;
           case 2:
-            data.ramus.name = 'min';
-            break;
-          case 3:
-            data.ramus.name = 'max';
+            data.ramus.name = 'reverse';
             break;
         }
         break;
@@ -225,9 +228,6 @@ class rialto {
             data.ramus.name = 'less';
             break;
           case 1:
-            data.ramus.name = 'balance';
-            break;
-          case 2:
             data.ramus.name = 'more';
             break;
         }
@@ -255,6 +255,7 @@ class rialto {
 
   draw( offsets ){
     let offset = offsets[0];
+    let l = FONT_SIZE + CELL_SIZE * 0.25;
 
     for( let i = 0; i < this.array.dice[0].length; i++ ){
       let vec = offset.copy();
@@ -274,24 +275,29 @@ class rialto {
       }
     }
 
+    let length = 0;
+    let r = 0;
     offset = offsets[1];
 
     for( let i = 0; i < this.array.criterion.length; i++ ){
       let vec = offset.copy();
-      vec.y += i * FONT_SIZE * 1.5;
+      vec.y += i * l + r * 0.25 * CELL_SIZE;
+
+      if( this.table.ramus[r].length - 1 + length <= i  ){
+        length += this.table.ramus[r].length;
+        r++;
+      }
+
 
       this.array.criterion[i].draw( vec );
     }
 
-    fill( 0 );
-    noStroke();
-
     for( let i = 0; i < this.array.sponsor.length; i++ ){
       let vec = offset.copy();
-      vec.x += ( i + 2 ) * CELL_SIZE;
+      vec.x += ( i * 2 + 2 ) * CELL_SIZE;
       vec.y -= 2 * FONT_SIZE;
       let txt = this.array.sponsor[i].const.index;
-      text( txt, vec.x, vec.y + FONT_SIZE / 3 );
+      text( txt, vec.x + CELL_SIZE / 2, vec.y + FONT_SIZE / 3 );
       vec.y += 2 * FONT_SIZE;
 
       let pedigree = this.array.sponsor[i].draw( vec );
