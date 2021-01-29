@@ -19,7 +19,9 @@ class isle {
   }
 
   click(){
+  }  
 
+  moved( offsets ){
   }
 
   draw(){

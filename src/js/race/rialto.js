@@ -106,6 +106,11 @@ class rialto {
     }
   }
 
+  initObstacles(){
+    //ascensive degressive gap exact
+    //table sudoku set
+  }
+
   init(){
     this.const.R = this.const.a / ( 2 * Math.sin( Math.PI / this.const.n ) );
     this.array.edge = [ 4, 6, 8, 10, 12, 20 ];
@@ -118,8 +123,8 @@ class rialto {
     this.rollDices();
     this.rollDices();
 
-    for( let sponsor of this.array.sponsor )
-      console.log( sponsor.data.pedigree.data.branch )
+    /*for( let sponsor of this.array.sponsor )
+      console.log( sponsor.data.pedigree.data.branch )*/
   }
 
   setPedigree(){

@@ -19,7 +19,7 @@ class board {
       }
     }
     this.var = {
-      layer: 4,
+      layer: 0,
       id: {
         button: 0,
         border: 0,
@@ -66,8 +66,8 @@ class board {
 
     let layer = 0;
     this.array.offset[layer].push( createVector(
-      CELL_SIZE * Math.floor( this.const.grid.x / 4 ),
-      CELL_SIZE * Math.floor( this.const.grid.y / 4 ) ) );
+      CELL_SIZE * Math.floor( this.const.grid.x / 2 ),
+      CELL_SIZE * Math.floor( this.const.grid.y / 2 ) ) );
     layer = 3;
     this.array.offset[layer].push( createVector( CELL_SIZE * 0.5, CELL_SIZE * 0.5 ) );
     layer = 4;
@@ -124,7 +124,8 @@ class board {
   initLayers(){
     //this layer has no meaning
     //this.array.layer.push( new settlement( 4 ) );
-    this.array.layer.push( new mechanism() );
+    //this.array.layer.push( new mechanism() );
+    this.array.layer.push( new tide() );
     this.array.layer.push( new square( 2 ) );
     this.array.layer.push( new scroll() );
     this.array.layer.push( new blend( this.const.blend.size, this.const.blend.shread, this.const.blend.a ) );

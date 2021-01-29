@@ -1015,6 +1015,9 @@ class blend {
 
   key(){
     //
+  }  
+
+  moved( offsets ){
   }
 
   draw( offsets ){

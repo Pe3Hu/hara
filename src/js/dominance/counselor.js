@@ -34,7 +34,7 @@ class counselor {
             challenger.array.floor.push( floor.const.index );
         }
 
-      console.log( challenger.array.floor )
+      //console.log( challenger.array.floor )
     }
 
   getBorderlands( challenger ){
@@ -73,7 +73,7 @@ class counselor {
         }
     }
 
-    console.log( challenger.array.corridor )
+    //console.log( challenger.array.corridor )
   }
 
   nextDecision(){

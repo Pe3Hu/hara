@@ -52,7 +52,7 @@ class coordinator {
 
   iniClefs(){
     let regions = this.data.arena.array.region;
-    console.log( regions );
+    //console.log( regions );
 
     for( let i = 0; i < regions.length; i++ )
       for( let j = 0; j < regions[i].length; j++ )
@@ -156,8 +156,8 @@ class coordinator {
 
     this.updateDistribution();
     //this.flag.distribution = true;
-    console.log( this.array.addon )
-    console.log( this.array.distribution )
+    //console.log( this.array.addon )
+    //console.log( this.array.distribution )
   }
 
   pickUpClefs( challenger, flag ){
@@ -181,8 +181,8 @@ class coordinator {
   }
 
   reshuffle(){
-    if( this.array.discard.length == 0 )
-        console.log( 'Колода добора пуста' )
+    /*if( this.array.discard.length == 0 )
+        console.log( 'Колода добора пуста' )*/
     for( let i = 0; i < this.array.discard.length; i++ )
       this.array.addon.push( this.array.discard.pop() );
 
@@ -206,7 +206,10 @@ class coordinator {
       case 4:
         this.give( challenger );
         break;
-    }
+    }    
+
+    this.updateSelection();
+
     decrees[this.var.current.decree].setActived( true );
 
     this.var.current.decree = null;
@@ -223,8 +226,6 @@ class coordinator {
       this.array.clef[index].setState( 4 );
       selections.push( index );
     };
-
-    this.updateSelection();
   }
 
   burn( challenger ){
@@ -247,7 +248,7 @@ class coordinator {
     while( distributions.length > 0 ){
       let index = distributions.pop();
       this.array.clef[index].setState( 3 );
-      selections.push( index );
+      activations.push( index );
     };
   }
 
@@ -316,6 +317,7 @@ class coordinator {
 
   key(){
     let challenger = this.var.index.player;
+
     switch ( keyCode ) {
       case 32:
         if( this.var.current.decree != null)

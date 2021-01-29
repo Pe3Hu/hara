@@ -408,10 +408,11 @@ class ism{
   draw( vec ){
     if( vec == null )
       vec = createVector();
-    vec.sub( this.var.center )
 
-    for( let i = 0; i < this.array.knot.length; i++ )
-      for( let j = 0; j < this.array.knot[i].length; j++ )
-        this.array.knot[i][j].draw( vec, true );
+    vec.sub( this.var.center );
+
+    for( let knots of this.array.knot )
+      for( let knot of knots )
+        knot.draw( vec, true );
   }
 }

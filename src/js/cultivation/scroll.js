@@ -156,22 +156,6 @@ class scroll {
     this.var.currentRune = 0;
   }
 
-  click(){
-    this.var.ism.click( this.table.markup[1][0].copy() );
-    this.pickRune();
-    this.update();
-  }
-
-  key(){
-    let rune = this.array.rune[0][this.var.currentRune];
-
-    switch ( key ) {
-      case ' ':
-        rune.flip();
-        break;
-    }
-  }
-
   cleanAttached(){
     this.var.ism.flag.runeAttached = false;
     this.var.attached = {
@@ -222,6 +206,25 @@ class scroll {
       else
         this.var.currentRune = index;
     }
+  }
+  
+  click(){
+    this.var.ism.click( this.table.markup[1][0].copy() );
+    this.pickRune();
+    this.update();
+  }
+
+  key(){
+    let rune = this.array.rune[0][this.var.currentRune];
+
+    switch ( key ) {
+      case ' ':
+        rune.flip();
+        break;
+    }
+  }
+
+  moved( offsets ){
   }
 
   draw(){

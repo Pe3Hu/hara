@@ -494,6 +494,9 @@ class square{
   click(){
     this.detectCard();
     this.detectGrid();
+  }  
+
+  moved( offsets ){
   }
 
   draw(){

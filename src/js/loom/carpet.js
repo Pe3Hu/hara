@@ -9,7 +9,10 @@ class carpet {
   }
 
   click(){
+  }
 
+
+  moved( offsets ){
   }
 
   draw(  ){
