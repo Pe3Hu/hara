@@ -51,6 +51,7 @@ class pond {
   initPuddles(){
     for( let i = 0; i < this.const.size; i++ ){
       this.array.puddle.push( [] );
+      
       for( let j = 0; j < this.const.size; j++ ){
         let index = i * this.const.size + j;
         let grid = createVector( j, i );

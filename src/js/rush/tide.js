@@ -9,7 +9,7 @@ class tide {
     };
     this.data = {
       pond: null
-    }
+    };
 
     this.init();
   }

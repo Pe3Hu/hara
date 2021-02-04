@@ -125,7 +125,8 @@ class board {
     //this layer has no meaning
     //this.array.layer.push( new settlement( 4 ) );
     //this.array.layer.push( new mechanism() );
-    this.array.layer.push( new tide() );
+    //this.array.layer.push( new tide() );
+    this.array.layer.push( new heritage() );
     this.array.layer.push( new square( 2 ) );
     this.array.layer.push( new scroll() );
     this.array.layer.push( new blend( this.const.blend.size, this.const.blend.shread, this.const.blend.a ) );
