@@ -76,12 +76,15 @@ class partition  {
       case 2:
         this.array.trigon[index].color.h = this.array.hue[0];
         break;
+      case 3:
+        this.array.trigon[index].color.h = this.array.hue[4];
+        break;
     }
   }
 
   set_doublet( index, status ){
-    let i = ( index ) % this.const.n;;
-    let ii = ( 3 + index ) % this.const.n;
+    let i = ( index + this.const.n ) % this.const.n;
+    let ii = ( 3 + index + this.const.n ) % this.const.n;
     this.set_status( i, status );
     this.set_status( ii, status );
   }

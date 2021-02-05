@@ -93,17 +93,42 @@ class platform {
     let anchor = createVector( 2, 0, 2 );
     let x = 3;
     let y = 3;
+    let rotation = 2;
+    let anchors = [
+      [
+        createVector( 2, 0, 2 ),
+        createVector( 2, 1, 0 ),
+        createVector( 2, 2, 0 ),
+        createVector( 0, 3, 0 )
+      ],
+      [
+        createVector( 4, 0, 2 ),
+        createVector( 4, 1, 2 ),
+        createVector( 2, 2, 0 ),
+        createVector( 0, 3, 0 )
+      ],
+      [
+        createVector( 2, 0, 2 ),
+        createVector( 4, 1, 2 ),
+        createVector( 2, 2, 0 ),
+        createVector( 2, 3, 2 )
+      ],
+      [
+        createVector( 2, 0, 2 ),
+        createVector( 4, 1, 2 ),
+        createVector( 0, 2, 0 ),
+        createVector( 0, 3, 0 )
+      ]
+     ];
 
-    this.add_compartment( type, subtype, anchor, x, y );
+    this.add_compartment( type, subtype, rotation, anchors[ rotation][subtype], x, y );
     subtype++;
-    anchor = createVector( 2, 1, 0 );
-    this.add_compartment( type, subtype, anchor, x, y );
+    this.add_compartment( type, subtype, rotation, anchors[ rotation][subtype], x, y );
     subtype++;
-    anchor = createVector( 2, 2, 0 );
-    this.add_compartment( type, subtype, anchor, x, y );
+    this.add_compartment( type, subtype, rotation, anchors[ rotation][subtype], x, y );
     subtype++;
-    anchor = createVector( 2, 3, 2 );
-    this.add_compartment( type, subtype, anchor, x, y );
+    this.add_compartment( type, subtype, rotation, anchors[ rotation][subtype], x, y );
+
   }
 
   init(){
@@ -117,9 +142,9 @@ class platform {
     this.init_compartments();
   }
 
-  add_compartment( type, subtype, anchor, x, y ){
-  console.log(subtype)
-    this.array.compartment.push( new compartment( this.var.index.compartment, this, type, subtype, anchor, x, y ) );
+  add_compartment( type, subtype, rotation, anchor, x, y ){
+    console.log(subtype)
+    this.array.compartment.push( new compartment( this.var.index.compartment, this, type, subtype,  rotation, anchor, x, y ) );
     this.var.index.compartment++;
   }
 
