@@ -143,7 +143,6 @@ class platform {
   }
 
   add_compartment( type, subtype, rotation, anchor, x, y ){
-    console.log(subtype)
     this.array.compartment.push( new compartment( this.var.index.compartment, this, type, subtype,  rotation, anchor, x, y ) );
     this.var.index.compartment++;
   }
@@ -153,6 +152,25 @@ class platform {
 
   click( offsets ){
 
+  }
+
+  check( vec ){
+    let flag = false;
+
+    if( vec.x >= 0 && this.array.partition.length > vec.x )
+      if( vec.y >= 0 && this.array.partition[vec.x].length >  vec.y )
+        if( vec.z >= 0 && this.array.partition[vec.x][vec.y].length > vec.z )
+          flag = true;
+
+    return flag;
+  }
+
+  free( vec ){
+    let flag = this.check( vec );
+    if( flag )
+      flag = ( this.array.partition[vec.x][vec.y][vec.z].var.status == 1 );
+
+    return flag;      
   }
 
   draw( offsets ){

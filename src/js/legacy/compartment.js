@@ -50,171 +50,221 @@ class compartment  {
     }
   }
 
-  activate(){
+  check(){
     let platform = this.data.platform;
     let begin = this.const.anchor.copy();
-    let add_i = createVector();
-    let add_j = createVector();
-    let end = {};
+    let obj = {
+      check: platform.check( begin )
+    };
 
-    switch ( this.data.type.id ) {
-      case 0:
-        switch ( this.data.type.rotation ) {
-          case 0:
-            switch ( this.data.type.subtype ){
-              case 0:
-                add_i.x = -1;
-                add_i.z = -1;
-                add_j.x = 1;
-                end.value = 1;
-                end.add = 1;
-                break;
-              case 1:
-                add_i.x = -1;
-                add_j.x = 1;
-                add_j.z = 1;
-                end.value = 1;
-                end.add = 1;
-                break;
-              case 2:
-                add_i.z = 1;
-                add_j.x = -1;
-                end.value = 3;
-                end.add = -1;
-                break;
-              case 3:
-                add_i.x = 1;
-                add_j.x = 1;
-                add_j.z = 1;
-                end.value = 3;
-                end.add = -1;
-                break;
-            }
-            break;
-          case 1:
-            switch ( this.data.type.subtype ){
-              case 0:
-                add_i.x = -1;
-                add_i.z = -1;
-                add_j.x = -1;
-                end.value = 1;
-                end.add = 1;
-                break;
-              case 1:
-                add_i.x = -2;
-                add_i.z = -1;
-                add_j.x = -1;
-                add_j.z = -1;
-                end.value = 3;
-                end.add = -1;
-                break;
-              case 2:
-                add_i.x = 1;
-                add_i.z = 1;
-                add_j.x = -1;
-                end.value = 3;
-                end.add = -1;
-                break;
-              case 3:
-                add_i.x = 1;
-                add_j.x = 1;
-                add_j.z = 1;
-                end.value = 1;
-                end.add = 1;
-                break;
-            }
-            break;
-          case 2:
-            switch ( this.data.type.subtype ){
-              case 0:
-                add_i.z = -1;
-                add_j.x = 1;
-                end.value = 3;
-                end.add = -1;
-                break;
-              case 1:
-                add_i.x = -1;
-                add_j.x = -1;
-                add_j.z = -1;
-                end.value = 3;
-                end.add = -1;
-                break;
-              case 2:
-                add_i.x = 1;
-                add_i.z = 1;
-                add_j.x = -1;
-                end.value = 1;
-                end.add = 1;
-                break;
-              case 3:
-                add_i.x = 1;
-                add_j.x = -1;
-                add_j.z = -1;
-                end.value = 1;
-                end.add = 1;
-                break;
-            }
-            break;
-          case 3:
-            switch ( this.data.type.subtype ){
-              case 0:
-                add_i.x = -1;
-                add_i.z = -1;
-                add_j.x = 1;
-                end.value = 3;
-                end.add = -1;
-                break;
-              case 1:
-                add_i.x = -1;
-                add_j.x = -1;
-                add_j.z = -1;
-                end.value = 1;
-                end.add = 1;
-                break;
-              case 2:
-                add_i.x = 1;
-                add_i.z = 1;
-                add_j.x = 1;
-                end.value = 1;
-                end.add = 1;
-                break;
-              case 3:
-                add_i.x = 2;
-                add_i.z = 1;
-                add_j.x = 1;
-                add_j.z = 1;
-                end.value = 3;
-                end.add = -1;
-                break;
-            }
-            break;
-        }
-        break;
-    }
-    let marker = this.const.anchor.y + this.data.type.rotation - 2;
+    if( obj.check ){
+      let add_i = createVector();
+      let add_j = createVector();
+      let end = {};
 
-
-    for( let i = 0; i < this.data.side.x; i++ ){
-      let current = begin.copy();
-
-      for( let j = 0; j < end.value; j++ ){
-        let flag;
-
-        if( marker == 4 || marker == 0 )
-          flag = ( j == 0 );
-        else
-          flag = ( j == end.value - 1 );
-
-        if( !flag )
-          platform.array.partition[current.x][current.y][current.z].set_all( 2 );
-        else
-          platform.array.partition[current.x][current.y][current.z].set_doublet( marker, 2 );
-        current.add( add_j );
+      switch ( this.data.type.id ) {
+        case 0:
+          switch ( this.data.type.rotation ) {
+            case 0:
+              switch ( this.data.type.subtype ){
+                case 0:
+                  add_i.x = -1;
+                  add_i.z = -1;
+                  add_j.x = 1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+                case 1:
+                  add_i.x = -1;
+                  add_j.x = 1;
+                  add_j.z = 1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+                case 2:
+                  add_i.z = 1;
+                  add_j.x = -1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+                case 3:
+                  add_i.x = 1;
+                  add_j.x = 1;
+                  add_j.z = 1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+              }
+              break;
+            case 1:
+              switch ( this.data.type.subtype ){
+                case 0:
+                  add_i.x = -1;
+                  add_i.z = -1;
+                  add_j.x = -1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+                case 1:
+                  add_i.x = -2;
+                  add_i.z = -1;
+                  add_j.x = -1;
+                  add_j.z = -1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+                case 2:
+                  add_i.x = 1;
+                  add_i.z = 1;
+                  add_j.x = -1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+                case 3:
+                  add_i.x = 1;
+                  add_j.x = 1;
+                  add_j.z = 1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+              }
+              break;
+            case 2:
+              switch ( this.data.type.subtype ){
+                case 0:
+                  add_i.z = -1;
+                  add_j.x = 1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+                case 1:
+                  add_i.x = -1;
+                  add_j.x = -1;
+                  add_j.z = -1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+                case 2:
+                  add_i.x = 1;
+                  add_i.z = 1;
+                  add_j.x = -1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+                case 3:
+                  add_i.x = 1;
+                  add_j.x = -1;
+                  add_j.z = -1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+              }
+              break;
+            case 3:
+              switch ( this.data.type.subtype ){
+                case 0:
+                  add_i.x = -1;
+                  add_i.z = -1;
+                  add_j.x = 1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+                case 1:
+                  add_i.x = -1;
+                  add_j.x = -1;
+                  add_j.z = -1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+                case 2:
+                  add_i.x = 1;
+                  add_i.z = 1;
+                  add_j.x = 1;
+                  end.value = 1;
+                  end.add = 1;
+                  break;
+                case 3:
+                  add_i.x = 2;
+                  add_i.z = 1;
+                  add_j.x = 1;
+                  add_j.z = 1;
+                  end.value = 3;
+                  end.add = -1;
+                  break;
+              }
+              break;
+          }
+          break;
       }
 
-      begin.add( add_i );
-      end.value += end.add;
+      obj = {
+        check: true,
+        add_i: add_i.copy(),
+        add_j: add_j.copy(),
+        end: {
+          value: end.value,
+          add: end.add
+        }
+      }
+
+      let marker = this.const.anchor.y + this.data.type.rotation - 2;
+
+      for( let i = 0; i < this.data.side.x; i++ ){
+        let current = begin.copy();
+
+        for( let j = 0; j < end.value; j++ ){
+          let flag;
+
+          if( marker == 4 || marker == 0 )
+            flag = ( j == 0 );
+          else
+            flag = ( j == end.value - 1 );
+
+          obj.check = obj.check && platform.free( current );
+          //console.log( current.x, current.y, current.z, obj.check )
+
+          current.add( obj.add_j );
+        }
+
+        begin.add( obj.add_i );
+        end.value += end.add;
+      }
     }
 
+    return obj;
+  }
+
+  activate(){
+    let obj = this.check();
+
+    if( obj.check ){
+      //console.log( obj )
+      let platform = this.data.platform;
+      let begin = this.const.anchor.copy();
+      let marker = this.const.anchor.y + this.data.type.rotation - 2;
+
+      for( let i = 0; i < this.data.side.x; i++ ){
+        let current = begin.copy();
+
+        for( let j = 0; j < obj.end.value; j++ ){
+          let flag;
+
+          if( marker == 4 || marker == 0 )
+            flag = ( j == 0 );
+          else
+            flag = ( j == obj.end.value - 1 );
+
+          if( !flag )
+            platform.array.partition[current.x][current.y][current.z].set_all( 2 );
+          else
+            platform.array.partition[current.x][current.y][current.z].set_doublet( marker, 2 );
+
+          current.add( obj.add_j );
+        }
+
+        begin.add( obj.add_i );
+        obj.end.value += obj.end.add;
+      }
+    }
   }
 }

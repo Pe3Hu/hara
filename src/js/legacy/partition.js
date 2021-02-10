@@ -15,6 +15,7 @@ class partition  {
       trigon: []
     };
     this.var = {
+      status: status,
       color: {},
     };
 
@@ -65,6 +66,8 @@ class partition  {
   set_status( index, status ){
     this.array.trigon[index].status.id = status;
     this.array.trigon[index].visiable = true;
+    if( status != 0 )    
+      this.var.status = status;
 
     switch ( status ) {
       case 0:
