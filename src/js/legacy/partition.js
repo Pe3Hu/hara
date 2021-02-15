@@ -66,16 +66,19 @@ class partition  {
   set_status( index, status ){
     this.array.trigon[index].status.id = status;
     this.array.trigon[index].visiable = true;
-    if( status != 0 )    
+    if( status != 0 )
       this.var.status = status;
 
     switch ( status ) {
+      //edge of platform
       case 0:
         this.array.trigon[index].visiable = false;
         break;
+      //free partition
       case 1:
         this.array.trigon[index].color.h = this.array.hue[2];
         break;
+      //taken partition
       case 2:
         this.array.trigon[index].color.h = this.array.hue[0];
         break;
@@ -100,7 +103,7 @@ class partition  {
   draw( offset){
       //stroke( this.var.color.h, this.var.color.s, this.var.color.l );
       strokeWeight( 0.2 );
-      stroke(0 );
+      stroke( 0 );
 
       for( let i = 0; i < this.array.trigon.length; i++ )
       if( this.array.trigon[i].visiable ){
