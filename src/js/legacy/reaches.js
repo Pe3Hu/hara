@@ -21,12 +21,27 @@ class reaches {
     };
     this.color = {
       bg: {
+        h: 120,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      },
+      input: {
+        h: 240,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      },
+      output: {
         h: 210,
         s: COLOR_MAX * 0.75,
         l: COLOR_MAX * 0.5
       },
-      flow: {
-        h: 120,
+      begin: {
+        h: 60,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      },
+      end: {
+        h: 0,
         s: COLOR_MAX * 0.75,
         l: COLOR_MAX * 0.5
       }
@@ -43,7 +58,7 @@ class reaches {
       vec.add( this.const.center );
 
       this.array.vertex.push( vec );
-      this.array.way.push( false );
+      this.array.way.push( 0 );
     }
   }
 
@@ -52,13 +67,17 @@ class reaches {
     this.init_vertexs();
   }
 
-  add_input( way ){
-    this.array.way[way] = true;
+  add_input( way, first ){
+    this.array.way[way] = 1;
+    if( first )
+      this.array.way[way] = 2;
     this.array.input.push( way );
   }
 
-  add_output( way ){
-    this.array.way[way] = true;
+  add_output( way, last ){
+    this.array.way[way] = 3;
+    if( last )
+      this.array.way[way] = 4;
     this.array.output.push( way );
   }
 
@@ -69,18 +88,37 @@ class reaches {
 
     for( let i = 0; i < this.array.vertex.length; i++ ){
       let ii = ( i + 1 ) % this.array.vertex.length;
-      if( this.array.way[i] ){
-        fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-        stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-      }
-      else{
-        fill( this.color.flow.h, this.color.flow.s, this.color.flow.l );
-        stroke( this.color.flow.h, this.color.flow.s, this.color.flow.l );
+      switch ( this.array.way[i] ) {
+        case 0:
+          fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+          stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+          break;
+        case 1:
+          fill( this.color.input.h, this.color.input.s, this.color.input.l );
+          stroke( this.color.input.h, this.color.input.s, this.color.input.l );
+          break;
+        case 2:
+          fill( this.color.begin.h, this.color.begin.s, this.color.begin.l );
+          stroke( this.color.begin.h, this.color.begin.s, this.color.begin.l );
+          break;
+        case 3:
+          fill( this.color.output.h, this.color.output.s, this.color.output.l );
+          stroke( this.color.output.h, this.color.output.s, this.color.output.l );
+          break;
+        case 4:
+          fill( this.color.end.h, this.color.end.s, this.color.end.l );
+          stroke( this.color.end.h, this.color.end.s, this.color.end.l );
+          break;
       }
 
       triangle( this.const.center.x + offset.x, this.const.center.y + offset.y,
                 this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
                 this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
     }
+
+
+  noStroke();
+  fill( 0 );
+  text( this.const.index, this.const.center.x + offset.x, this.const.center.y + offset.y + FONT_SIZE / 3 );
   }
 }

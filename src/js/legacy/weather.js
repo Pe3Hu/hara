@@ -51,7 +51,7 @@ class weather {
   }
 
   add_nulla( direction, headwaters, water_content ){
-    this.array.nulla.push( new nulla( this.var.index.nulla, direction, headwaters, water_content, this.array.reaches ) );
+    this.array.nulla.push( new nulla( this.var.index.nulla, direction, headwaters, water_content, this ) );
     this.var.index.nulla++;
   }
 
@@ -61,6 +61,30 @@ class weather {
   click( offsets ){
 
   }
+
+  check_way( grid ){
+    let flag = this.check_border( grid );
+
+    if( flag ){
+      let reaches = this.array.reaches[grid.x][grid.y];
+      let sum = 0;
+
+      for( let way of reaches.array.way )
+        sum += way;
+
+      if( sum > 0 )
+        flag = false;
+    }
+
+    return flag;
+  }
+
+  check_border( grid ){
+    let flag = ( grid.x >= this.const.m ) || ( grid.x < 0 ) || ( grid.y >= this.const.n ) || ( grid.y < 0 );
+
+    return !flag;
+  }
+
 
   draw( offset ){
     offset = createVector( this.const.a, this.const.a );
