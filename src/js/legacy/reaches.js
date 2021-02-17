@@ -1,6 +1,6 @@
 //
 class reaches {
-  constructor ( index, altitude, center, grid, a ){
+  constructor ( index, altitude, center, grid, r ){
     this.const = {
       index: index,
       altitude: altitude,
@@ -8,7 +8,12 @@ class reaches {
       i: grid.y,
       j: grid.x,
       n: 8,
-      a: a
+      a: null,
+      r: r,
+      circumradius: null
+    };
+    this.var = {
+      cluster: 0
     };
     this.array = {
       vertex: [],
@@ -17,7 +22,8 @@ class reaches {
       output: [],
     };
     this.data = {
-      water_content: 0
+      water_content: 0,
+      height: null
     };
     this.color = {
       bg: {
@@ -51,74 +57,108 @@ class reaches {
   }
 
   init_vertexs(){
+    this.array.vertex = [ [], [], [], [] ];
+    let scale = 1/3;
+
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
-        Math.sin( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.r,
-        Math.cos( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.r );
-      vec.add( this.const.center );
+        Math.sin( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.circumradius,
+        Math.cos( Math.PI * 2 / this.const.n * ( -0.5 - i + this.const.n / 2 ) ) * this.const.circumradius );
 
-      this.array.vertex.push( vec );
+      let vertex = vec.copy();
+      vertex.add( this.const.center );
+      this.array.vertex[0].push( vertex.copy() );
+
+      vertex = vec.copy();
+      vertex.mult( scale );
+      vertex.add( this.const.center );
+      this.array.vertex[1].push( vertex.copy() );
+
+      vec = createVector(
+        Math.sin( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) ) * this.const.r,
+        Math.cos( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) ) * this.const.r );
+      vec.mult( 1 - scale );
+      vec.add( vertex );
+      this.array.vertex[2].push( vec.copy() );
+
+      vec = createVector(
+        Math.sin( Math.PI * 2 / this.const.n * ( -1 - i + this.const.n / 2 ) ) * this.const.r,
+        Math.cos( Math.PI * 2 / this.const.n * ( -1 - i + this.const.n / 2 ) ) * this.const.r );
+      vec.mult( 1 - scale );
+      vec.add( vertex );
+      this.array.vertex[3].push( vec.copy() );
+
+
       this.array.way.push( 0 );
     }
   }
 
   init(){
-    this.const.r =  this.const.a / ( Math.cos( Math.PI / this.const.n ) );
+    this.const.a =  this.const.r * Math.tan( Math.PI / this.const.n ) * 2 ;
+    this.const.circumradius =  this.const.r / Math.cos( Math.PI / this.const.n );
     this.init_vertexs();
   }
 
-  add_input( way, first ){
-    this.array.way[way] = 1;
-    if( first )
-      this.array.way[way] = 2;
+  add_input( way, first, cluster ){
+    this.array.way[way] = 1 + first;
     this.array.input.push( way );
+    this.var.cluster = cluster;
   }
 
   add_output( way, last ){
-    this.array.way[way] = 3;
-    if( last )
-      this.array.way[way] = 4;
+    this.array.way[way] = 3 + last;
     this.array.output.push( way );
   }
 
+  set_height( height ){
+    this.data.height = height;
+    this.color.bg.h = 240 - height
+  }
+
   draw( offset ){
-    let size = this.const.a * 1.75;
+    strokeWeight( 0.25 );
+    fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+    stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
 
-    strokeWeight( 0.2 );
-
-    for( let i = 0; i < this.array.vertex.length; i++ ){
-      let ii = ( i + 1 ) % this.array.vertex.length;
-      switch ( this.array.way[i] ) {
-        case 0:
-          fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-          stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-          break;
-        case 1:
-          fill( this.color.input.h, this.color.input.s, this.color.input.l );
-          stroke( this.color.input.h, this.color.input.s, this.color.input.l );
-          break;
-        case 2:
-          fill( this.color.begin.h, this.color.begin.s, this.color.begin.l );
-          stroke( this.color.begin.h, this.color.begin.s, this.color.begin.l );
-          break;
-        case 3:
-          fill( this.color.output.h, this.color.output.s, this.color.output.l );
-          stroke( this.color.output.h, this.color.output.s, this.color.output.l );
-          break;
-        case 4:
-          fill( this.color.end.h, this.color.end.s, this.color.end.l );
-          stroke( this.color.end.h, this.color.end.s, this.color.end.l );
-          break;
-      }
+    for( let i = 0; i < this.array.vertex[0].length; i++ ){
+      let ii = ( i + 1 ) % this.array.vertex[0].length;
 
       triangle( this.const.center.x + offset.x, this.const.center.y + offset.y,
-                this.array.vertex[i].x + offset.x, this.array.vertex[i].y + offset.y,
-                this.array.vertex[ii].x + offset.x, this.array.vertex[ii].y + offset.y );
+                this.array.vertex[0][i].x + offset.x, this.array.vertex[0][i].y + offset.y,
+                this.array.vertex[0][ii].x + offset.x, this.array.vertex[0][ii].y + offset.y );
     }
+
+    stroke( 0 );
+    strokeWeight( 0.5 );
+
+    if( this.var.cluster < 0 )
+      for( let i = 0; i < this.array.vertex[0].length; i++ ){
+        let ii = ( i + 1 ) % this.array.vertex[0].length;
+
+        switch ( this.array.way[i] ) {
+          case 0:
+          case 4:
+            line( this.array.vertex[1][i].x + offset.x, this.array.vertex[1][i].y + offset.y,
+                  this.array.vertex[1][ii].x + offset.x, this.array.vertex[1][ii].y + offset.y );
+            break;
+          case 1:
+          case 2:
+          case 3:
+          case 5:
+            line( this.array.vertex[1][ii].x + offset.x, this.array.vertex[1][ii].y + offset.y,
+                  this.array.vertex[2][ii].x + offset.x, this.array.vertex[2][ii].y + offset.y );
+            line( this.array.vertex[1][i].x + offset.x, this.array.vertex[1][i].y + offset.y,
+                  this.array.vertex[3][i].x + offset.x, this.array.vertex[3][i].y + offset.y );
+            break;
+        }
+      }
+
 
 
   noStroke();
   fill( 0 );
-  text( this.const.index, this.const.center.x + offset.x, this.const.center.y + offset.y + FONT_SIZE / 3 );
+  let txt = this.const.index;// Math.floor( this.data.height)
+  text( txt, this.const.center.x + offset.x, this.const.center.y + offset.y + FONT_SIZE / 3 );
+
   }
 }

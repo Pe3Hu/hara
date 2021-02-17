@@ -4,19 +4,58 @@ class weather {
     this.const = {
       n: n,
       m: m,
-      a: a
+      a: a,
+      seabed: 20,
+      peak: 200
     };
     this.var = {
       index: {
-        nulla: 0
-      }
+        nulla: 0,
+        cluster: 0
+      },
+      peak: null
     };
     this.array = {
       reaches: [],
       nulla: []
     };
+    this.table = {
+      probabilities: [],
+      neighbors: []
+    };
 
     this.init();
+  }
+
+  init_neighbors(){
+    this.table.neighbors = [
+      createVector( -1, 1 ),
+      createVector( 0, 1 ),
+      createVector( 1, 1 ),
+      createVector( 1, 0 ),
+      createVector( 1, -1 ),
+      createVector( 0, -1 ),
+      createVector( -1, -1 ),
+      createVector( -1, 0 )
+    ];
+  }
+
+  init_probabilities(){
+    this.table.probabilities = [ [
+      [ 0, 2, 1, 8, 6, 5, 1, 2 ],
+      [ 0, 4, 1, 1, 1, 11, 3, 4 ],
+      [ 0, 4, 11, 3, 1, 1, 1, 4 ],
+      [ 0, 10, 1, 1, 1, 1, 1, 10 ],
+      [ 0, 0, 0, 9, 7, 9, 0, 0 ],
+    ],
+    [
+      [ 0, 1, 3, 5, 7, 5, 3, 1 ],
+      [ 0, 1, 1, 1, 9, 4, 7, 2 ],
+      [ 0, 2, 9, 1, 1, 1, 9, 2 ],
+      [ 0, 2, 7, 4, 9, 1, 1, 1 ],
+      [ 0, 1, 1, 1, 1, 1, 15, 5 ],
+      [ 0, 5, 15, 1, 1, 1, 1, 1 ]
+    ] ];
   }
 
   init_reachess(){
@@ -35,24 +74,164 @@ class weather {
         index++;
       }
     }
+
+    this.generateNoise();
   }
 
   init_nulla(){
-    let headwaters = createVector( 0, 0 );
+    this.find_peak();
+    let headwaters = this.var.peak;
     let water_content = 100;
-    let direction = 6;
+    let direction = this.define_direction_at_border( headwaters );
 
     this.add_nulla( direction, headwaters, water_content );
   }
 
   init(){
+    this.init_probabilities();
+    this.init_neighbors();
     this.init_reachess();
     this.init_nulla();
+  }
+
+  generateNoise(){
+    let inc = createVector( 20 / COLOR_MAX, 20 / COLOR_MAX );
+    let xoff = 0;
+    let heights = [];
+    let min = 1;
+    let max = 0;
+
+    for( let i = 0; i < this.array.reaches.length; i++ ){
+      let yoff = 0;
+      heights.push( [] );
+
+      for( let j = 0; j < this.array.reaches[i].length; j++ ){
+        let n = noise( xoff, yoff )
+        heights[i].push( n );
+
+        if( n > max )
+          max = n;
+        if( n < min )
+          min = n;
+
+        yoff += inc.y;
+      }
+
+      xoff += inc.x;
+    }
+
+    let scatter = max - min;
+
+    for( let i = 0; i < this.array.reaches.length; i++ )
+      for( let j = 0; j < this.array.reaches[i].length; j++ ){
+        let height = Math.floor( this.const.seabed + this.const.peak * ( heights[i][j] - min ) / scatter );
+        this.array.reaches[i][j].set_height( height );
+      }
+  }
+
+  find_peak(){
+    let max = 0;
+
+    for( let i = 0; i < this.array.reaches.length; i++ )
+      for( let j = 0; j < this.array.reaches[i].length; j++ ){
+        if( this.array.reaches[i][j].data.height > max ){
+          if( i == 0 || j == 0 || i == this.array.reaches.length - 1 || j == this.array.reaches[i].length - 1 )
+          max = this.array.reaches[i][j].data.height;
+          this.var.peak = createVector( i, j );
+        }
+      }
+  }
+
+  define_direction_at_border( grid ){
+    let borders = [ false, false, false, false, false, false, false, false ];
+
+    if( grid.x == 0 )
+      borders[7] = true;
+    if( grid.x == this.const.n - 1 )
+      borders[3] = true;
+    if( grid.y == 0 )
+      borders[5] = true;
+    if( grid.y == this.const.m - 1 )
+      borders[1] = true;
+
+    let avg = 0;
+    let count = 0;
+
+    for( let i = 0; i < borders.length; i++ )
+      if( borders[i] ){
+        let exception = i == 7 && borders[1];
+        if( !exception )
+          avg += i;
+        else
+          avg += i - borders.length;
+        count++;
+      }
+
+    avg /= count;
+    return avg;
   }
 
   add_nulla( direction, headwaters, water_content ){
     this.array.nulla.push( new nulla( this.var.index.nulla, direction, headwaters, water_content, this ) );
     this.var.index.nulla++;
+
+    this.demarcate_clusters();
+  }
+
+  demarcate_clusters(){
+    this.var.index.cluster = 0;
+    let unlabeled = [];
+
+    for( let reachess of this.array.reaches )
+      for( let reaches of reachess )
+        if( reaches.var.cluster == -1 )
+          unlabeled.push( reaches.const.index );
+
+    let clusters = [];
+
+    while( false ){
+      let origin_index = unlabeled.pop();
+      let previous = [ origin_index ];
+      let counter = 0;
+
+      while( previous.length > 0 && counter < 100 ){
+        let next = [];
+        clusters.push( [] );
+
+        for( let i = 0; i < previous.length; i++ ){
+          let grid = this.convert_index( previous[i] );
+
+          //only adjacent faces
+          for( let i = 1; i < this.table.neighbors.length; i += 2 ){
+            let neighbor = grid.copy();
+            neighbor.add( this.table.neighbors[i] );
+            let status = this.check_way( neighbor );
+            if( status == 1 ){
+              let index = this.array.reaches[neighbor.x][neighbor.y].const.index;
+              next.push( index );
+              let unlabeled_index = unlabeled.indexOf( index );
+              unlabeled.splice( unlabeled_index, 1 );
+              clusters[this.var.index.cluster].push( index )
+            }
+          }
+        }
+
+        previous = [];
+
+        for( let i = 0; i < next.length; i++ )
+          previous.push( next[i] );
+
+      counter++;
+      }
+
+
+      this.var.index.cluster++;
+    }
+        console.log( clusters )
+
+    for( let i = 0; i < this.array.reaches.length; i++ )
+      for( let j = 0; j < this.array.reaches[i].length; j++ ){}
+
   }
 
   key(){
@@ -62,21 +241,41 @@ class weather {
 
   }
 
+  //find the grid coordinates by index
+  convert_index( index ){
+    if( index == undefined )
+      return null;
+
+    let i = Math.floor( index / this.const.n );
+    let j = index % this.const.m;
+    return createVector( i, j );
+  }
+
+  //find the index coordinates by grid coordinates
+  convert_grid( grid ){
+    if( vec == undefined )
+      return null;
+
+    return grid.x * this.const.m + grid.y;
+  }
+
   check_way( grid ){
+    let status = 0;
     let flag = this.check_border( grid );
 
-    if( flag ){
-      let reaches = this.array.reaches[grid.x][grid.y];
-      let sum = 0;
+    //border flag
+    if( flag )
+      status = 1;
 
-      for( let way of reaches.array.way )
-        sum += way;
+    //unlabeled flag
+    if( flag )
+      flag = this.array.reaches[grid.x][grid.y].var.cluster == 0;
 
-      if( sum > 0 )
-        flag = false;
-    }
+    //deadlock flag
+    if( flag )
+      status = 2;
 
-    return flag;
+    return status;
   }
 
   check_border( grid ){
@@ -84,7 +283,6 @@ class weather {
 
     return !flag;
   }
-
 
   draw( offset ){
     offset = createVector( this.const.a, this.const.a );

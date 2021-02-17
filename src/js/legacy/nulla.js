@@ -2,7 +2,8 @@
 class nulla {
   constructor ( index, input, grid, water_content, weather ){
     this.const = {
-      index: index
+      index: index,
+      cluster: -( index + 1 )
     };
     this.var = {
       current: {
@@ -11,7 +12,10 @@ class nulla {
       }
     };
     this.flag = {
-      stop: false
+      //0 - border check failed
+      //1 - collison check failde
+      //2 - keep flowing
+      stop: null
     }
     this.data = {
       weather: weather,
@@ -21,55 +25,18 @@ class nulla {
       },
       water_content: water_content
     };
-    this.table = {
-      probabilities: [],
-      neighbors: []
-    };
 
     this.init();
   }
 
-  init_probabilities(){
-    this.table.probabilities = [ [
-      [ 0, 2, 1, 8, 6, 5, 1, 2 ],
-      [ 0, 4, 1, 1, 1, 11, 3, 4 ],
-      [ 0, 4, 11, 3, 1, 1, 1, 4 ],
-      [ 0, 10, 1, 1, 1, 1, 1, 10 ],
-      [ 0, 0, 0, 9, 7, 9, 0, 0 ],
-    ],
-    [
-      [ 0, 1, 3, 5, 7, 5, 3, 1 ],
-      [ 0, 1, 1, 1, 9, 4, 7, 2 ],
-      [ 0, 2, 9, 1, 1, 1, 9, 2 ],
-      [ 0, 2, 7, 4, 9, 1, 1, 1 ],
-      [ 0, 1, 1, 1, 1, 1, 15, 5 ],
-      [ 0, 5, 15, 1, 1, 1, 1, 1 ]
-    ] ];
-  }
-
-  init_neighbors(){
-    this.table.neighbors = [
-      createVector( -1, 1 ),
-      createVector( 0, 1 ),
-      createVector( 1, 1 ),
-      createVector( 1, 0 ),
-      createVector( 1, -1 ),
-      createVector( 0, -1 ),
-      createVector( -1, -1 ),
-      createVector( -1, 0 )
-    ];
-  }
-
   init_flow(){
-    this.add_next_reaches( this.data.headwaters.grid, this.data.headwaters.input, true );
+    this.add_next_reaches( this.data.headwaters.grid, this.data.headwaters.input, 1 );
 
-    while( !this.flag.stop )
-      this.add_next_reaches( this.var.current.grid, this.var.current.input, false );
+    while( this.flag.stop == 2 )
+      this.add_next_reaches( this.var.current.grid, this.var.current.input, 0 );
   }
 
   init(){
-    this.init_probabilities();
-    this.init_neighbors();
     this.init_flow();
   }
 
@@ -108,7 +75,6 @@ class nulla {
         if( borders[i] )
           rule = Math.abs( subtype - ( i + borders.length ) ) % borders.length;
 
-
     if( count == 2 ){
       let avg = 0;
 
@@ -143,18 +109,47 @@ class nulla {
     return result;
   }
 
-  generate_new_way( type, rule, direction ){
-    let table = this.table.probabilities[type][rule];
+  generate_new_way( grid, direction, type, rule ){
+    let weather = this.data.weather;
+    let reachess = weather.array.reaches;
+    let table = weather.table.probabilities[type][rule];
     let probabilities = [];
     let shift = direction;//( direction + table.length * 1.5 ) % table.length;
+    let neighbors = [];
+    let origin_height = reachess[grid.x][grid.y].data.height;
+    let min = this.data.weather.const.peak + this.data.weather.const.seabed;
+    let max = 0;
+
+    for( let i = 0; i < weather.table.neighbors.length; i++ ){
+      let neighbor = grid.copy();
+      neighbor.add( weather.table.neighbors[i] );
+      let neighbor_height = this.data.weather.const.peak + this.data.weather.const.seabed * 2;
+
+      if( weather.check_border( neighbor ) )
+        neighbor_height = reachess[neighbor.x][neighbor.y].data.height;
+      if( neighbor_height > max )
+        max = neighbor_height;
+      if( neighbor_height < min )
+        min = neighbor_height;
+
+      neighbors.push( neighbor_height );
+    }
+
+    for( let i = 0; i < neighbors.length; i++ ){
+      let sign = Math.sign( origin_height - neighbors[i] );
+        neighbors[i] = ( 1 + sign * ( max - neighbors[i] ) / ( max - min ) );
+    }
 
     for( let i = 0; i < table.length; i++ )
       probabilities.push( 0 );
 
     for( let i = 0; i < table.length; i++ ){
       let ii = ( i + shift ) % table.length;
+      let scale = 4;
+      if( table[i] == 1 )
+        scale = 1;
 
-      probabilities[ii] = table[i];
+      probabilities[ii] = Math.floor( table[i] * neighbors[ii] * scale );
     }
 
     let outcomes = [];
@@ -168,22 +163,23 @@ class nulla {
   }
 
   continue_flow( grid, way ){
+    let weather = this.data.weather;
     let l = 8;
     this.var.current.grid = grid.copy();
-    this.var.current.grid.add( this.table.neighbors[way] );
-    this.flag.stop = !this.data.weather.check_way( this.var.current.grid );
-    this.data.weather.array.reaches[grid.x][grid.y].add_output( way, this.flag.stop );
+    this.var.current.grid.add( weather.table.neighbors[way] );
+    this.flag.stop = weather.check_way( this.var.current.grid );
+    weather.array.reaches[grid.x][grid.y].add_output( way, this.flag.stop );
 
-    if( !this.flag.stop ){
+    if( this.flag.stop == 2 ){
       this.var.current.input = ( way + l / 2 ) % l;
-      this.data.weather.array.reaches[this.var.current.grid.x][this.var.current.grid.y].add_input( this.var.current.input );
+      weather.array.reaches[this.var.current.grid.x][this.var.current.grid.y].add_input( this.var.current.input, 0, this.const.cluster );
     }
   }
 
   add_next_reaches( grid, input, first ){
-    this.data.weather.array.reaches[grid.x][grid.y].add_input( input, first );
+    this.data.weather.array.reaches[grid.x][grid.y].add_input( input, first, this.const.cluster );
     let obj = this.define_type_and_rule( grid, input );
-    let way = this.generate_new_way( obj.type, obj.rule, input );
+    let way = this.generate_new_way( grid, input, obj.type, obj.rule );
     this.continue_flow( grid, way );
   }
 

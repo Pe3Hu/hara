@@ -22,7 +22,7 @@ class heritage {
 
   init(){
     this.array.layout.push( new platform( this.const.size, this.const.a ) );
-    this.array.layout.push( new weather( this.const.n, this.const.m, this.const.a ) );
+    this.array.layout.push( new weather( this.const.n, this.const.m, this.const.a * 2 ) );
   }
 
   click( offsets ){
