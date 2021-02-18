@@ -5,25 +5,22 @@ class reaches {
       index: index,
       altitude: altitude,
       center: center,
-      i: grid.y,
-      j: grid.x,
+      grid: grid,
       n: 8,
       a: null,
       r: r,
       circumradius: null
     };
     this.var = {
-      cluster: 0
+      cluster: 0,
+      water_content: 0,
+      height: null
     };
     this.array = {
       vertex: [],
       way: [],
       input: [],
       output: [],
-    };
-    this.data = {
-      water_content: 0,
-      height: null
     };
     this.color = {
       bg: {
@@ -99,19 +96,24 @@ class reaches {
     this.init_vertexs();
   }
 
-  add_input( way, first, cluster ){
-    this.array.way[way] = 1 + first;
-    this.array.input.push( way );
+  add_input( way, first, cluster, water_content ){
     this.var.cluster = cluster;
+    this.var.water_content = water_content;
+    this.array.way[way] = 1 + first;
+    let index = this.array.input.indexOf( way );
+    if( index == - 1 )
+      this.array.input.push( way );
   }
 
   add_output( way, last ){
     this.array.way[way] = 3 + last;
-    this.array.output.push( way );
+    let index = this.array.output.indexOf( way );
+    if( index == - 1 )
+      this.array.output.push( way );
   }
 
   set_height( height ){
-    this.data.height = height;
+    this.var.height = height;
     this.color.bg.h = 240 - height
   }
 
@@ -157,7 +159,7 @@ class reaches {
 
   noStroke();
   fill( 0 );
-  let txt = this.const.index;// Math.floor( this.data.height)
+  let txt = this.const.index;// Math.floor( this.var.height)
   text( txt, this.const.center.x + offset.x, this.const.center.y + offset.y + FONT_SIZE / 3 );
 
   }
