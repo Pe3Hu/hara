@@ -16,7 +16,12 @@ class weather {
       water_content: {
         max: 100
       },
-      peak: null
+      peak: null,
+      biggest_cluster: {
+        index: null,
+        length: 0
+      },
+      layout: 2
     };
     this.array = {
       reaches: [],
@@ -90,11 +95,20 @@ class weather {
     this.add_nulla( direction, headwaters, this.var.water_content.max, null );
 
     this.demarcate_clusters();
-    this.split_large_cluster();
 
-    while( false ){
-
+    do{
+      this.split_large_cluster();
+      this.demarcate_clusters();
     }
+    while( this.var.biggest_cluster.length > this.const.m )
+
+    for( let i = 0; i < this.array.cluster.length; i++ )
+      for( let index of this.array.cluster[i] ){
+        let grid = this.convert_index( index );
+        this.array.reaches[grid.y][grid.x].var.cluster = i;
+      }
+
+    console.log( this.array.cluster )
   }
 
   init(){
@@ -194,9 +208,10 @@ class weather {
 
     for( let reachess of this.array.reaches )
       for( let reaches of reachess )
-        if( reaches.var.cluster == 0 )
+        if( reaches.var.cluster >= 0 ){
+          reaches.var.cluster = 0;
           unlabeled.push( reaches.const.index );
-
+        }
 
     while( unlabeled.length > 0 ){
       let origin_index = unlabeled.pop();
@@ -245,27 +260,28 @@ class weather {
   }
 
   split_large_cluster(){
-    let biggest = {
-      index: null,
+    this.var.biggest_cluster = {
+      index: -1,
       length: 0
     };
 
     for( let i = 0; i < this.array.cluster.length; i++ )
-      if( this.array.cluster[i].length > biggest.length )
-        biggest = {
+      if( this.array.cluster[i].length > this.var.biggest_cluster.length )
+        this.var.biggest_cluster = {
           index: i,
           length: this.array.cluster[i].length
         }
 
     let center = createVector();
 
-    for( let index of this.array.cluster[biggest.index] ){
+    for( let index of this.array.cluster[this.var.biggest_cluster.index] ){
       let grid = this.convert_index( index );
       center.add( grid );
     }
-    center.x =  center.x / this.array.cluster[biggest.index].length ;
-    center.y =  center.y / this.array.cluster[biggest.index].length ;
-    console.log( this.array.reaches[Math.round(center.y)][Math.round(center.x)].const.index )
+
+
+    center.x =  center.x / this.array.cluster[this.var.biggest_cluster.index].length ;
+    center.y =  center.y / this.array.cluster[this.var.biggest_cluster.index].length ;
 
     let nearest = {
       grid: null,
@@ -275,9 +291,6 @@ class weather {
     for( let reachess of this.array.reaches )
       for( let reaches of reachess )
         if( reaches.var.cluster < 0 ){
-          /*let x = Math.abs( center.x - reaches.const.grid.x );
-          let y = Math.abs( center.y - reaches.const.grid.y );
-          let d = x + y;*/
           let d = center.dist( reaches.const.grid )
 
           if ( d < nearest.dist )
@@ -285,10 +298,8 @@ class weather {
             grid: reaches.const.grid.copy(),
             dist: d
           };
-          //console.log( reaches.const.index, d  )
         }
 
-    console.log(this.array.reaches[nearest.grid.y][nearest.grid.x].const.index, nearest.dist );
 
     let spreader = center.copy();
     spreader.sub( nearest.grid );
@@ -298,10 +309,8 @@ class weather {
        border_dist.x = this.const.m - 1 - nearest.grid.x;
     if( Math.sign( spreader.y ) == 1 )
        border_dist.y = this.const.n - 1 - nearest.grid.y;
-    //console.log(border_dist.x, border_dist.y );
 
     let steps = createVector( border_dist.x / spreader.x, border_dist.y / spreader.y );
-    //console.log(steps.x, steps.y);
     let scale = Math.min( Math.abs( steps.x ), Math.abs( steps.y ) );
     let target = nearest.grid.copy();
     spreader.mult( scale );
@@ -336,13 +345,23 @@ class weather {
     let grid = nearest.grid.copy();
     grid.add( this.table.neighbors[neighbor.index] )
     let water_content = this.array.reaches[nearest.grid.y][nearest.grid.x].var.water_content / 2;
-    console.log( neighbor.index, nearest.grid, water_content, target )
 
-    this.array.reaches[nearest.grid.y][nearest.grid.x].add_output( neighbor.index, false )
+    let obj = {
+      way: neighbor.index,
+      type: 3,
+      in_out: 'out'
+    };
+
+    this.array.reaches[nearest.grid.y][nearest.grid.x].add_way( obj );
     this.add_nulla( neighbor.index, grid, water_content, target );
   }
 
   key(){
+    switch ( keyCode ) {
+      case 32:
+        this.var.layout = ( this.var.layout + 1 ) % 3;
+        break;
+    }
   }
 
   click( offsets ){
@@ -397,6 +416,6 @@ class weather {
 
     for( let reachess of this.array.reaches )
       for( let reaches of reachess )
-        reaches.draw( offset );
+        reaches.draw( offset, this.var.layout );
   }
 }

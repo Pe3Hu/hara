@@ -12,6 +12,9 @@ class nulla {
       },
       water_content: water_content
     };
+    this.array = {
+      track: []
+    }
     this.flag = {
       //0 - border check failed
       //1 - collison check failde
@@ -35,7 +38,7 @@ class nulla {
       this.add_next_reaches( this.data.headwaters.grid, this.data.headwaters.input, 1 );
     else{
       this.var.current.grid = this.data.headwaters.grid.copy();
-      this.add_input( this.data.headwaters.input );
+      this.add_input( this.data.headwaters.input, 2 );
     }
 
     while( this.flag.stop == 2 )
@@ -178,7 +181,7 @@ class nulla {
     }
 
     let outcomes = [];
-    console.log( this.var.current.grid.y, this.var.current.grid.x, probabilities )
+    //console.log( this.var.current.grid.y * 10 + this.var.current.grid.x, probabilities )
 
     for( let i = 0; i < probabilities.length; i++ )
       for( let j = 0; j < probabilities[i]; j++ )
@@ -193,7 +196,30 @@ class nulla {
     this.var.current.grid = grid.copy();
     this.var.current.grid.add( weather.table.neighbors[way] );
     this.flag.stop = weather.check_way( this.var.current.grid );
-    weather.array.reaches[grid.y][grid.x].add_output( way, this.flag.stop );
+    if( this.flag.stop == 0 )
+      console.log( grid.y * 10 + grid.x, this.flag.stop, way )
+
+    let type;
+
+    switch ( this.flag.stop ) {
+      case 0:
+        type = 6;
+        break;
+      case 1:
+        type = 5;
+        break;
+      case 2:
+        type = 4;
+        break;
+    }
+
+    let obj = {
+      way: way,
+      type: type,
+      in_out: 'out'
+    };
+
+    weather.array.reaches[grid.y][grid.x].add_way( obj );
 
     /*if( this.data.target != null )
       if( this.var.current.grid.x == this.data.target.x &&
@@ -201,22 +227,40 @@ class nulla {
         this.flag.stop = 1;*/
   }
 
-  add_input( way ){
+  add_input( way, type ){
     let reaches = this.data.weather.array.reaches[this.var.current.grid.y][this.var.current.grid.x];
     let l = 8;
     this.var.current.input = ( way + l / 2 ) % l;
-    reaches.add_input( this.var.current.input, 0, this.const.cluster, this.var.water_content );
+
+    let obj = {
+      way: this.var.current.input,
+      type: type,
+      in_out: 'in',
+      cluster: this.const.cluster,
+      water_content: this.var.water_content
+    };
+    reaches.add_way( obj );
   }
 
-  add_next_reaches( grid, input, first ){
-    this.data.weather.array.reaches[grid.y][grid.x].add_input( input, first, this.const.cluster, this.var.water_content );
-    let obj = this.define_type_and_rule( grid, input );
+  add_next_reaches( grid, input, type ){
+    let reaches = this.data.weather.array.reaches[grid.y][grid.x];
+    let obj = {
+      way: input,
+      type: type,
+      in_out: 'in',
+      cluster: this.const.cluster,
+      water_content: this.var.water_content
+    };
+    reaches.add_way( obj );
+
+    this.array.track.push( reaches.const.index );
+    obj = this.define_type_and_rule( grid, input );
     let way = this.generate_new_way( grid, input, obj.type, obj.rule );
 
     this.add_output( grid, way );
 
     if( this.flag.stop == 2 )
-      this.add_input( way );
+      this.add_input( way, 0 );
   }
 
   draw( offset ){

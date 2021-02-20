@@ -38,17 +38,22 @@ class reaches {
         s: COLOR_MAX * 0.75,
         l: COLOR_MAX * 0.5
       },
-      begin: {
-        h: 60,
-        s: COLOR_MAX * 0.75,
-        l: COLOR_MAX * 0.5
-      },
-      end: {
+      entry: {
         h: 0,
         s: COLOR_MAX * 0.75,
         l: COLOR_MAX * 0.5
+      },
+      exit: {
+        h: 0,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
+      },
+      deadlock: {
+        h: 270,
+        s: COLOR_MAX * 0.75,
+        l: COLOR_MAX * 0.5
       }
-    }
+    };
 
     this.init();
   }
@@ -96,20 +101,27 @@ class reaches {
     this.init_vertexs();
   }
 
-  add_input( way, first, cluster, water_content ){
-    this.var.cluster = cluster;
-    this.var.water_content = water_content;
-    this.array.way[way] = 1 + first;
-    let index = this.array.input.indexOf( way );
-    if( index == - 1 )
-      this.array.input.push( way );
-  }
+  add_way( obj ){
+    let status, array;
 
-  add_output( way, last ){
-    this.array.way[way] = 3 + last;
-    let index = this.array.output.indexOf( way );
+    switch ( obj.in_out ) {
+      case 'in':
+        array = this.array.input;
+        status = 1 + obj.type;
+        this.var.cluster = obj.cluster;
+        this.var.water_content = obj.water_content;
+        break;
+      case 'out':
+        array = this.array.output;
+        status = obj.type;
+        break;
+    }
+
+    this.array.way[obj.way] = status;
+
+    let index = array.indexOf(  obj.way );
     if( index == - 1 )
-      this.array.output.push( way );
+      array.push( obj.way );
   }
 
   set_height( height ){
@@ -117,10 +129,31 @@ class reaches {
     this.color.bg.h = 240 - height
   }
 
-  draw( offset ){
+  draw( offset, layout ){
+    let txt = '';
+    let bg = {
+      h: 300,
+      s: COLOR_MAX * 0.25,
+      l: COLOR_MAX * 0.75
+    };
+    switch ( layout ) {
+      case 0:
+      case 1:
+        bg = {
+          h: 300,
+          s: COLOR_MAX * 0.25,
+          l: COLOR_MAX * 0.75
+        };
+        break;
+      case 2:
+        txt = Math.floor( this.var.height);
+        bg = this.color.bg;
+        break;
+    }
+
     strokeWeight( 0.25 );
-    fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-    stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
+    fill( bg.h, bg.s, bg.l );
+    stroke( bg.h, bg.s, bg.l );
 
     for( let i = 0; i < this.array.vertex[0].length; i++ ){
       let ii = ( i + 1 ) % this.array.vertex[0].length;
@@ -130,23 +163,84 @@ class reaches {
                 this.array.vertex[0][ii].x + offset.x, this.array.vertex[0][ii].y + offset.y );
     }
 
+    switch ( layout ) {
+      case 0:
+        txt = this.const.index;
+
+        for( let i = 0; i < this.array.vertex[0].length; i++ ){
+          let ii = ( i + 1 ) % this.array.vertex[0].length;
+
+          switch ( this.array.way[i] ) {
+              case 2:
+                stroke( 120, this.color.bg.s, this.color.bg.l );
+                fill( 120, this.color.bg.s, this.color.bg.l );
+                break;
+              case 3:
+                stroke( 60, this.color.bg.s, this.color.bg.l );
+                fill( 60, this.color.bg.s, this.color.bg.l );
+                break;
+              case 6:
+                stroke( 270, this.color.bg.s, this.color.bg.l );
+                fill( 270, this.color.bg.s, this.color.bg.l );
+                break;
+              case 1:
+                stroke( 210, this.color.bg.s, this.color.bg.l );
+                fill( 210, this.color.bg.s, this.color.bg.l );
+                break;
+              case 4:
+                stroke( 0, this.color.bg.s, this.color.bg.l );
+                fill( 0, this.color.bg.s, this.color.bg.l );
+                break;
+          }
+          switch ( this.array.way[i] ) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 6:
+              triangle( this.array.vertex[1][ii].x + offset.x, this.array.vertex[1][ii].y + offset.y,
+                        this.array.vertex[2][ii].x + offset.x, this.array.vertex[2][ii].y + offset.y,
+                        this.array.vertex[1][i].x + offset.x, this.array.vertex[1][i].y + offset.y );
+              triangle( this.array.vertex[2][ii].x + offset.x, this.array.vertex[2][ii].y + offset.y,
+                        this.array.vertex[3][i].x + offset.x, this.array.vertex[3][i].y + offset.y,
+                        this.array.vertex[1][i].x + offset.x, this.array.vertex[1][i].y + offset.y );
+              break;
+          }
+        }
+        break;
+      case 1:
+        txt = this.var.cluster;
+        break;
+      case 2:
+        txt = Math.floor( this.var.height);
+        break;
+    }
+
     stroke( 0 );
     strokeWeight( 0.5 );
 
-    if( this.var.cluster < 0 )
+    if( this.var.cluster < 0 ){
       for( let i = 0; i < this.array.vertex[0].length; i++ ){
         let ii = ( i + 1 ) % this.array.vertex[0].length;
 
+        //0 - no input & no output
+        //1 - regular input
+        //2 - headwaters input
+        //3 - distributary input
+        //4 - regular output
+        //5 - output deadlock
+        //6 - delta output
         switch ( this.array.way[i] ) {
           case 0:
-          case 4:
+          case 5:
             line( this.array.vertex[1][i].x + offset.x, this.array.vertex[1][i].y + offset.y,
                   this.array.vertex[1][ii].x + offset.x, this.array.vertex[1][ii].y + offset.y );
             break;
           case 1:
           case 2:
           case 3:
-          case 5:
+          case 4:
+          case 6:
             line( this.array.vertex[1][ii].x + offset.x, this.array.vertex[1][ii].y + offset.y,
                   this.array.vertex[2][ii].x + offset.x, this.array.vertex[2][ii].y + offset.y );
             line( this.array.vertex[1][i].x + offset.x, this.array.vertex[1][i].y + offset.y,
@@ -154,12 +248,10 @@ class reaches {
             break;
         }
       }
-
-
+    }
 
   noStroke();
   fill( 0 );
-  let txt = this.const.index;// Math.floor( this.var.height)
   text( txt, this.const.center.x + offset.x, this.const.center.y + offset.y + FONT_SIZE / 3 );
 
   }
