@@ -482,6 +482,9 @@ class arena {
         let hall_rand = this.convertFloor( neighbors[rand] );
         let floor_rand = this.array.hall[hall_rand.i][hall_rand.j].array.floor[hall_rand.f];
         let region = floor_rand.var.region;
+        //not fixed error
+        if( this.array.region[region] == undefined )
+          this.restart();
         this.array.region[region].push( floor_rand );
         floor.setRegion( region );
         overloads.push( region );

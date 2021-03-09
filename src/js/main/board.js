@@ -19,7 +19,7 @@ class board {
       }
     }
     this.var = {
-      layer: 0,
+      layer: 5,
       id: {
         button: 0,
         border: 0,
@@ -133,7 +133,9 @@ class board {
     //this layer has no meaning
     //this.array.layer.push( new carpet() );
     this.array.layer.push( new rialto() );
-    this.array.layer.push( new isle() );
+    //this layer has some content
+    //this.array.layer.push( new isle() );
+    this.array.layer.push( new swarm() );
     this.array.layer.push( new debate() );
       //this layer has no meaning
     this.array.layer.push( new collision() );

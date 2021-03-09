@@ -3,7 +3,7 @@ class blend {
   constructor ( size, shred, a ){
     this.const = {
       a: a,
-      field:{
+      field: {
         count: 3,
         size: size,
       }
@@ -32,7 +32,7 @@ class blend {
     this.init();
   }
 
-  initTables(){
+  init_tables(){
     this.table.shred = [
       [ 15, 10, 5 ],
       [ 15, 14, 10, 7, 5 ],
@@ -46,19 +46,19 @@ class blend {
     ];*/
   }
 
-  initMap(){
+  init_map(){
     let table = this.table.shred[this.var.shred];
-    let copys = Math.pow( this.const.field.size, 2 ) * this.const.field.count - table.length + 1;
+    let copies = Math.pow( this.const.field.size, 2 ) * this.const.field.count - table.length + 1;
     this.array.value = [];
 
     for( let i = 0; i < table.length; i++ )
-      for( let j = 0; j <copys; j++ )
+      for( let j = 0; j < copies; j++ )
         this.array.value.push( table[i] );
 
     this.shuffle( this.array.value );
   }
 
-  initNodes(){
+  init_nodes(){
     let a = this.const.a / 4;
     let index = 0;
     let label = 0;
@@ -141,7 +141,7 @@ class blend {
     }
   }
 
-  initShreds(){
+  init_shreds(){
     let a = this.const.a / 2;
     let index = 0;
 
@@ -167,17 +167,17 @@ class blend {
     }
   }
 
-  cleanShreds(){
+  clean_shreds(){
     let type = 2;
     let status = 2;
     //
     for( let f = 0; f < this.array.shred.length; f++ )
       for( let i = 0; i < this.array.shred[f].length; i++ )
         for( let j = 0; j < this.array.shred[f][i].length; j++ )
-          this.array.shred[f][i][j].setFit( type, status );
+          this.array.shred[f][i][j].set_fit( type, status );
   }
 
-  findConnections(){
+  find_connections(){
     let charges = [];
     let groups = [];
 
@@ -249,10 +249,10 @@ class blend {
         else
           extent[groups[i][j]]++;
 
-    this.sortGroupsByExtent( groups, extent, values );
+    this.sort_groups_by_extent( groups, extent, values );
   }
 
-  defineLaws(){
+  define_laws(){
     let table = this.table.shred[this.var.shred];
     this.obj.laws = new laws( table );
     let subtypes = [ 'single', 'shortest', 'longest', 'total' ];
@@ -265,10 +265,10 @@ class blend {
 
             for( let s = 0; s < subtypes.length; s++ ){
                 if( shred.var.value[subtypes[s]] )
-                  this.obj.laws.updateInfluence( subtypes[s], location, shred.const.value.id, shred.const.index );
+                  this.obj.laws.update_influence( subtypes[s], location, shred.const.value.id, shred.const.index );
 
                 if( shred.var.group[subtypes[s]] && subtypes[s] != 'single' )
-                  this.obj.laws.updateInfluence( subtypes[s], location, 0, shred.const.index );
+                  this.obj.laws.update_influence( subtypes[s], location, 0, shred.const.index );
             }
           }
 
@@ -288,7 +288,7 @@ class blend {
 
         for( let i = 0; i < on.length; i++ ){
           let index = on[i];
-          let result = this.convertShredIndex( index );
+          let result = this.convert_shred_index( index );
 
           for( let j = 0; j < neighbors.length; j++ ){
             let neighbor = createVector( result.j, result.i, result.f );
@@ -327,7 +327,7 @@ class blend {
               for( let j = 0; j < max; j++ )
                 if( this.obj.laws.obj[subtype][notLocation][value].indexOf( j ) == -1 ){
                   let flag = true;
-                  if( location == 'notNear' )
+                  if( location == 'not_near' )
                     flag = ( this.obj.laws.obj[subtype]['on'][value].indexOf( j ) == -1 );
 
                   if( flag )
@@ -337,7 +337,7 @@ class blend {
         }
   }
 
-  generateIntersections(){
+  generate_intersections(){
     let laws = [];
     let max = Math.pow( this.const.field.size, 2 ) * this.const.field.count;
 
@@ -523,22 +523,22 @@ class blend {
       } );
     }
 
-    this.obj.laws.setAnswers( result );
+    this.obj.laws.set_answers( result );
     //console.log( result );
   }
 
   init(){
-    this.initTables();
-    this.initMap();
-    this.initNodes();
-    this.initShreds();
-    this.findConnections();
-    this.defineLaws();
-    this.generateIntersections();
-    this.setAnswer();
+    this.init_tables();
+    this.init_map();
+    this.init_nodes();
+    this.init_shreds();
+    this.find_connections();
+    this.define_laws();
+    this.generate_intersections();
+    this.set_answer();
   }
 
-  sortGroupsByExtent( groups, extent, values ){
+  sort_groups_by_extent( groups, extent, values ){
     let table = this.table.shred[this.var.shred];
     let shreds = [];
 
@@ -591,8 +591,8 @@ class blend {
             for( let j = 0; j < groups[i].length; j++ ){
               if( groups[i][j] == shortest.group ){
                 let brick = createVector( j, i );
-                let shred = this.convertBrick( brick );
-                this.array.shred[shred.f][shred.i][shred.j].setGroup( -1, groups[i][j] );
+                let shred = this.convert_brick( brick );
+                this.array.shred[shred.f][shred.i][shred.j].set_group( -1, groups[i][j] );
               }
             }
 
@@ -601,8 +601,8 @@ class blend {
             for( let j = 0; j < groups[i].length; j++ ){
               if( groups[i][j] == longest.group ){
                 let brick = createVector( j, i );
-                let shred = this.convertBrick( brick );
-                this.array.shred[shred.f][shred.i][shred.j].setGroup( 1, groups[i][j] );
+                let shred = this.convert_brick( brick );
+                this.array.shred[shred.f][shred.i][shred.j].set_group( 1, groups[i][j] );
               }
             }
       }
@@ -612,8 +612,8 @@ class blend {
           for( let j = 0; j < groups[i].length; j++ ){
             if( groups[i][j] == longest.group ){
               let brick = createVector( j, i );
-              let shred = this.convertBrick( brick );
-              this.array.shred[shred.f][shred.i][shred.j].setSingle( true );
+              let shred = this.convert_brick( brick );
+              this.array.shred[shred.f][shred.i][shred.j].set_single( true );
             }
           }
     }
@@ -652,8 +652,8 @@ class blend {
         for( let j = 0; j < groups[i].length; j++ ){
           if( groups[i][j] == shortest.group ){
             let brick = createVector( j, i );
-            let shred = this.convertBrick( brick );
-            this.array.shred[shred.f][shred.i][shred.j].setGroup( -2, groups[i][j] );
+            let shred = this.convert_brick( brick );
+            this.array.shred[shred.f][shred.i][shred.j].set_group( -2, groups[i][j] );
           }
         }
 
@@ -662,8 +662,8 @@ class blend {
         for( let j = 0; j < groups[i].length; j++ ){
           if( groups[i][j] == longest.group ){
             let brick = createVector( j, i );
-            let shred = this.convertBrick( brick );
-            this.array.shred[shred.f][shred.i][shred.j].setGroup( 2, groups[i][j] );
+            let shred = this.convert_brick( brick );
+            this.array.shred[shred.f][shred.i][shred.j].set_group( 2, groups[i][j] );
           }
         }
   }
@@ -700,7 +700,7 @@ class blend {
         synonyms[i].sort();
 
 
-    this.supplementWithSynonyms( array, synonyms );
+    this.supplement_with_synonyms( array, synonyms );
 
     for( let i = 0; i < array.length; i++ )
       for( let j = 0; j < array[i].length; j++ )
@@ -725,27 +725,27 @@ class blend {
 
   }
 
-  supplementWithSynonyms( groups, synonyms ){
+  supplement_with_synonyms( groups, synonyms ){
     for( let i = 0; i < groups.length; i++ )
       for( let j = 0; j < groups[i].length; j++ ){
         groups[i][j] = synonyms[groups[i][j][0]];
       }
   }
 
-  setAnswer(){
+  set_answer(){
     this.array.answer = [];
     let id = 0;
     let laws = this.obj.laws;
     let answers = laws.array.answer[id].answers;
 
     for( let i = 0; i < answers.length; i++ ){
-      let obj = this.convertShredIndex( answers[i] );
-      this.array.shred[obj.f][obj.i][obj.j].setAnswer( true );
+      let obj = this.convert_shred_index( answers[i] );
+      this.array.shred[obj.f][obj.i][obj.j].set_answer( true );
       this.array.answer.push( answers[i] );
     }
   }
 
-  activateLaw( string ){
+  activate_law( string ){
     //
     let id =  this.array.activated.law.indexOf( string );
     if( id == -1 )
@@ -754,7 +754,7 @@ class blend {
       this.array.activated.law.splice( id, 1 );
   }
 
-  updateLaws(){
+  update_laws(){
     //
     let type = 0;
 
@@ -768,7 +768,7 @@ class blend {
       let status = false;
 
       for( let j = 0; j < indexs.length; j++ ){
-        let obj = this.convertShredIndex( indexs[j] );
+        let obj = this.convert_shred_index( indexs[j] );
         status = this.array.answer.includes(this.array.shred[obj.f][obj.i][obj.j].const.index ) || status;
       }
 
@@ -778,13 +778,13 @@ class blend {
         status = 0;
 
       for( let j = 0; j < indexs.length; j++ ){
-        let obj = this.convertShredIndex( indexs[j] );
-        this.array.shred[obj.f][obj.i][obj.j].setFit( type, status );
+        let obj = this.convert_shred_index( indexs[j] );
+        this.array.shred[obj.f][obj.i][obj.j].set_fit( type, status );
       }
     }
   }
 
-  activateButton( buttons, id ){
+  activate_button( buttons, id ){
     let array = buttons[id].const.name.split( ' ' );
     let subtype = array[0];
     let location = array[1];
@@ -805,26 +805,26 @@ class blend {
     else
       shift = l;
 
-    let status = this.checkLaw( indexs );
+    let status = this.check_law( indexs );
     let shifteID = id + shift;
     let shiftedStatus = 2;
 
     if( status == 1 ){
       shiftedStatus = 0;
       buttons[shifteID].setStatus( shiftedStatus );
-      this.activateLaw( buttons[shifteID].const.name );
+      this.activate_law( buttons[shifteID].const.name );
     }
 
     let string = buttons[id].const.name;
     buttons[id].setStatus( status );
-    this.activateLaw( string );
+    this.activate_law( string );
   }
 
-  checkLaw( indexs ){
+  check_law( indexs ){
     let status = false;
 
     for( let j = 0; j < indexs.length; j++ ){
-      let obj = this.convertShredIndex( indexs[j] );
+      let obj = this.convert_shred_index( indexs[j] );
       status = this.array.answer.includes(this.array.shred[obj.f][obj.i][obj.j].const.index ) || status;
     }
 
@@ -844,7 +844,7 @@ class blend {
     }
   }
 
-  convertBrick( brick ){
+  convert_brick( brick ){
     let result = {
       f: Math.floor( brick.x / this.const.field.size ),
       i: brick.y,
@@ -853,7 +853,7 @@ class blend {
     return result;
   }
 
-  convertShredIndex( index ){
+  convert_shred_index( index ){
     let f = Math.floor( index / Math.pow( this.const.field.size, 2 ) );
     let id = index - f * Math.pow( this.const.field.size, 2 );
     let i = Math.floor( id / this.const.field.size );
@@ -867,7 +867,7 @@ class blend {
     return result;
   }
 
-  convertNodeIndex( index ){
+  convert_node_index( index ){
     let f = Math.floor( index / Math.pow( ( this.const.field.size + 1 ), 2 ) );
     let id = index - f * Math.pow( ( this.const.field.size + 1 ), 2 );
     let i = Math.floor( id / ( this.const.field.size + 1 ) );
@@ -886,11 +886,11 @@ class blend {
   }
 
   click( offsets ){
-    this.clickNode( offsets );
+    this.click_node( offsets );
     this.update();
   }
 
-  clickNode( offsets ){
+  click_node( offsets ){
     let minDist = INFINITY;
     let node = null;
     let mouse = createVector( mouseX, mouseY );
@@ -929,26 +929,26 @@ class blend {
           ( node.const.f + 1 ) % this.const.field.count );
 
 
-      let status = this.checkNode( node );
+      let status = this.check_node( node );
       let doubleStatus = 2;
 
       if( double != null )
-        doubleStatus = this.checkNode( this.array.node[double.z][double.x][double.y] )
+        doubleStatus = this.check_node( this.array.node[double.z][double.x][double.y] )
 
       if( doubleStatus != 2 )
         status = Math.max( status, doubleStatus );
 
       node.press( status );
-      this.activateNode( node.const.index );
+      this.activate_node( node.const.index );
 
       if( double != null ){
         this.array.node[double.z][double.x][double.y].press( status );
-        this.activateNode( this.array.node[double.z][double.x][double.y].const.index );
+        this.activate_node( this.array.node[double.z][double.x][double.y].const.index );
       }
     }
   }
 
-  checkNode( node ){
+  check_node( node ){
     let status = false;
     let center = createVector( node.const.i, node.const.j, node.const.f );
 
@@ -966,7 +966,7 @@ class blend {
     return status;
   }
 
-  activateNode( index ){
+  activate_node( index ){
     let id =  this.array.activated.node.indexOf( index );
     if( id == -1 )
       this.array.activated.node.push( index );
@@ -974,13 +974,13 @@ class blend {
       this.array.activated.node.splice( id, 1 );
   }
 
-  updateNodes(){
+  update_nodes(){
     //
     let type = 1;
 
     for( let i = 0; i < this.array.activated.node.length; i++ ){
       let index = this.array.activated.node[i];
-      let obj = this.convertNodeIndex( index );
+      let obj = this.convert_node_index( index );
       let node = this.array.node[obj.f][obj.i][obj.j];
       let center = createVector( obj.i, obj.j, obj.f );
       let status = false;
@@ -1002,27 +1002,36 @@ class blend {
       for( let i = 0; i < node.array.neighbors.length; i++ ){
         let neighbor = center.copy();
         neighbor.add( node.array.neighbors[i] );
-        this.array.shred[neighbor.z][neighbor.y][neighbor.x].setFit( type, status );
+        this.array.shred[neighbor.z][neighbor.y][neighbor.x].set_fit( type, status );
       }
     }
   }
 
   update(){
-    this.cleanShreds();
-    this.updateLaws();
-    this.updateNodes();
+    this.clean_shreds();
+    this.update_laws();
+    this.update_nodes();
   }
 
   key(){
-    //
-  }  
+    switch ( keyCode ) {
+      case 32:
+        this.var.kind = ( this.var.kind + 1 ) % 4;
+
+        for( let field of this.array.shred )
+          for( let shreds of field )
+            for( let shred of shreds )
+              shred.set_kind( this.var.kind );
+        break;
+    }
+  }
 
   moved( offsets ){
   }
 
   draw( offsets ){
     let offset = offsets[1].copy();
-    offset.add( this.const.a / 3, this.const.a / 3 )
+    offset.add( this.const.a / 3, this.const.a / 3 );
 
     for( let f = 0; f < this.array.shred.length; f++ )
       for( let i = 0; i < this.array.shred[f].length; i++ )

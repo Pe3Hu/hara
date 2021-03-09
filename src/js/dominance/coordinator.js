@@ -206,7 +206,7 @@ class coordinator {
       case 4:
         this.give( challenger );
         break;
-    }    
+    }
 
     this.updateSelection();
 
@@ -556,7 +556,7 @@ class coordinator {
     stroke( 0 );
     for( let i = 0; i < this.table.size.zone.length; i++ )
       rect( offsets[i].x - this.table.size.zone[i].x / 2, offsets[i].y - this.table.size.zone[i].y / 2,
-        this.table.size.zone[i].x, this.table.size.zone[i].y );
+            this.table.size.zone[i].x, this.table.size.zone[i].y );
   }
 
   draw( offsets ){
@@ -575,5 +575,6 @@ class coordinator {
     textSize( 40 );
     for( let i = 0; i < this.table.size.zone.length; i++ )
       text( i, offsets[i].x, offsets[i].y + 40 / 3 );
+    textSize( FONT_SIZE );
   }
 }

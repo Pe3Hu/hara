@@ -7,7 +7,6 @@ class shred {
         id: null,
         name: null
       },
-      kind: kind,
       i: grid.y,
       j: grid.x,
       n: 8,
@@ -20,6 +19,7 @@ class shred {
       color: []
     };
     this.var = {
+      kind: kind,
       center: center.copy(),
       harmony: null,
       group:{
@@ -62,7 +62,7 @@ class shred {
     this.init( value );
   }
 
-  initVertexs(){
+  init_vertexs(){
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
         Math.sin( Math.PI * 2 / this.const.n * ( 0.5 - i + this.const.n / 2 ) ) * this.const.r,
@@ -72,7 +72,7 @@ class shred {
     }
   }
 
-  initColors(){
+  init_colors(){
     this.color.extent = {
       13: 210,
       14: 240,
@@ -86,13 +86,13 @@ class shred {
 
   init( value ){
     this.const.r =  this.const.a / ( Math.cos( Math.PI / this.const.n ) );
-    this.initVertexs();
-    this.initColors();
-    this.setValue( value );
-    this.setGroup( 0 );
+    this.init_vertexs();
+    this.init_colors();
+    this.set_value( value );
+    this.set_group( 0 );
   }
 
-  setValue( value ){
+  set_value( value ){
     this.const.value.id = value;
     let code = value;
     let rank = 8;
@@ -109,14 +109,14 @@ class shred {
     for( let i = binaryCode.length - 1; i > -1 ; i-- )
       this.array.corner.push( binaryCode[i] )
 
-    this.setSegments();
-    this.updateHarmony();
+    this.set_segments();
+    this.update_harmony();
   }
 
-  setSegments(){
+  set_segments(){
     let length = null;
 
-    switch ( this.const.kind ) {
+    switch ( this.var.kind ) {
       case 0:
         length = 7;
         break;
@@ -140,7 +140,7 @@ class shred {
     for( let i = 0; i < length; i++ )
       segments.push( false );
 
-    switch ( this.const.kind ) {
+    switch ( this.var.kind ) {
       case 0:
         sqaure = [];
         dots = [];
@@ -391,12 +391,10 @@ class shred {
             this.array.segment.push( vertexs );
           }
         break;
-
     }
-
   }
 
-  setGroup( type, id ){
+  set_group( type, id ){
     if( id == undefined )
       id = null;
     this.var.group.id = id;
@@ -429,11 +427,11 @@ class shred {
     }
   }
 
-  setSingle( single ){
+  set_single( single ){
     this.var.value['single'] = single;
   }
 
-  setFit( type, status ){
+  set_fit( type, status ){
     //status
     //0 - definitely not an answer
     //1- definitely an answer
@@ -459,7 +457,7 @@ class shred {
         this.var.fit.node == 0 )
       this.color.bg.h = 120;
 
-      
+
     this.color.value.h = 30;
 
     if( ( this.var.fit.law == 1 && this.var.fit.node == 2 ) ||
@@ -469,7 +467,7 @@ class shred {
         }
   }
 
-  setAnswer( flag ){
+  set_answer( flag ){
     this.var.answer = flag;
     if( flag )
       this.color.value.l = COLOR_MAX * 0.5;
@@ -477,7 +475,12 @@ class shred {
       this.color.value.l = 0;
   }
 
-  updateHarmony(){
+  set_kind( kind ){
+    this.var.kind = kind;
+    this.set_segments();
+  }
+
+  update_harmony(){
     let harmony = 0;
     let charges = [ 1, 2, -2 , -1 ];
 
@@ -487,14 +490,14 @@ class shred {
     this.var.harmony = harmony;
   }
 
-  drawValue( offset ){
+  draw_value( offset ){
     noStroke();
     fill( this.color.value.h, this.color.value.s, this.color.value.l );
     fill( this.color.value.h, this.color.value.s, this.color.value.l );
 
     for( let i = 0; i < this.array.segment.length; i++ ){
         let length = this.array.segment[i].length - 1;
-        if( this.const.kind == 2 )
+        if( this.var.kind == 2 )
           length = this.array.segment[i].length;
 
         for( let j = 1; j < length; j++ ){
@@ -509,7 +512,7 @@ class shred {
     }
   }
 
-  drawBackground( offset ){
+  draw_background( offset ){
     let size = this.const.a * 1.75;
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
     stroke( this.color.bg.h, this.color.bg.s, this.color.bg.l );
@@ -526,11 +529,11 @@ class shred {
   }
 
   draw( offset ){
-   this.drawBackground( offset );
-   this.drawValue( offset );
+   this.draw_background( offset );
+   this.draw_value( offset );
 
-   fill( 0 );
+   /*fill( 0 );
    let txt = this.const.index;
-  // text( txt, this.var.center.x + offset.x, this.var.center.y + offset.y + fontSize / 3 );
+   text( txt, this.var.center.x + offset.x, this.var.center.y + offset.y + FONT_SIZE / 3 );*/
   }
 }

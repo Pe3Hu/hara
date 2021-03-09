@@ -162,8 +162,7 @@ class button {
               break;
           }
 
-
-          switch ( this.const.type ){
+          /*switch ( this.const.type ){
             case 13:
             case 14:
               d = ( this.const.type - 13 ) * 4;
@@ -183,7 +182,7 @@ class button {
               this.array.vertex[d][3].x, this.array.vertex[d][3].y,
               this.array.vertex[d][4].x, this.array.vertex[d][4].y );
               break;
-          }
+          }*/
       }
     }
   }

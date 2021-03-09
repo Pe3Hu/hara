@@ -4,27 +4,27 @@ class laws {
     this.obj = {
       'total': {
         'on': {},
-        'notOn': {},
+        'not_on': {},
         'near': {},
-        'notNear': {}
+        'not_near': {}
       },
       'shortest': {
         'on': {},
-        'notOn': {},
+        'not_on': {},
         'near': {},
-        'notNear': {}
+        'not_near': {}
       },
       'longest': {
         'on': {},
-        'notOn': {},
+        'not_on': {},
         'near': {},
-        'notNear': {}
+        'not_near': {}
       },
       'single': {
         'on': {},
-        'notOn': {},
+        'not_on': {},
         'near': {},
-        'notNear': {}
+        'not_near': {}
       }
     };
     this.array = {
@@ -38,7 +38,7 @@ class laws {
     this.init();
   }
 
-  initValues(){
+  init_values(){
     for( let subtype in this.obj )
       for( let location in this.obj[subtype] ){
         for( let i = 0; i < this.array.value.length; i++ )
@@ -49,7 +49,7 @@ class laws {
       }
   }
 
-  initLabels(){
+  init_labels(){
     this.table.label = {
       '0': 'all',
       '5': '2',
@@ -63,15 +63,15 @@ class laws {
   }
 
   init(){
-    this.initValues();
-    this.initLabels();
+    this.init_values();
+    this.init_labels();
   }
 
-  updateInfluence( subtype, location, value, index ){
+  update_influence( subtype, location, value, index ){
     this.obj[subtype][location][value].push( index );
   }
 
-  setAnswers( answers ){
-    this.array.answer = answers
+  set_answers( answers ){
+    this.array.answer = answers;
   }
 }

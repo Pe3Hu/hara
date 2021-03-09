@@ -29,7 +29,7 @@ class node {
     this.init();
   }
 
-  initVertexs(){
+  init_vertexs(){
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
         Math.sin( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) ) * this.const.a,
@@ -41,7 +41,7 @@ class node {
 
   init(){
     this.const.r =  this.const.a * Math.sqrt( 2 );
-    this.initVertexs();
+    this.init_vertexs();
   }
 
   press( status ){

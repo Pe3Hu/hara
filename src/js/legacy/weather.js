@@ -108,7 +108,7 @@ class weather {
         this.array.reaches[grid.y][grid.x].var.cluster = i;
       }
 
-    console.log( this.array.cluster )
+    //console.log( this.array.cluster )
   }
 
   init(){

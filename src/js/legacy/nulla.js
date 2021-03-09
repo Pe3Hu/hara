@@ -121,74 +121,77 @@ class nulla {
   generate_new_way( grid, direction, type, rule ){
     let weather = this.data.weather;
     let reachess = weather.array.reaches;
-    let table = weather.table.probabilities[type][rule];
-    let probabilities = [];
-    let heights = [];
-    let convergences = [];
-    let shift = direction;
-    let origin_height = reachess[grid.y][grid.x].var.height;
-    let min = this.data.weather.const.peak + this.data.weather.const.seabed;
-    let max = 0;
-    let current_distance;
+    //not fixed error
+    if( weather.table.probabilities != undefined ){
+      let table = weather.table.probabilities[type][rule];
+      let probabilities = [];
+      let heights = [];
+      let convergences = [];
+      let shift = direction;
+      let origin_height = reachess[grid.y][grid.x].var.height;
+      let min = this.data.weather.const.peak + this.data.weather.const.seabed;
+      let max = 0;
+      let current_distance;
 
-    if( this.data.target != null )
-      current_distance = this.data.target.dist( grid );
+      if( this.data.target != null )
+        current_distance = this.data.target.dist( grid );
 
-    for( let i = 0; i < weather.table.neighbors.length; i++ ){
-      let neighbor = grid.copy();
-      neighbor.add( weather.table.neighbors[i] );
-      let neighbor_height = this.data.weather.const.peak + this.data.weather.const.seabed * 2;
+      for( let i = 0; i < weather.table.neighbors.length; i++ ){
+        let neighbor = grid.copy();
+        neighbor.add( weather.table.neighbors[i] );
+        let neighbor_height = this.data.weather.const.peak + this.data.weather.const.seabed * 2;
 
-      if( weather.check_border( neighbor ) )
-        neighbor_height = reachess[neighbor.y][neighbor.x].var.height;
-      if( neighbor_height > max )
-        max = neighbor_height;
-      if( neighbor_height < min )
-        min = neighbor_height;
+        if( weather.check_border( neighbor ) )
+          neighbor_height = reachess[neighbor.y][neighbor.x].var.height;
+        if( neighbor_height > max )
+          max = neighbor_height;
+        if( neighbor_height < min )
+          min = neighbor_height;
 
-      heights.push( neighbor_height );
+        heights.push( neighbor_height );
 
-      if( this.data.target != null ){
-        let d = this.data.target.dist( neighbor );
-        let convergence = current_distance - d;
-        convergences.push( convergence );
-      }
-    }
-
-    for( let i = 0; i < heights.length; i++ ){
-      let sign = Math.sign( origin_height - heights[i] );
-      heights[i] = ( 1 + sign * ( max - heights[i] ) / ( max - min ) );
-    }
-
-    for( let i = 0; i < table.length; i++ )
-      probabilities.push( 0 );
-
-    for( let i = 0; i < table.length; i++ ){
-      let ii = ( i + shift ) % table.length;
-      let scale = 4;
-      let sign = 1;
-      if( table[i] == 1 )
-        scale = 1;
-
-      if( this.data.target != null ){
-        if( convergences[ii] < -1 )
-          sign = 1/5;
-        if( convergences[ii] > 1 )
-          sign = 5;
+        if( this.data.target != null ){
+          let d = this.data.target.dist( neighbor );
+          let convergence = current_distance - d;
+          convergences.push( convergence );
+        }
       }
 
-      probabilities[ii] = Math.floor( table[i] * heights[ii] * scale * sign );
+      for( let i = 0; i < heights.length; i++ ){
+        let sign = Math.sign( origin_height - heights[i] );
+        heights[i] = ( 1 + sign * ( max - heights[i] ) / ( max - min ) );
+      }
+
+      for( let i = 0; i < table.length; i++ )
+        probabilities.push( 0 );
+
+      for( let i = 0; i < table.length; i++ ){
+        let ii = ( i + shift ) % table.length;
+        let scale = 4;
+        let sign = 1;
+        if( table[i] == 1 )
+          scale = 1;
+
+        if( this.data.target != null ){
+          if( convergences[ii] < -1 )
+            sign = 1/5;
+          if( convergences[ii] > 1 )
+            sign = 5;
+        }
+
+        probabilities[ii] = Math.floor( table[i] * heights[ii] * scale * sign );
+      }
+
+      let outcomes = [];
+      //console.log( this.var.current.grid.y * 10 + this.var.current.grid.x, probabilities )
+
+      for( let i = 0; i < probabilities.length; i++ )
+        for( let j = 0; j < probabilities[i]; j++ )
+          outcomes.push( i );
+
+      let rand = Math.floor( Math.random() * outcomes.length );
+      return outcomes[rand];
     }
-
-    let outcomes = [];
-    //console.log( this.var.current.grid.y * 10 + this.var.current.grid.x, probabilities )
-
-    for( let i = 0; i < probabilities.length; i++ )
-      for( let j = 0; j < probabilities[i]; j++ )
-        outcomes.push( i );
-
-    let rand = Math.floor( Math.random() * outcomes.length );
-    return outcomes[rand];
   }
 
   add_output( grid, way ){
@@ -196,8 +199,8 @@ class nulla {
     this.var.current.grid = grid.copy();
     this.var.current.grid.add( weather.table.neighbors[way] );
     this.flag.stop = weather.check_way( this.var.current.grid );
-    if( this.flag.stop == 0 )
-      console.log( grid.y * 10 + grid.x, this.flag.stop, way )
+    /*if( this.flag.stop == 0 )
+      console.log( grid.y * 10 + grid.x, this.flag.stop, way )*/
 
     let type;
 
