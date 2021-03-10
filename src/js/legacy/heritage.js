@@ -17,7 +17,7 @@ class heritage {
       layout: []
     }
 
-    this.init();
+    //this.init();
   }
 
   init(){

@@ -18,7 +18,58 @@ class womb {
 
   init_traits(){
     this.array.trait = [
-      [ 0, 1, 2, 3 ]
+      [
+        {
+          id: 0,
+          name: 'yellow'
+        },
+        {
+          id: 1,
+          name: 'green'
+        },
+        {
+          id: 2,
+          name: 'blue'
+        },
+        {
+          id: 3,
+          name: 'red'
+        }
+      ],
+      [
+        {
+          id: 0,
+          name: 'diag-0'
+        },
+        {
+          id: 1,
+          name: 'horizon'
+        },
+        {
+          id: 2,
+          name: 'diag-1'
+        },
+        {
+          id: 3,
+          name: 'vertical'
+        },
+        {
+          id: 4,
+          name: 'diag-0'
+        },
+        {
+          id: 5,
+          name: 'horizon'
+        },
+        {
+          id: 6,
+          name: 'diag-1'
+        },
+        {
+          id: 7,
+          name: 'vertical'
+        }
+      ]
     ];
   }
 
@@ -66,7 +117,7 @@ class womb {
       traits.push( array[rand] );
     }
 
-    this.data.hive.array.comb[0][col].set_honey( new honey( this.var.current.honey, this.data.hive.const.a * 0.45, traits ) );
+    this.data.hive.array.comb[0][col].set_honey( new honey( this.var.current.honey, this.data.hive.const.a * 0.2, traits, this ) );
     this.var.current.honey++;
   }
 
