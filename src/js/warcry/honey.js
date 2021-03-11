@@ -48,10 +48,10 @@ class honey {
     let vec = offset.copy();
     noStroke();
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-    ellipse( vec.x, vec.y, this.const.d, this.const.d );
+    //ellipse( vec.x, vec.y, this.const.d, this.const.d );
 
     stroke( 0 );
-    strokeWeight( 0.2 );
+    strokeWeight( 0.5 );
     let i = this.array.trait[1].id;
     let ii = ( i + this.const.n / 2 ) % this.const.n;
     /*line( this.array.vertex[i].x + vec.x, this.array.vertex[i].y + vec.y,

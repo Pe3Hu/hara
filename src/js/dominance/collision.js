@@ -16,7 +16,7 @@ class collision {
     this.table = {
     };
 
-    this.init();
+    //this.init();
   }
 
   init(){
@@ -34,8 +34,8 @@ class collision {
   }
 
   click( offsets ){
-    this.data.arena.click( offsets );
-    this.data.coordinator.click( offsets );
+    /*this.data.arena.click( offsets );
+    this.data.coordinator.click( offsets );*/
   }
 
   key(){
@@ -43,7 +43,7 @@ class collision {
   }
 
   moved( offsets ){
-    this.data.coordinator.moved( offsets );
+    //this.data.coordinator.moved( offsets );
   }
 
   update(){
@@ -54,8 +54,8 @@ class collision {
   }
 
   draw( offsets ){
-    this.update();
+    /*this.update();
     this.data.arena.draw( offsets );
-    this.data.coordinator.draw( offsets );
+    this.data.coordinator.draw( offsets );*/
   }
 }

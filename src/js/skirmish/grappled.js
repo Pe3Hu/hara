@@ -246,8 +246,8 @@ class grappled {
   moved( offsets ){
     //let offset = offsets[1];
     if( this.flag.time )
-    for( let i = 0; i < this.array.satellite.length; i++ )
-      this.array.satellite[i].detectModulus( offsets );
+      for( let i = 0; i < this.array.satellite.length; i++ )
+        this.array.satellite[i].detectModulus( offsets );
   }
 
   update(){

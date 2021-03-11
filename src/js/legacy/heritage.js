@@ -26,7 +26,7 @@ class heritage {
   }
 
   click( offsets ){
-    this.array.layout[this.var.layout].click( offsets );
+    //this.array.layout[this.var.layout].click( offsets );
   }
 
   key(){
@@ -37,6 +37,6 @@ class heritage {
   }
 
   draw( offsets ){
-    this.array.layout[this.var.layout].draw( offsets );
+    //this.array.layout[this.var.layout].draw( offsets );
   }
 }

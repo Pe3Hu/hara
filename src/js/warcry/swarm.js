@@ -5,7 +5,7 @@ class swarm {
       size: 2,
       n: 10,
       m: 3,
-      a: CELL_SIZE
+      a: CELL_SIZE * 3
     };
     this.var = {
       layout: 0

@@ -114,5 +114,10 @@ class comb {
 
     if( this.data.honey != null )
       this.data.honey.draw( vec );
+
+
+    noStroke();
+    fill( 0 );
+    text( this.const.index, vec.x, vec.y + FONT_SIZE / 3 );    
   }
 }

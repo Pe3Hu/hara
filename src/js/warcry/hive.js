@@ -19,6 +19,7 @@ class hive {
       }
     };
     this.array = {
+      neighbor: [],
       comb: [],
       drone: [],
       cluster: []
@@ -28,6 +29,15 @@ class hive {
     };
 
     this.init();
+  }
+
+  init_neighbors(){
+    this.array.neighbor = [
+      createVector( 1, 0 ),
+      createVector( 0, 1 ),
+      createVector( -1, 0 ),
+      createVector( 0, -1 )
+    ]
   }
 
   init_combs(){
@@ -85,6 +95,7 @@ class hive {
   }
 
   init(){
+    this.init_neighbors();
     this.init_combs();
     this.init_womb();
     this.init_drones();
@@ -191,6 +202,28 @@ class hive {
       return null;
 
     return vec.y * this.const.m + vec.x;
+  }
+
+  check_border( grid ){
+    let flag = ( grid.x >= this.const.m ) || ( grid.x < 0 ) || ( grid.y >= this.const.n ) || ( grid.y < 0 );
+
+    return !flag;
+  }
+
+  bubble_sort( arr, key ){
+    for( let i = 0; i < arr.length - 1; i++ ){
+      let flag = false;
+
+      for( let j = 0; j < arr.length - 1 - i; j++ )
+        if( arr[j][key] > arr[j + 1][key] ){
+          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+          flag = true;
+        }
+
+      if ( !flag ) break;
+    }
+
+    return arr;
   }
 
   draw( offset ){
