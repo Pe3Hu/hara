@@ -48,7 +48,7 @@ class honey {
     let vec = offset.copy();
     noStroke();
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
-    //ellipse( vec.x, vec.y, this.const.d, this.const.d );
+    ellipse( vec.x, vec.y, this.const.d, this.const.d );
 
     stroke( 0 );
     strokeWeight( 0.5 );

@@ -103,7 +103,7 @@ class hive {
     this.update_ripes();
 
     let drone = this.array.drone[0];
-    drone.selection_of_variants();
+    drone.find_promising_ripe();
   }
 
   add_cluster( traits ){
@@ -163,7 +163,23 @@ class hive {
         indexs_cluster.push( comb )
     }
 
-    rand =  Math.floor( Math.random() * indexs_cluster.length );
+    let corner = true;
+    while( corner ){
+      rand = Math.floor( Math.random() * indexs_cluster.length );
+      let comb = indexs_cluster[rand];
+      let grid = this.convert_index( comb );
+      corner = this.check_corners( grid );
+
+      if( corner )
+        indexs_cluster.splice( rand, 1 );
+      //upgradeability
+      //elimination of a cluster consisting of corner honey
+      if( indexs_cluster.length == 0 ){
+        this.define_ripe();
+        return;
+      }
+    }
+
     let rand_comb = indexs_cluster[rand];
     let grid = this.convert_index( rand_comb );
     this.array.comb[grid.y][grid.x].set_status( 1 );
@@ -202,6 +218,12 @@ class hive {
       return null;
 
     return vec.y * this.const.m + vec.x;
+  }
+
+  check_corners( grid ){
+    let x = grid.x == 0 || grid.x == this.const.m - 1;
+    let y = grid.y == 0 || grid.y == this.const.n - 1;
+    return x && y;
   }
 
   check_border( grid ){
