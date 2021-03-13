@@ -64,7 +64,7 @@ class hive {
         let col = i * 2 + 1;
         let row = 0;
         let sight = 1;
-        this.array.drone.push( new drone( i, row, col, sight, this.const.a * 0.3, this ) );
+        this.array.drone.push( new drone( i, row, col, sight, this.const.a, this ) );
       }
     }
 
@@ -103,7 +103,7 @@ class hive {
     this.update_ripes();
 
     let drone = this.array.drone[0];
-    drone.find_promising_ripe();
+    drone.start();
   }
 
   add_cluster( traits ){

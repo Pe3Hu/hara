@@ -6,7 +6,13 @@ class honey {
       n: 8,
       a: a,
       d: a * 2
-    }
+    };
+    this.var = {
+      impact: null
+    };
+    this.flag = {
+      tandem: false
+    };
     this.array = {
       trait: traits,
       vertex: []
@@ -46,6 +52,13 @@ class honey {
 
   draw( offset ){
     let vec = offset.copy();
+    if( this.var.impact != null ){
+      vec.add( this.var.impact )
+
+      if( this.flag.tandem )
+        vec = this.var.impact.copy();
+    }
+
     noStroke();
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );
     ellipse( vec.x, vec.y, this.const.d, this.const.d );
