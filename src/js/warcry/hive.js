@@ -8,7 +8,8 @@ class hive {
     };
     this.var = {
       current: {
-        cluster: 0
+        cluster: 0,
+        score: 0
       }
     }
     this.flag = {
@@ -22,7 +23,8 @@ class hive {
       neighbor: [],
       comb: [],
       drone: [],
-      cluster: []
+      cluster: [],
+      ripe: []
     };
     this.data = {
       womb: null
@@ -80,18 +82,18 @@ class hive {
         this.add_cluster( [ trait ] );
 
     for( let combs of this.array.comb )
-      for( let comb of combs ){
-        let traits = comb.data.honey.array.trait;
+      for( let comb of combs )
+        if( comb.data.honey != null ){
+          let traits = comb.data.honey.array.trait;
 
+          for( let trait of traits )
+            for( let cluster of this.array.cluster ){
+              let index = cluster.array.trait.indexOf( trait );
 
-        for( let trait of traits )
-          for( let cluster of this.array.cluster ){
-            let index = cluster.array.trait.indexOf( trait );
-
-            if( index != -1 )
-              cluster.array.comb.push( comb.const.index );
-          }
-      }
+              if( index != -1 )
+                cluster.array.comb.push( comb.const.index );
+            }
+        }
   }
 
   init(){
@@ -141,57 +143,69 @@ class hive {
           border_clusters.push( cluster.const.index );
     }
 
-    let distribution = [];
+    if( border_clusters.length > 0 ){
+      let distribution = [];
 
-    for( let i = 0; i < border_clusters.length; i++ ){
-      let length = this.array.cluster[border_clusters[i]].array.comb.length;
+      for( let i = 0; i < border_clusters.length; i++ ){
+        let length = this.array.cluster[border_clusters[i]].array.comb.length;
 
-      for( let j = 0; j < length; j++ )
-        distribution.push( i );
-    }
+        for( let j = 0; j < length; j++ )
+          distribution.push( i );
+      }
 
-    let rand = Math.floor( Math.random() * distribution.length );
-    let index = border_clusters[distribution[rand]]
-    let rand_cluster = this.array.cluster[index];
-    let indexs_cluster = [];
+      let rand = Math.floor( Math.random() * distribution.length );
+      let index = border_clusters[distribution[rand]];
+      let rand_cluster = this.array.cluster[index];
+      let indexs_cluster = [];
 
-    for( let comb of rand_cluster.array.comb ){
-      let index = indexs.indexOf( comb );
-      let grid = this.convert_index( comb );
+      for( let comb of rand_cluster.array.comb ){
+        let index = indexs.indexOf( comb );
+        let grid = this.convert_index( comb );
 
-      if( index != -1 && this.array.comb[grid.y][grid.x].is_movable() )
-        indexs_cluster.push( comb )
-    }
+        if( index != -1 && this.array.comb[grid.y][grid.x].is_movable() )
+          indexs_cluster.push( comb )
+      }
 
-    let corner = true;
-    while( corner ){
-      rand = Math.floor( Math.random() * indexs_cluster.length );
-      let comb = indexs_cluster[rand];
-      let grid = this.convert_index( comb );
-      corner = this.check_corners( grid );
+      let corner = true;
+      while( corner ){
+        rand = Math.floor( Math.random() * indexs_cluster.length );
+        let comb = indexs_cluster[rand];
+        let grid = this.convert_index( comb );
+        corner = this.check_corners( grid );
 
-      if( corner )
-        indexs_cluster.splice( rand, 1 );
-      //upgradeability
-      //elimination of a cluster consisting of corner honey
-      if( indexs_cluster.length == 0 ){
-        this.define_ripe();
-        return;
+        if( corner )
+          indexs_cluster.splice( rand, 1 );
+        //upgradeability
+        //elimination of a cluster consisting of corner honey
+        if( indexs_cluster.length == 0 ){
+          this.define_ripe();
+          return;
+        }
+      }
+
+      let rand_comb = indexs_cluster[rand];
+      let grid = this.convert_index( rand_comb );
+      this.array.comb[grid.y][grid.x].set_status( 1 );
+
+      if( grid.x == 0 ){
+        this.flag.ripe.left = true;
+        this.array.ripe.push( rand_comb );
+      }
+      if( grid.x == this.const.m - 1 ){
+        this.flag.ripe.right = true;
+        this.array.ripe.push( rand_comb );
       }
     }
 
-    let rand_comb = indexs_cluster[rand];
-    let grid = this.convert_index( rand_comb );
-    this.array.comb[grid.y][grid.x].set_status( 1 );
+    this.check_ripes();
+  }
 
-    if( grid.x == 0 ){
-      this.flag.ripe.left = true;
-      this.array.drone[0].array.ripe.push( rand_comb );
-    }
-    if( grid.x == this.const.m - 1 ){
-      this.flag.ripe.right = true;
-      this.array.drone[this.array.drone.length - 1].array.ripe.push( rand_comb );
-    }
+  reap_ripe(){
+    //
+    console.log(  '!!!!!!!!!!!!!' )
+    this.var.current.score++;
+    this.flag.full = false;
+    this.data.womb.refill();
   }
 
   key(){
@@ -200,6 +214,36 @@ class hive {
 
   click(){
 
+  }
+
+  compare_traits( combs ){
+    let traits = [];
+    let flag = false;
+    let coincided = [];
+
+    for( let comb of combs )
+      if( comb.data.honey != null )
+        traits.push( comb.data.honey.array.trait );
+
+
+    if( traits.length == combs.length )
+      for( let origin of traits[0] ){
+        let origin_flag = true;
+
+        for( let i = 1; i < traits.length; i++ ){
+          let index = traits[i].indexOf( origin );
+
+          origin_flag = origin_flag && index != -1;
+        }
+
+        flag = flag || origin_flag;
+        if( origin_flag )
+          coincided.push( origin );
+      }
+
+    if( coincided.length>0 )
+      console.log( coincided[0].name )
+    return flag;
   }
 
   //find the grid coordinates by index
@@ -232,6 +276,36 @@ class hive {
     return !flag;
   }
 
+  check_ripes(){
+    for( let ripe of this.array.ripe ){
+
+      let grid = this.convert_index( ripe );
+      let combs = [
+        this.array.comb[grid.y - 1][grid.x],
+        this.array.comb[grid.y][grid.x],
+        this.array.comb[grid.y + 1][grid.x] ];
+
+      if( this.compare_traits( combs ) ){
+        this.array.comb[grid.y - 1][grid.x].data.honey = null;
+        this.array.comb[grid.y][grid.x].data.honey = null;
+        this.array.comb[grid.y][grid.x].set_status( 0 );
+        this.array.comb[grid.y + 1][grid.x].data.honey = null;
+
+        this.reap_ripe();
+
+        if( grid.x == 0 ){
+          this.array.ripe.splice( 0, 1 );
+          this.flag.ripe.left = false;
+        }
+        if( grid.x == this.const.m - 1 ){
+          this.array.ripe.splice( 1, 1 );
+          this.flag.ripe.right = false;
+        }
+      }
+
+    }
+  }
+
   bubble_sort( arr, key ){
     for( let i = 0; i < arr.length - 1; i++ ){
       let flag = false;
@@ -248,8 +322,13 @@ class hive {
     return arr;
   }
 
+  update(){
+    this.update_ripes();
+  }
+
   draw( offset ){
     offset = createVector();
+    this.update();
 
     for( let combs of this.array.comb )
       for( let comb of combs )
@@ -257,5 +336,9 @@ class hive {
 
     for( let drone of this.array.drone )
       drone.draw( offset );
+
+    noStroke();
+    fill( 0 );
+    text( 'score: ' + this.var.current.score, ( this.const.m + 0.5 ) * this.const.a, this.const.a / 2 + FONT_SIZE / 3 );
   }
 }

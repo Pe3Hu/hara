@@ -17,29 +17,30 @@ class drone {
       rotate: {
         end: null,
         clockwise: null,
-        tempo: FRAME_RATE /3 ,
+        tempo: FRAME_RATE  / 10,
         crank: null
       },
       swap: {
         end: Math.PI,
         clockwise: true,
         center: null,
-        tempo: FRAME_RATE /3 ,
+        tempo: FRAME_RATE  / 10,
         crank: null,
         neighbor: null,
         r: null
       },
-      impact:{
+      impact: {
         begin: null,
         end: null,
         slip: null,
         direction: null,
-        tempo: FRAME_RATE /3 ,
+        tempo: FRAME_RATE  / 10,
         vector: null,
         stage: 0
       },
       arc: {
         center: null,
+        begin: null,
         between: null,
         tandem: null,
         center_swap: null
@@ -49,7 +50,7 @@ class drone {
       },
       cut_frame: {
         counter: 0,
-        stopper: 1
+        stopper: 0
       }
     };
     this.flag = {
@@ -68,10 +69,10 @@ class drone {
     };
     this.array = {
       vertex: [],
-      ripe: [],
       track: [],
       turn: [],
-      task_list: []
+      task_list: [],
+      lodestar: []
     };
     this.data = {
       hive: hive,
@@ -91,18 +92,14 @@ class drone {
 
   start(){
     this.find_promising_ripe();
-    //this.add_task( 'impact', -1 );
-    //this.add_task( 'swap' );
-    //this.add_task( 'rotate', 2 );
-    //this.slide();
-    console.log( this.array.task_list);
+    //this.add_task( 'rotate', 2 )
   }
 
   find_promising_ripe(){
     let hive = this.data.hive;
     let options = [];
 
-    for( let ripe of this.array.ripe ){
+    for( let ripe of hive.array.ripe ){
       let grid = hive.convert_index( ripe );
 
       if( !hive.check_corners( grid ) ){
@@ -116,7 +113,7 @@ class drone {
             let combs = [];
 
             for( let comb of cluster.array.comb ){
-               let index = this.array.ripe.indexOf( comb );
+               let index = hive.array.ripe.indexOf( comb );
 
                if( index == -1 )
                  combs.push( comb );
@@ -146,6 +143,7 @@ class drone {
     for( let option of options ){
       let top_grid = hive.convert_index( option.top );
       let bot_grid = hive.convert_index( option.bot );
+      //if(  )
       let neighbors = [ top_grid, bot_grid ];
       let distances = [];
 
@@ -222,42 +220,45 @@ class drone {
             }
           } );
 
-
     let rand = Math.floor( Math.random() * nearest_couples.length );
     this.data.couple = nearest_couples[rand];
-    this.move_func();
+
+    this.array.lodestar = [];
+    if( this.data.couple.top.stage == -1 )
+      this.array.lodestar.push( this.data.couple.top );
+    if( this.data.couple.bot.stage == -1 )
+      this.array.lodestar.push( this.data.couple.bot );
   }
 
   move_func(){
     let hive = this.data.hive;
-    let lodestars = [];
-    if( this.data.couple.top.stage == -1 )
-      lodestars.push( this.data.couple.top );
-    if( this.data.couple.bot.stage == -1 )
-      lodestars.push( this.data.couple.bot );
 
-    while( lodestars.length > 0 && !this.flag.transfer ){
+    if( this.array.lodestar.length > 0 && !this.flag.transfer ){
       this.flag.transfer = true;
       this.array.track = [];
       this.array.turn = [];
       this.array.task_list = [];
-      let nearest = this.select_nearest_honey( lodestars );
-      let lodestar = lodestars[nearest.index];
+      let nearest = this.select_nearest_honey( this.array.lodestar );
+      let lodestar = this.array.lodestar[nearest.index];
+      console.log( this.array.lodestar[0], this.array.lodestar[1] )
       console.log( lodestar )
 
       if( lodestar.begin != lodestar.end ){
         this.go_to_nearest_honey( lodestar );
         this.get_directions( lodestar );
       }
-      else
+      else{
+        lodestar.start = 3;
         this.flag.transfer = false;
+      }
 
-      lodestars.splice( nearest.index, 1 );
+      this.array.lodestar.splice( nearest.index, 1 );
     }
-
+    else
+      this.find_promising_ripe();
   }
 
-  select_nearest_honey( lodestars ){
+  select_nearest_honey(){
     let hive = this.data.hive;
     let nearest = {
       grid: null,
@@ -265,8 +266,8 @@ class drone {
     };
     let current = createVector( this.var.col, this.var.row );
 
-    for( let i = 0; i < lodestars.length; i++ ){
-      let grid = hive.convert_index( lodestars[i] );
+    for( let i = 0; i < this.array.lodestar.length; i++ ){
+      let grid = hive.convert_index( this.array.lodestar[i] );
       let d = current.dist( grid );
 
       if( d < nearest.d )
@@ -292,11 +293,14 @@ class drone {
     if( iteration < 0 )
       direction = 3;
 
-    console.log( 'iter', iteration )
+    //console.log( 'iter', iteration )
     this.turn_to( direction );
 
-    for( let i = 0; i < Math.abs( iteration ); i++ )
+    for( let i = 0; i < Math.abs( iteration - 1 ); i++ )
       this.slide();
+
+    if( Math.abs( iteration ) > 0 )
+      this.add_task( 'swap', true );
   }
 
   get_directions( obj ){
@@ -314,9 +318,7 @@ class drone {
       obj.stage = this.detect_stage( this.array.track[this.array.track.length - 1], grids[1] );
       counter++;
     }
-    console.log( this.array.turn )
-
-    this.trace();
+    //console.log( this.array.turn )
   }
 
   detect_stage( current, end ){
@@ -371,43 +373,38 @@ class drone {
     } );
   }
 
-  trace(){
-    for( let turn of this.array.turn ){
-      let direction = turn.direction;//( this.var.sight - turn.direction + this.const.sides ) % this.const.sides;
-      if( turn.stage == 0 )
-        direction = ( this.const.sides / 2 + direction ) % this.const.sides
-        console.log( turn.stage, direction )
-      this.turn_to( direction );
-      this.exchange();
-      if( direction % 2 == 1 )
-        this.add_task( 'swap', false );
-    }
-  }
-
   reset(){
     //
     this.var.angle.rotate = this.var.sight * Math.PI / 2;
+    this.var.angle.swap = 0;
+
     this.var.arc.center = createVector(
       Math.sin( Math.PI / 2 - this.var.angle.rotate ) * this.const.b ,
       Math.cos( Math.PI / 2 - this.var.angle.rotate ) * this.const.b );
 
-    this.var.arc.begin =-Math.PI / 2 + this.var.angle.rotate;
-    this.var.angle.swap = 0;
+    this.var.arc.begin = -Math.PI / 2 + this.var.angle.rotate;
+
     this.var.arc.between = null;
-    this.var.arc.impact = null;
-    this.var.arc.center_swap = null;
     this.var.arc.tandem = null;
-    /*
-    this.var.arc.center = createVector(
-      Math.sin( ( this.var.sight - 2 ) * Math.PI / 2 - this.var.angle.rotate ) * this.const.b,
-      Math.cos( ( this.var.sight - 2 ) * Math.PI / 2 - this.var.angle.rotate ) * this.const.b );
+    this.var.arc.center_swap = null;
 
-    this.var.arc.begin = ( this.var.sight - 2 ) * Math.PI / 2 + this.var.angle.rotate;
-    this.var.arc.end =  this.var.sight * Math.PI / 2 + this.var.angle.rotate;
-    this.var.angle.swap = 0;*/
+    this.var.rotate.end = null;
+    this.var.rotate.clockwise = null;
+    this.var.rotate.crank = null;
 
-    //console.log('sight',this.var.sight)
-    //onsole.log(this.var.angle.rotate )
+    this.var.impact.begin = null;
+    this.var.impact.end = null;
+    this.var.impact.slip = null;
+    this.var.impact.direction = null;
+    this.var.impact.vector = null,
+    this.var.impact.stage = 0;
+
+    this.var.swap.end = null;
+    this.var.swap.crank = null;
+    this.var.swap.center = null;
+    this.var.swap.crank = null;
+    this.var.swap.neighbor = null;
+    this.var.swap.r = null;
 
     this.flag.reset = false;
     this.flag.swap = false;
@@ -416,6 +413,7 @@ class drone {
     this.flag.cargo = false;
     this.flag.last_animation = false;
     this.flag.slide = false;
+    this.flag.transfer = false;
     this.flag.wait = true;
 
     this.update_tandem();
@@ -441,12 +439,13 @@ class drone {
 
   swap(){
     let d = Math.abs( this.var.angle.swap - this.var.swap.end );
+    //console.log(this.flag.swap, d, this.var.swap.crank )
 
     if( d > this.var.swap.crank ){
       this.var.angle.swap += this.var.swap.crank;
       this.var.arc.center_swap = createVector(
-        Math.sin( Math.PI - this.var.angle.swap ) * this.var.swap.r,
-        Math.cos( Math.PI - this.var.angle.swap ) * this.var.swap.r );
+        Math.sin( ( this.var.sight + 1 ) * Math.PI / 2 - this.var.angle.swap ) * this.var.swap.r,
+        Math.cos( ( this.var.sight + 1 ) * Math.PI / 2 - this.var.angle.swap ) * this.var.swap.r );
     }
     else {
       this.flag.swap = false;
@@ -454,8 +453,8 @@ class drone {
       this.var.angle.swap = Math.round( this.var.angle.swap / Math.PI ) * Math.PI;
 
       this.var.arc.center_swap = createVector(
-        Math.sin( Math.PI - this.var.swap.end ) * this.var.swap.r,
-        Math.cos( Math.PI - this.var.swap.end ) * this.var.swap.r );
+        Math.sin( ( this.var.sight + 1 ) * Math.PI / 2 - this.var.angle.swap ) * this.var.swap.r,
+        Math.cos( ( this.var.sight + 1 ) * Math.PI / 2 - this.var.angle.swap ) * this.var.swap.r );
     }
   }
 
@@ -464,9 +463,9 @@ class drone {
     let end = this.var.impact.end.copy();
     let d = this.var.impact.vector.dist( end );
 
-    if( d > this.var.impact.slip.mag() ){
+    if( d >= this.var.impact.slip.mag() ){
       let slip = this.var.impact.slip.copy();
-      slip.mult( this.var.impact.direction )
+      slip.mult( this.var.impact.direction );
       this.var.impact.vector.add( slip );
     }
     else {
@@ -479,6 +478,8 @@ class drone {
     }
 
     if( this.var.impact.stage == 2 ){
+      this.var.impact.vector = end;
+
       this.flag.impact = false;
       this.flag.wait = true;
       this.var.impact.begin = null;
@@ -492,12 +493,12 @@ class drone {
 
   turn_to( direction ){
     let turns = direction - this.var.sight;
-    console.log( 'truns', direction, this.var.sight, turns )
 
     if(  Math.abs( turns ) > 0 ){
       if( Math.abs( turns ) > this.const.sides / 2 )
         turns = turns - Math.sign( turns ) * this.const.sides;
 
+      //console.log( 'truns', direction, this.var.sight, turns )
       this.add_task( 'rotate', turns );
     }
   }
@@ -507,22 +508,59 @@ class drone {
     this.add_task( 'rotate', 2 );
   }
 
-  exchange(){
+  exchange( comb_swap ){
     //
     this.add_task( 'impact', 1 );
     this.add_task( 'swap', false );
     this.add_task( 'impact', -1 );
-    this.add_task( 'swap', true );
+    this.add_task( 'exchange', comb_swap );
+
+    if( !comb_swap )
+      this.add_task( 'swap', false );
+
+    this.add_task( 'reset' );
   }
 
   add_task( task, detail ){
-    this.array.task_list.push( new basic_operation( this.var.index.task, task, detail, this ) );
-    this.var.index.task++;
+    let error = false;
+
+    if( task == 'swap' && this.data.tandem != null ){
+      if( detail == true && this.var.sight % 2 == 0 ){
+        error = true;
+        console.log( 'slide_error' )
+      }
+
+      if( this.data.tandem.flag.anchor == true ){
+        error = true;
+        console.log( 'anchor_error' )
+      }
+    }
+
+    if( !error ){
+      this.array.task_list.push( new basic_operation( this.var.index.task, task, detail, this ) );
+      this.var.index.task++;
+    }
+  }
+
+  check_ripe(){
+    if( this.data.couple != null ){
+      if( this.data.couple.top.begin == this.data.couple.top.end )
+        this.data.couple.top.stage = 3;
+      if( this.data.couple.bot.begin == this.data.couple.bot.end )
+        this.data.couple.bot.stage = 3;
+
+      if( this.data.couple.bot.stage == 3 && this.data.couple.top.stage == 3 ){
+
+        this.data.hive.check_ripes();
+        this.data.couple = null;
+      }
+    }
   }
 
   update(){
-    if( this.flag.last_animation && this.flag.slide )
+    if( this.flag.last_animation && this.flag.slide || this.flag.reset )
       this.flag.stop = true;
+
     if( this.flag.stop )
       if( this.var.cut_frame.counter < this.var.cut_frame.stopper )
         this.var.cut_frame.counter++;
@@ -530,7 +568,6 @@ class drone {
         this.var.cut_frame.counter = 0;
         this.flag.stop = false;
       }
-    this.update_arc();
 
     if( this.flag.reset )
       this.reset();
@@ -541,13 +578,24 @@ class drone {
     if( this.flag.impact )
       this.impact();
 
+    this.update_arc();
 
-      /*if( this.array.task_list.length > 0 )
-        console.log( this.flag.wait, this.flag.impact, this.flag.swap )*/
-    if( this.flag.wait && this.array.task_list.length > 0 ){
-      this.array.task_list[0].execute();
-      this.array.task_list.splice( 0, 1 );
-    }
+    if( this.flag.wait )
+      if( this.array.task_list.length > 0 ){
+        this.array.task_list[0].execute();
+        this.array.task_list.splice( 0, 1 );
+      }
+      else
+        if( this.array.turn.length > 0 )
+          this.add_task( 'trace' );
+        else{
+          this.flag.transfer = false;
+
+          if( this.data.hive.flag.full ){
+            this.check_ripe();
+            this.move_func();
+          }
+        }
   }
 
   update_arc(){
@@ -557,33 +605,41 @@ class drone {
         Math.cos( Math.PI / 2 - this.var.angle.rotate ) * this.const.b );
 
       this.var.arc.begin = -Math.PI / 2 + this.var.angle.rotate + this.var.angle.swap;
+      /*if( this.var.sight % 2 == 0 )
+        this.var.arc.begin += Math.PI;*/
 
       if( this.var.arc.center_swap != null ){
         this.var.arc.center = this.var.arc.between.copy();
-        this.var.arc.center.add( this.var.arc.center_swap );
+        let swap = this.var.arc.center_swap.copy();
+        let parity = this.var.sight % 2;
+        if( parity == 0)
+          parity = -1;
+
+        swap.mult( parity )
+        this.var.arc.center.add( swap );
       }
 
       if( this.flag.impact )
         this.var.arc.center.add( this.var.impact.vector );
 
-      let tandem_mirror = this.var.arc.between.copy();
-      tandem_mirror.sub( this.var.arc.center );
-      tandem_mirror.mult( 2 );
-
-      this.var.arc.tandem = this.var.arc.center.copy();
-      this.var.arc.tandem.add( tandem_mirror );
+      if( this.var.arc.between != null ){
+        let tandem_mirror = this.var.arc.between.copy();
+        tandem_mirror.sub( this.var.arc.center );
+        tandem_mirror.mult( 2 );
+        this.var.arc.tandem = this.var.arc.center.copy();
+        this.var.arc.tandem.add( tandem_mirror );
+      }
 
       if( this.flag.cargo ){
         this.data.comb.data.honey.var.impact = this.var.arc.center.copy();
         this.data.tandem.data.honey.var.impact = this.var.arc.tandem.copy();
-        this.data.tandem.data.honey.var.impact.add( this.data.comb.const.center )
+        this.data.tandem.data.honey.var.impact.add( this.data.comb.const.center );
       }
 
       if( Math.abs( this.var.angle.rotate ) > Math.PI * 2 )
         this.var.angle.rotate = Math.sign( this.var.angle.rotate ) * ( Math.abs( this.var.angle.rotate ) - Math.PI * 2 );
 
       if( this.flag.last_animation ){
-
         if( this.flag.slide ){
           this.var.sight = ( this.var.sight + this.const.sides / 2 ) % this.const.sides;
           this.var.col = this.var.swap.tandem.x;
@@ -593,14 +649,14 @@ class drone {
           this.reset();
         }
         else{
-
-            this.flag.wait = true;
+          this.flag.wait = true;
           this.flag.last_animation = false;
         }
       }
     }
   }
 
+  update_tandem(){
     this.update_arc();
     let hive = this.data.hive;
     let neighbor = hive.array.neighbor[this.var.sight].copy();
@@ -621,30 +677,47 @@ class drone {
       this.var.arc.tandem = null;
   }
 
-  draw_tandem( vec ){
-    let hive = this.data.hive;
-    let weight = 0.5;
-    stroke( 0 );
-    strokeWeight( weight );
-    fill( 0 );
-    arc( this.var.arc.center.x + vec.x, this.var.arc.center.y + vec.y,
-        this.const.d, this.const.d, this.var.arc.begin, this.var.arc.begin + Math.PI, CHORD );
+  arc_check( vec ){
+    let arc = this.data.comb.const.center.copy();
+    arc.sub( vec );
+    let d = arc.dist( this.var.arc.center );
+    return d > this.data.hive.const.a;
+  }
 
-    stroke( 360 );
-    fill( 360 )
-    if( ( this.flag.wait || this.flag.swap || this.flag.impact || this.flag.last_animation ) &&
-          this.var.arc.tandem != null )
-      arc( this.var.arc.tandem.x + vec.x, this.var.arc.tandem.y + vec.y,
-          this.const.d, this.const.d, this.var.arc.begin + Math.PI, this.var.arc.begin, CHORD );
+  draw_tandem( vec ){
+    if( ( this.flag.wait || this.flag.rotate || this.flag.swap || this.flag.impact || this.flag.last_animation ) &&
+      !this.arc_check( vec ) ){
+      let hive = this.data.hive;
+      let weight = 0.5;
+      stroke( 0 );
+      strokeWeight( weight );
+      fill( 0 );
+      arc( this.var.arc.center.x + vec.x, this.var.arc.center.y + vec.y,
+          this.const.d, this.const.d, this.var.arc.begin, this.var.arc.begin + Math.PI, CHORD );
+
+      stroke( 360 );
+      fill( 360 );
+      if( !this.flag.rotate && this.var.arc.tandem != null )
+        arc( this.var.arc.tandem.x + vec.x, this.var.arc.tandem.y + vec.y,
+            this.const.d, this.const.d, this.var.arc.begin + Math.PI, this.var.arc.begin, CHORD );
+    }
+
   }
 
   draw( offset ){
     let vec = offset.copy();
     vec.add( this.data.comb.const.center );
-    this.update( vec );
+
+    if( !this.flag.error )
+      this.update( vec );
 
     if( !this.flag.stop )
       this.draw_tandem( vec );
+
+    noFill();
+    stroke( 360 );
+    strokeWeight( 6 );
+    ellipse( this.data.comb.const.center.x, this.data.comb.const.center.y, 27, 27  )
     //console.log( this.flag.impact )
   }
 }

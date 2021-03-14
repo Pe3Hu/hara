@@ -50,6 +50,10 @@ class honey {
     }
   }
 
+  copy(){
+    return new honey( this.const.index, this.const.a, this.array.trait, this.data.womb );
+  }
+
   draw( offset ){
     let vec = offset.copy();
     if( this.var.impact != null ){

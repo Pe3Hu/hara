@@ -79,37 +79,48 @@ class womb {
   }
 
   refill(){
-    while( !this.data.hive.flag.full ){
-      this.data.hive.flag.full = true;
+    let hive = this.data.hive;
+    //console.log( hive.flag.full, hive )
 
-      for( let col = 0; col < this.data.hive.array.comb[0].length; col++ ){
-        let flag = this.comb_fullness_check( 0, col );
-        if( flag )
+    while( !hive.flag.full ){
+      hive.flag.full = true;
+
+      for( let col = 0; col < hive.array.comb[0].length; col++ ){
+        let flag = this.col_fullness_check( col );
+          //  console.log( 'col_flag', flag )
+
+        if( !flag )
           this.milk( col );
 
-        this.data.hive.flag.full = this.data.hive.flag.full && !flag;
+        hive.flag.full = hive.flag.full && flag;
       }
     }
-  }
 
-  comb_fullness_check( row, col ){
-    return this.data.hive.array.comb[row][col].data.honey == null;
+    //console.log( this.data.hive.array.comb[0][0].data.honey )
   }
 
   milk( col ){
-    let count_new_milk = null;
+    //console.log( 'milk', col )
+    let hive = this.data.hive;
 
-    for( let row = 0; row < this.data.hive.array.comb.length; row++ )
-      if( this.comb_fullness_check( row, col ) )
-        count_new_milk = row;
+    //while( !this.comb_fullness_check( col ) ){
+    if( true ){
+      let count_new_milk = -1;
 
-    this.add_honey( col );
+      for( let row = 0; row < hive.array.comb.length; row++ )
+        if( !this.comb_fullness_check( row, col ) )
+          count_new_milk = row;
 
-    if( count_new_milk > 0 )
-      this.shift_down( col, count_new_milk );
+      this.add_honey( col );
+
+      if( count_new_milk > 0 )
+        this.shift_down( col, count_new_milk );
+    //console.log( count_new_milk )
+    }
   }
 
   add_honey( col ){
+    let hive = this.data.hive;
     let traits = [];
 
     for( let array of this.array.trait ){
@@ -117,16 +128,33 @@ class womb {
       traits.push( array[rand] );
     }
 
-    this.data.hive.array.comb[0][col].set_honey( new honey( this.var.current.honey, this.data.hive.const.a * 0.2, traits, this ) );
+    hive.array.comb[0][col].set_honey( new honey( this.var.current.honey, hive.const.a * 0.2, traits, this ) );
     this.var.current.honey++;
   }
 
   shift_down( col, count_new_milk ){
+    let hive = this.data.hive;
+
     for( let row = count_new_milk; row > 0; row-- ){
-      let bot = this.data.hive.array.comb[row][col];
-      let top = this.data.hive.array.comb[row - 1][col];
+      let bot = hive.array.comb[row][col];
+      let top = hive.array.comb[row - 1][col];
       bot.set_honey( top.data.honey );
       top.set_honey( null );
     }
+  }
+
+  comb_fullness_check( row, col ){
+    //console.log( row, col, this.data.hive.array.comb[row][col].data.honey)
+    return this.data.hive.array.comb[row][col].data.honey != null;
+  }
+
+  col_fullness_check( col ){
+    let hive = this.data.hive;
+    let flag = true;
+
+    for( let row = 0; row < hive.array.comb.length; row++ )
+      flag = flag && this.comb_fullness_check( row, col )
+
+    return flag;
   }
 }

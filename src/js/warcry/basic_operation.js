@@ -12,7 +12,7 @@ class basic_operation {
   }
 
   execute(){
-    console.log( 'task', this.const.index, this.data.task, this.data.drone.data.comb.const.index )
+    //console.log( 'task', this.const.index, this.data.task, this.data.drone.data.comb.const.index,  this.data.drone.var.sight )
     let drone = this.data.drone;
     let hive = drone.data.hive;
 
@@ -30,7 +30,8 @@ class basic_operation {
         }
         break;
       case 'swap':
-        if( drone.flag.wait && drone.var.arc.tandem != null ){
+        if( drone.flag.wait && drone.var.arc.tandem != null &&
+            !( this.data.drone.var.sight % 2 == 0 && this.data.detail )){
           drone.var.swap.end = drone.var.angle.swap + Math.PI;
           drone.flag.slide = this.data.detail;
           drone.flag.swap = true;
@@ -66,6 +67,47 @@ class basic_operation {
           drone.data.tandem.data.honey.flag.tandem = true;
         }
         break;
+      case 'exchange':
+        if( drone.flag.wait ){
+          let temp = drone.data.comb.data.honey.copy();
+          drone.data.comb.data.honey = drone.data.tandem.data.honey.copy();
+          drone.data.tandem.data.honey = temp;
+          drone.flag.slide = this.data.detail;
+          drone.flag.last_animation = this.data.detail;
+        }
+        break;
+      case 'trace':
+        if( drone.flag.wait ){
+          let turn = drone.array.turn.splice( 0, 1 );
+          let direction = turn[0].direction;
+
+          if( turn[0].stage == 0 )
+            direction = ( drone.const.sides / 2 + turn[0].direction ) % drone.const.sides;
+
+          //console.log( 'before', turn[0].stage, direction )
+          drone.turn_to( direction );
+          let comb_swap = drone.var.sight % 2 == 1 && turn[0].stage == 1;
+          drone.exchange( comb_swap );
+          //console.log( 'after', turn[0].stage, direction )
+          }
+        break;
+      case 'reset':
+        if( drone.flag.wait )
+          drone.flag.reset = true;;
+        break;
     }
   }
 }
+
+//this.add_task( 'impact', -1 );
+//this.add_task( 'swap' );
+//this.add_task( 'rotate', 2 );
+//this.slide();
+//this.exchange();
+//this.add_task( 'rotate', 1 )
+/*this.slide();
+this.add_task( 'rotate', 1 )
+this.exchange();
+this.add_task( 'rotate', 1 )
+this.exchange();*/
+//this.add_task( 'swap', true );
