@@ -66,7 +66,7 @@ class hive {
         let col = i * 2 + 1;
         let row = 0;
         let sight = 1;
-        this.array.drone.push( new drone( i, row, col, sight, this.const.a, this ) );
+        this.array.drone.push( new drone_v2( i, row, col, sight, this.const.a, this ) );
       }
     }
 

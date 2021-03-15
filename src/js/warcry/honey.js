@@ -43,8 +43,8 @@ class honey {
   init_vertexs(){
     for( let i = 0; i < this.const.n; i++ ){
       let vec = createVector(
-        Math.sin( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) ) * this.const.a,
-        Math.cos( Math.PI * 2 / this.const.n * ( - i + this.const.n / 2 ) ) * this.const.a );
+        Math.sin( Math.PI * 2 / this.const.n * ( -1 - i + this.const.n / 2 ) ) * this.const.a,
+        Math.cos( Math.PI * 2 / this.const.n * ( -1 - i + this.const.n / 2 ) ) * this.const.a );
 
       this.array.vertex.push( vec.copy() );
     }

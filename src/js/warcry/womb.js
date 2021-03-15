@@ -43,7 +43,7 @@ class womb {
         },
         {
           id: 1,
-          name: 'horizon'
+          name: 'horizon-0'
         },
         {
           id: 2,
@@ -51,23 +51,23 @@ class womb {
         },
         {
           id: 3,
-          name: 'vertical'
+          name: 'vertical-0'
         },
         {
           id: 4,
-          name: 'diag-0'
+          name: 'diag-2'
         },
         {
           id: 5,
-          name: 'horizon'
+          name: 'horizon-1'
         },
         {
           id: 6,
-          name: 'diag-1'
+          name: 'diag-3'
         },
         {
           id: 7,
-          name: 'vertical'
+          name: 'vertical-1'
         }
       ]
     ];
@@ -80,14 +80,12 @@ class womb {
 
   refill(){
     let hive = this.data.hive;
-    //console.log( hive.flag.full, hive )
 
     while( !hive.flag.full ){
       hive.flag.full = true;
 
       for( let col = 0; col < hive.array.comb[0].length; col++ ){
         let flag = this.col_fullness_check( col );
-          //  console.log( 'col_flag', flag )
 
         if( !flag )
           this.milk( col );
@@ -95,12 +93,9 @@ class womb {
         hive.flag.full = hive.flag.full && flag;
       }
     }
-
-    //console.log( this.data.hive.array.comb[0][0].data.honey )
   }
 
   milk( col ){
-    //console.log( 'milk', col )
     let hive = this.data.hive;
 
     //while( !this.comb_fullness_check( col ) ){
@@ -115,7 +110,6 @@ class womb {
 
       if( count_new_milk > 0 )
         this.shift_down( col, count_new_milk );
-    //console.log( count_new_milk )
     }
   }
 
@@ -144,7 +138,6 @@ class womb {
   }
 
   comb_fullness_check( row, col ){
-    //console.log( row, col, this.data.hive.array.comb[row][col].data.honey)
     return this.data.hive.array.comb[row][col].data.honey != null;
   }
 
