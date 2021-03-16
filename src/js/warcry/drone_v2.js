@@ -17,14 +17,14 @@ class drone_v2 {
       rotate: {
         end: null,
         clockwise: null,
-        tempo: FRAME_RATE / 3,
+        tempo: FRAME_RATE / 2,
         crank: null
       },
       swap: {
         end: Math.PI,
         clockwise: true,
         center: null,
-        tempo: FRAME_RATE / 3,
+        tempo: FRAME_RATE / 2,
         crank: null,
         neighbor: null,
         r: null
@@ -34,7 +34,7 @@ class drone_v2 {
         end: null,
         slip: null,
         direction: null,
-        tempo: FRAME_RATE / 3,
+        tempo: FRAME_RATE / 2,
         vector: null,
         stage: 0
       },
@@ -82,7 +82,8 @@ class drone_v2 {
     this.data = {
       hive: hive,
       comb: hive.array.comb[row][col],
-      set: null
+      set: null,
+      cargo: null
     };
 
     this.init();
@@ -102,13 +103,6 @@ class drone_v2 {
     this.const.d = this.const.a * 0.4;
 
     this.reset();
-  }
-
-  start(){
-    //this.find_promising_ripe();
-    //this.add_task( 'rotate', 2 )
-    this.find_cargo();
-    this.play_it_by_ear();
   }
 
   find_cargo(){
@@ -209,6 +203,7 @@ class drone_v2 {
 
     for( let min_distance of min_distances ){
       let sets = [];
+      console.log(min_distance.distances  )
       let l = min_distance.distances[0].length;
       let max = Math.pow( l, min_distance.distances.length );
       let counter = 0;
@@ -268,6 +263,7 @@ class drone_v2 {
 
       all_sets.push( sets );
     }
+    console.log( all_sets )
 
     for( let sets of all_sets )
       for( let set of sets )
@@ -355,7 +351,7 @@ class drone_v2 {
     }
     else {
       stage = 2;
-      console.log( destination.y, this.var.row )
+
       if( destination.y == this.var.row )
         stage = 3;
     }
@@ -364,18 +360,11 @@ class drone_v2 {
     if( hive.array.comb[destination.y][destination.x].data.honey.const.index == this.data.cargo.honey )
       stage = 4;
 
-    if( stage >  this.data.cargo.stage ){
-     //console.log( stage, this.data.cargo.stage )
+    if( stage >  this.data.cargo.stage )
      this.data.cargo.stage = stage;
-    }
-    //  this.find_cargo();
   }
 
   play_it_by_ear(){
-    /*if( this.data.cargo == null ){
-      this.find_cargo();
-      return;
-    }*/
     let hive = this.data.hive;
     let direction = null;
     let sign = null;
@@ -425,25 +414,26 @@ class drone_v2 {
 
     switch( this.data.cargo.stage ) {
       case 0:
-        this.add_task( 'swap', true );
+        this.add_task( 'swap' );
         break;
       case 1:
+      case 2:
       case 3:
         this.add_task( 'impact', 1 );
-        this.add_task( 'swap', false );
+        this.add_task( 'exchange_begin' );
         this.add_task( 'impact', -1 );
-        this.add_task( 'swap', false );
-        this.add_task( 'exchange' );
-        break;
-      case 2:
-        //this.add_task( 'impact', 1 );
-        this.add_task( 'swap', true );
-        //this.add_task( 'impact', -1 );
-        this.add_task( 'exchange' );
-        //this.add_task( 'reset' );
+        this.add_task( 'swap' );
+        this.add_task( 'impact', -2 );
+        this.add_task( 'exchange_end' );
+        this.add_task( 'impact', 2 );
         break;
     }
 
+    if( this.data.cargo.stage == 0 || this.data.cargo.stage == 2 )
+      this.add_task( 'slide' );
+
+    if( this.data.cargo.stage == 1 || this.data.cargo.stage == 3 )
+      this.add_task( 'swap' );
   }
 
   turn_to( direction ){
@@ -479,10 +469,6 @@ class drone_v2 {
   }
 
   reset(){
-    //
-    if( this.flag.reset )
-      this.detect_cargo_stage();
-
     this.var.angle.rotate = this.var.sight * Math.PI / 2;
     this.var.angle.swap = 0;
 
@@ -504,7 +490,7 @@ class drone_v2 {
     this.var.impact.end = null;
     this.var.impact.slip = null;
     this.var.impact.direction = null;
-    this.var.impact.vector = null,
+    this.var.impact.vector = createVector(),
     this.var.impact.stage = 0;
 
     this.var.swap.end = null;
@@ -530,13 +516,13 @@ class drone_v2 {
   rotate(){
     let d = Math.abs( this.var.angle.rotate - this.var.rotate.end );
     //console.log( this.var.angle.rotate, this.var.rotate.end )
-
     if( d > Math.abs( this.var.rotate.crank ) ){
       this.var.angle.rotate += this.var.rotate.crank;
       if( this.var.angle.rotate < 0 )
         this.var.angle.rotate += Math.PI * 2;
     }
     else {
+
       this.var.angle.rotate = this.var.rotate.end;
       this.flag.rotate = false;
       this.flag.last_animation = true;
@@ -577,47 +563,71 @@ class drone_v2 {
       this.var.impact.vector.add( slip );
     }
     else {
-      this.var.impact.end = this.var.impact.begin.copy();
-      this.var.impact.direction *= -1;
-      this.var.impact.stage++;
-
-    }
-
-    if( this.var.impact.stage == 2 ){
-      this.var.impact.vector = end;
-
       this.flag.impact = false;
-      this.flag.wait = true;
+      this.flag.last_animation = true;
       this.var.impact.begin = null;
       this.var.impact.end = null;
       this.var.impact.slip = null;
       this.var.impact.direction = null;
-      this.var.impact.vector = null;
-      this.var.impact.stage = 0;
     }
   }
 
   update(){
-    if( this.flag.reset )
-      this.reset();
-    if( this.flag.rotate )
-      this.rotate();
-    if( this.flag.swap )
-      this.swap();
-    if( this.flag.impact )
-      this.impact();
+    let hive = this.data.hive;
 
-    this.update_arc();
-
-    if( this.flag.wait )
-      if( this.array.task_list.length > 0 ){
-        this.array.task_list[0].execute();
-        this.array.task_list.splice( 0, 1 );
-      }
-      else{
+    if( hive.flag.full ){
+      if( this.data.cargo == null ){
+        this.find_cargo();
         this.play_it_by_ear();
+        return;
       }
 
+      if( this.flag.last_animation && this.flag.slide )
+          this.flag.stop = true;
+
+      if( this.flag.stop )
+        if( this.var.cut_frame.counter < this.var.cut_frame.stopper )
+          this.var.cut_frame.counter++;
+        else {
+          this.var.cut_frame.counter = 0;
+          this.flag.stop = false;
+        }
+
+      this.update_arc();
+
+      if( this.flag.reset )
+        this.reset();
+      if( this.flag.rotate )
+        this.rotate();
+      if( this.flag.swap )
+        this.swap();
+      if( this.flag.impact )
+        this.impact();
+
+      if( this.flag.slide ){
+        this.var.sight = ( this.var.sight + this.const.sides / 2 ) % this.const.sides;
+        this.var.col = this.var.swap.tandem.x;
+        this.var.row = this.var.swap.tandem.y;
+        this.data.comb = hive.array.comb[this.var.row][this.var.col];
+        this.reset();
+      }
+
+      if( this.flag.wait )
+        if( this.array.task_list.length > 0 ){
+          this.array.task_list[0].execute();
+          this.array.task_list.splice( 0, 1 );
+        }
+        else{
+          this.play_it_by_ear();
+        }
+
+      if( this.data.cargo.stage == 4 ){
+        //hive.array.ripe
+        //this.find_cargo();
+        hive.check_ripes();
+        this.data.cargo = null;
+      }
+    }
   }
 
   update_arc(){
@@ -627,6 +637,8 @@ class drone_v2 {
         Math.cos( Math.PI / 2 - this.var.angle.rotate ) * this.const.b );
 
       this.var.arc.begin = -Math.PI / 2 + this.var.angle.rotate + this.var.angle.swap;
+      /*if( this.var.sight % 2 == 0 )
+        this.var.arc.begin += Math.PI;*/
 
       if( this.var.arc.center_swap != null ){
         this.var.arc.center = this.var.arc.between.copy();
@@ -651,33 +663,26 @@ class drone_v2 {
         this.var.arc.tandem.add( tandem_mirror );
       }
 
-      if( this.flag.cargo ){
+      if( this.flag.exchange ){
         this.data.comb.data.honey.var.impact = this.var.arc.center.copy();
+        this.data.comb.data.honey.var.impact.add( this.data.comb.const.center );
         this.data.tandem.data.honey.var.impact = this.var.arc.tandem.copy();
         this.data.tandem.data.honey.var.impact.add( this.data.comb.const.center );
       }
 
+      if( this.flag.last_animation ){
+        this.flag.wait = true;
+        this.flag.last_animation = false;
+      }
+
       if( Math.abs( this.var.angle.rotate ) > Math.PI * 2 )
         this.var.angle.rotate = Math.sign( this.var.angle.rotate ) * ( Math.abs( this.var.angle.rotate ) - Math.PI * 2 );
-
-      if( this.flag.last_animation ){
-        if( this.flag.slide ){
-          this.var.sight = ( this.var.sight + this.const.sides / 2 ) % this.const.sides;
-          this.var.col = this.var.swap.tandem.x;
-          this.var.row = this.var.swap.tandem.y;
-          this.data.comb = this.data.hive.array.comb[this.var.row][this.var.col];
-          this.reset();
-        }
-        else{
-          this.flag.wait = true;
-          this.flag.last_animation = false;
-        }
-      }
     }
   }
 
   update_tandem(){
     this.update_arc();
+
     let hive = this.data.hive;
     let neighbor = hive.array.neighbor[this.var.sight].copy();
     let d = 2 * Math.abs( this.const.a / 2 - this.const.b );

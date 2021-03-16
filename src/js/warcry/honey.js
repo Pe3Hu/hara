@@ -6,16 +6,16 @@ class honey {
       n: 8,
       a: a,
       d: a * 2
-    };
-    this.var = {
-      impact: null
+    }
+    this.array = {
+      trait: traits,
+      vertex: []
     };
     this.flag = {
       tandem: false
     };
-    this.array = {
-      trait: traits,
-      vertex: []
+    this.var = {
+      impact: createVector()
     };
     this.color = {
       bg: {
@@ -26,7 +26,7 @@ class honey {
     };
     this.data = {
       womb: womb
-    }
+    };
 
     this.init();
   }
@@ -56,12 +56,8 @@ class honey {
 
   draw( offset ){
     let vec = offset.copy();
-    if( this.var.impact != null ){
-      vec.add( this.var.impact )
-
-      if( this.flag.tandem )
-        vec = this.var.impact.copy();
-    }
+    if( this.var.impact.x != 0 && this.var.impact.y != 0 )
+      vec = this.var.impact.copy();
 
     noStroke();
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );

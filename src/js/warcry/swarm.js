@@ -37,13 +37,5 @@ class swarm {
 
   draw( offsets ){
     this.array.layout[this.var.layout].draw( offsets );
-    /*let l = 0.4;
-
-    for( let i = 0; i < this.const.m; i++ ){
-        line( this.const.a * ( i + 0.5 - l / 2 ), 0, this.const.a * ( i + 0.5 - l / 2 ), this.const.m * this.const.a );
-        line( this.const.a * ( i + 0.5 + l / 2 ), 0, this.const.a * ( i + 0.5 + l / 2 ), this.const.m * this.const.a );
-        line( 0, this.const.a * ( i + 0.5 - l / 2 ), this.const.m * this.const.a, this.const.a * ( i + 0.5 - l / 2 ), 0 );
-        line( 0, this.const.a * ( i + 0.5 + l / 2 ), this.const.m * this.const.a, this.const.a * ( i + 0.5 + l / 2 ), 0 );
-      }*/
   }
 }

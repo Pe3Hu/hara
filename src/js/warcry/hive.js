@@ -103,9 +103,6 @@ class hive {
     this.init_drones();
     this.init_clusters();
     this.update_ripes();
-
-    let drone = this.array.drone[0];
-    drone.start();
   }
 
   add_cluster( traits ){
@@ -198,6 +195,8 @@ class hive {
     }
 
     this.check_ripes();
+
+    console.log(  '!!!!!!!!!!!!!', this.array.ripe)
   }
 
   reap_ripe(){
@@ -278,7 +277,6 @@ class hive {
 
   check_ripes(){
     for( let ripe of this.array.ripe ){
-
       let grid = this.convert_index( ripe );
       let combs = [
         this.array.comb[grid.y - 1][grid.x],
@@ -292,15 +290,14 @@ class hive {
         this.array.comb[grid.y + 1][grid.x].data.honey = null;
 
         this.reap_ripe();
+        let index = this.array.ripe.indexOf( ripe );
+        this.array.ripe.splice( index, 1 );
 
-        if( grid.x == 0 ){
-          this.array.ripe.splice( 0, 1 );
+        if( grid.x == 0 )
           this.flag.ripe.left = false;
-        }
-        if( grid.x == this.const.m - 1 ){
-          this.array.ripe.splice( 1, 1 );
-          this.flag.ripe.right = false;
-        }
+
+        if( grid.x == this.const.m - 1 )
+          this.flag.ripe.right = false;          
       }
 
     }
