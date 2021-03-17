@@ -15,7 +15,8 @@ class honey {
       tandem: false
     };
     this.var = {
-      impact: createVector()
+      impact: createVector(),
+      milk: createVector()
     };
     this.color = {
       bg: {
@@ -56,8 +57,11 @@ class honey {
 
   draw( offset ){
     let vec = offset.copy();
+
     if( this.var.impact.x != 0 && this.var.impact.y != 0 )
       vec = this.var.impact.copy();
+    if( this.var.milk.x != 0 || this.var.milk.y != 0 )
+      vec.add( this.var.milk )
 
     noStroke();
     fill( this.color.bg.h, this.color.bg.s, this.color.bg.l );

@@ -78,6 +78,16 @@ class comb {
     return !this.flag.anchor && !this.flag.buoy
   }
 
+  milk( vector ){
+    if( this.data.honey != null )
+      this.data.honey.var.milk = vector.copy();
+  }
+
+  reset(){
+    if( this.data.honey != null )
+      this.data.honey.var.milk = createVector();
+  }
+
   draw_arrow( offset, direction ){
     let points = this.array.arrow[direction];
 

@@ -4,7 +4,8 @@ class hive {
     this.const = {
       n: n,
       m: m,
-      a: a
+      a: a,
+      tempo: 10
     };
     this.var = {
       current: {
@@ -81,19 +82,7 @@ class hive {
       for( let trait of traits )
         this.add_cluster( [ trait ] );
 
-    for( let combs of this.array.comb )
-      for( let comb of combs )
-        if( comb.data.honey != null ){
-          let traits = comb.data.honey.array.trait;
-
-          for( let trait of traits )
-            for( let cluster of this.array.cluster ){
-              let index = cluster.array.trait.indexOf( trait );
-
-              if( index != -1 )
-                cluster.array.comb.push( comb.const.index );
-            }
-        }
+    this.update_clusters();
   }
 
   init(){
@@ -102,17 +91,14 @@ class hive {
     this.init_womb();
     this.init_drones();
     this.init_clusters();
-    this.update_ripes();
+
+    let drone = this.array.drone[0];
+    //drone.flag.enegry = true;
   }
 
   add_cluster( traits ){
     this.array.cluster.push( new cluster( this.var.current.cluster, traits ) )
     this.var.current.cluster++;
-  }
-
-  update_ripes(){
-    while( !this.flag.ripe.left || !this.flag.ripe.right )
-      this.define_ripe();
   }
 
   define_ripe(){
@@ -196,12 +182,12 @@ class hive {
 
     this.check_ripes();
 
-    console.log(  '!!!!!!!!!!!!!', this.array.ripe)
+    //console.log(  '!!!!!!!!!!!!!', this.array.ripe)
   }
 
   reap_ripe(){
     //
-    console.log(  '!!!!!!!!!!!!!' )
+    //console.log(  '!!!!!!!!!!!!!' )
     this.var.current.score++;
     this.flag.full = false;
     this.data.womb.refill();
@@ -212,7 +198,7 @@ class hive {
   }
 
   click(){
-
+    this.array.drone[0].flag.error = !this.array.drone[0].flag.error;
   }
 
   compare_traits( combs ){
@@ -240,8 +226,8 @@ class hive {
           coincided.push( origin );
       }
 
-    if( coincided.length>0 )
-      console.log( coincided[0].name )
+    /*if( coincided.length>0 )
+      console.log( coincided[0].name )*/
     return flag;
   }
 
@@ -297,7 +283,7 @@ class hive {
           this.flag.ripe.left = false;
 
         if( grid.x == this.const.m - 1 )
-          this.flag.ripe.right = false;          
+          this.flag.ripe.right = false;
       }
 
     }
@@ -319,13 +305,96 @@ class hive {
     return arr;
   }
 
-  update(){
-    this.update_ripes();
+  update_clusters(){
+    for( let cluster of this.array.cluster )
+      cluster.array.comb = [];
+
+    for( let combs of this.array.comb )
+      for( let comb of combs )
+        if( comb.data.honey != null ){
+          let traits = comb.data.honey.array.trait;
+
+          for( let trait of traits )
+            for( let cluster of this.array.cluster ){
+              let index = cluster.array.trait.indexOf( trait );
+
+              if( index != -1 )
+                cluster.array.comb.push( comb.const.index );
+            }
+        }
+  }
+
+  update_ripes(){
+    while( !this.flag.ripe.left || !this.flag.ripe.right )
+      this.define_ripe();
+  }
+
+  update_honeys(){
+    let womb = this.data.womb;
+    //console.log( this.flag.full, womb.flag.milk )
+
+    if( womb.flag.milk ){
+      this.milk();
+
+      for( let col = 0; col < this.const.m; col++ ){
+        let count_new_milk = -1;
+
+        for( let row = 0; row < this.const.n; row++ )
+            if( !womb.comb_fullness_check( row, col ) )
+              count_new_milk = row;
+
+
+      if( count_new_milk > 0 )
+        if( womb.flag.milk )
+          for( let row = 0; row < this.const.n; row++ )
+            for( let col = 0; col < this.array.comb[row].length; col++ )
+              this.array.comb[row][col].milk( womb.var.milk.vector );
+      }
+    }
+  }
+
+  milk(){
+    let womb = this.data.womb;
+    let end = womb.var.milk.end.copy();
+    let d = womb.var.milk.vector.dist( end );
+
+    if( d > womb.var.milk.slip.mag() ){
+      let slip = womb.var.milk.slip.copy();
+      womb.var.milk.vector.add( slip );
+      //console.log( womb.var.milk.vector)
+    }
+    else
+      this.end_milk_func();
+  }
+
+  end_milk_func(){
+    let womb = this.data.womb;
+    womb.shift_down();
+
+    for( let combs of this.array.comb )
+      for( let comb of combs )
+        comb.reset();
+
+    womb.flag.milk = false;
+    womb.refill();
+    if( this.flag.full )
+      this.update_clusters();
+  }
+
+  update( offset ){
+    this.update_honeys();
+
+    if( this.flag.full )
+      this.update_ripes();
+
+    for( let drone of this.array.drone )
+      if( drone.flag.enegry )
+        drone.update( offset );
   }
 
   draw( offset ){
     offset = createVector();
-    this.update();
+    this.update( offset );
 
     for( let combs of this.array.comb )
       for( let comb of combs )

@@ -12,7 +12,7 @@ class basic_operation {
   }
 
   execute(){
-    console.log( 'task', this.const.index, this.data.task, this.data.drone.data.comb.const.index, this.data.drone.data.comb.data.honey.const.index, this.data.drone.data.cargo.stage )
+    //console.log( 'task', this.const.index, this.data.task, this.data.drone.data.comb.const.index, this.data.drone.data.comb.data.honey.const.index, this.data.drone.data.cargo.stage )
     let drone = this.data.drone;
     let hive = drone.data.hive;
 
@@ -58,7 +58,6 @@ class basic_operation {
           drone.var.impact.slip.div( drone.var.impact.tempo );
 
           drone.var.impact.direction = Math.sign( this.data.detail );
-          //console.log( drone.var.impact.direction, drone.var.impact.vector, drone.var.impact.end )
           drone.data.tandem.data.honey.flag.tandem = true;
         }
         break;

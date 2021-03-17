@@ -17,14 +17,14 @@ class drone_v2 {
       rotate: {
         end: null,
         clockwise: null,
-        tempo: FRAME_RATE / 2,
+        tempo: FRAME_RATE / hive.const.tempo,
         crank: null
       },
       swap: {
         end: Math.PI,
         clockwise: true,
         center: null,
-        tempo: FRAME_RATE / 2,
+        tempo: FRAME_RATE / hive.const.tempo,
         crank: null,
         neighbor: null,
         r: null
@@ -34,7 +34,7 @@ class drone_v2 {
         end: null,
         slip: null,
         direction: null,
-        tempo: FRAME_RATE / 2,
+        tempo: FRAME_RATE / hive.const.tempo,
         vector: null,
         stage: 0
       },
@@ -50,7 +50,7 @@ class drone_v2 {
       },
       cut_frame: {
         counter: 0,
-        stopper: 0
+        stopper: 1
       },
       trait: {
         origin: null
@@ -68,7 +68,8 @@ class drone_v2 {
       cargo: false,
       last_animation: false,
       slide: false,
-      stop: false
+      stop: false,
+      enegry: false
     };
     this.array = {
       vertex: [],
@@ -89,16 +90,8 @@ class drone_v2 {
     this.init();
   }
 
-  init_acts(){
-    this.array.act = [
-      'slide',
-      'swap_only_cargo',
-      'swap_with_cargo'
-    ];
-  }
-
   init(){
-    this.init_acts();
+    //
     this.const.b = this.const.a * 0.25;
     this.const.d = this.const.a * 0.4;
 
@@ -108,28 +101,28 @@ class drone_v2 {
   find_cargo(){
     let hive = this.data.hive;
     let options = [];
+    //console.log( '_0', hive.array.cluster )
 
     for( let ripe of hive.array.ripe ){
-      let grid = hive.convert_index( ripe );
+      let ripe_grid = hive.convert_index( ripe );
 
-      if( !hive.check_corners( grid ) ){
-        let comb = hive.array.comb[grid.y][grid.x];
-        let traits = comb.data.honey.array.trait;
+      if( !hive.check_corners( ripe_grid ) ){
+        let ripe_comb = hive.array.comb[ripe_grid.y][ripe_grid.x];
+        let traits = ripe_comb.data.honey.array.trait;
+        //console.log(traits[0].name, traits[1].name  )
 
         for( let cluster of hive.array.cluster ){
-          let index = cluster.array.comb.indexOf( ripe );
+          let ripe_index = cluster.array.comb.indexOf( ripe );
 
-          if( index != -1 ){
+          if( ripe_index != -1 ){
             let combs = [];
 
             for( let comb of cluster.array.comb ){
-               let index = hive.array.ripe.indexOf( comb );
+               let comb_index = hive.array.ripe.indexOf( comb );
 
-               if( index == -1 )
+               if( comb_index == -1 )
                  combs.push( comb );
             }
-
-            combs.splice( index, 1 );
 
             if( combs.length > 1 )
               options.push( {
@@ -149,6 +142,15 @@ class drone_v2 {
       console.log( 'empty options' )
       return;
     }
+    //console.log(hive.array.ripe )
+    //console.log( '_1',options )
+    /*
+
+    let comb_grid = hive.convert_index( comb );
+    let trait_neighbor = Math.abs( ripe_grid.y - comb_grid.y );
+
+    if( index == -1 && trait_neighbor != - 1 )
+    */
 
     let min_distances = [];
 
@@ -165,6 +167,7 @@ class drone_v2 {
 
         for( let ripe_trait of option.traits ){
           let index = destination_traits.indexOf( ripe_trait );
+
           if( index != -1 )
             trait_flag = true;
         }
@@ -178,8 +181,17 @@ class drone_v2 {
               x = 2;
             let d = x + y;
 
-            if( destination_grid.x == challenger_grid.x && destination_grid.y== challenger_grid.y )
-              d = 0;
+            if( destination_grid.x == challenger_grid.x ){
+              if( destination_grid.y == challenger_grid.y )
+                d = 0;
+
+              //checking the use of honey already near the ripe
+              let ripe_y = ( destination_grid.y + challenger_grid.y ) / 2;
+              let ripe_grid = hive.convert_index( option.ripe );
+
+              if( ripe_y == ripe_grid.y )
+                d = hive.const.n + hive.const.m;
+            }
 
             ds.push( d );
           }
@@ -200,10 +212,10 @@ class drone_v2 {
     }
 
     let all_sets = [];
+    //console.log( '_2', min_distances  )
 
     for( let min_distance of min_distances ){
       let sets = [];
-      console.log(min_distance.distances  )
       let l = min_distance.distances[0].length;
       let max = Math.pow( l, min_distance.distances.length );
       let counter = 0;
@@ -255,6 +267,7 @@ class drone_v2 {
             distances: min_distance.distances,
             departures: min_distance.departures,
             destinations: min_distance.destinations,
+            traits: min_distance.traits,
             set: set,
             sum: 0 } );
 
@@ -263,17 +276,17 @@ class drone_v2 {
 
       all_sets.push( sets );
     }
-    console.log( all_sets )
 
     for( let sets of all_sets )
       for( let set of sets )
         for( let i = 0; i < set.set.length; i++ )
-          set.sum += set.distances[i][set.set[i]];
+          set.sum += set.distances[set.set.length - 1 -i][set.set[i]];
 
 
     for( let sets of all_sets )
       sets = hive.bubble_sort( sets, 'sum' );
 
+    //console.log( '_3', all_sets )
 
     let min_sum = all_sets[0][0].sum;
 
@@ -292,6 +305,8 @@ class drone_v2 {
             departures.push( sets.departures[sets.set[j]] );
 
           nearest_sets.push( {
+            traits: sets.traits,
+            set: sets.set,
             departures: departures,
             destinations: sets.destinations } );
         }
@@ -300,6 +315,7 @@ class drone_v2 {
     let closest_to_drone = [];
     let min_dist = hive.const.m + hive.const.n;
     let drone_grid = createVector( this.var.col, this.var.row );
+    //console.log( '_4',nearest_sets  )
 
     for( let nearest_set of nearest_sets ){
       let ds = [];
@@ -317,23 +333,43 @@ class drone_v2 {
       }
 
       dists.push( ds );
-
     }
+    //console.log( '_5',min_dist  )
 
     for( let i = 0; i < dists.length; i++ )
       for( let j = 0; j < dists[i].length; j++ )
         if( dists[i][j] == min_dist )
           closest_to_drone.push( {
+            traits: nearest_sets[i].traits,
+            set: nearest_sets[i].set,
             departure:  nearest_sets[i].departures[j],
             destination: nearest_sets[i].destinations[j]
           } );
 
+
+
     let rand = Math.floor( Math.random() * closest_to_drone.length );
     this.data.cargo = closest_to_drone[rand];
     let departure_grid = hive.convert_index( this.data.cargo.departure );
-    this.data.cargo.honey = hive.array.comb[departure_grid.y][departure_grid.x].data.honey.const.index;
+    let honey = hive.array.comb[departure_grid.y][departure_grid.x].data.honey;
+    this.data.cargo.honey = honey.const.index;
     this.data.cargo.stage = -1;
-    this.detect_cargo_stage();
+
+    let trait_match = false;
+
+    for( let trait of honey.array.trait ){
+      let index = this.data.cargo.traits.indexOf( trait );
+
+      if( index != - 1)
+        trait_match = true;
+    }
+
+    if( trait_match )
+      this.detect_cargo_stage();
+    else{
+      this.flag.error = true;
+      console.log( 'cargo trait error' )
+    }
     console.log( this.data.cargo )
   }
 
@@ -434,6 +470,8 @@ class drone_v2 {
 
     if( this.data.cargo.stage == 1 || this.data.cargo.stage == 3 )
       this.add_task( 'swap' );
+
+    this.add_task( 'reset' );
   }
 
   turn_to( direction ){
@@ -515,7 +553,6 @@ class drone_v2 {
 
   rotate(){
     let d = Math.abs( this.var.angle.rotate - this.var.rotate.end );
-    //console.log( this.var.angle.rotate, this.var.rotate.end )
     if( d > Math.abs( this.var.rotate.crank ) ){
       this.var.angle.rotate += this.var.rotate.crank;
       if( this.var.angle.rotate < 0 )
@@ -533,7 +570,6 @@ class drone_v2 {
 
   swap(){
     let d = Math.abs( this.var.angle.swap - this.var.swap.end );
-    //console.log(this.flag.swap, d, this.var.swap.crank )
 
     if( d > this.var.swap.crank ){
       this.var.angle.swap += this.var.swap.crank;
@@ -575,15 +611,17 @@ class drone_v2 {
   update(){
     let hive = this.data.hive;
 
-    if( hive.flag.full ){
+    if( hive.flag.full && this.flag.enegry && !this.flag.error){
       if( this.data.cargo == null ){
+        //console.log( 'find cargo' )
+        hive.update_clusters();
         this.find_cargo();
         this.play_it_by_ear();
         return;
       }
 
       if( this.flag.last_animation && this.flag.slide )
-          this.flag.stop = true;
+        this.flag.stop = true;
 
       if( this.flag.stop )
         if( this.var.cut_frame.counter < this.var.cut_frame.stopper )
@@ -593,7 +631,6 @@ class drone_v2 {
           this.flag.stop = false;
         }
 
-      this.update_arc();
 
       if( this.flag.reset )
         this.reset();
@@ -627,6 +664,9 @@ class drone_v2 {
         hive.check_ripes();
         this.data.cargo = null;
       }
+
+
+      this.update_arc();
     }
   }
 
@@ -652,8 +692,7 @@ class drone_v2 {
         this.var.arc.center.add( swap );
       }
 
-      if( this.flag.impact )
-        this.var.arc.center.add( this.var.impact.vector );
+      this.var.arc.center.add( this.var.impact.vector );
 
       if( this.var.arc.between != null ){
         let tandem_mirror = this.var.arc.between.copy();
@@ -733,9 +772,6 @@ class drone_v2 {
     let vec = offset.copy();
     vec.add( this.data.comb.const.center );
 
-    if( !this.flag.error )
-      this.update( vec );
-
     if( !this.flag.stop )
       this.draw_tandem( vec );
 
@@ -743,6 +779,5 @@ class drone_v2 {
     stroke( 360 );
     strokeWeight( 6 );
     ellipse( this.data.comb.const.center.x, this.data.comb.const.center.y, 27, 27  )
-    //console.log( this.flag.impact )
   }
 }

@@ -4,8 +4,18 @@ class womb {
     this.var = {
       current: {
         honey: 0
+      },
+      milk: {
+        slip: null,
+        tempo: FRAME_RATE / hive.const.tempo,
+        vector: createVector(),
+        end: null
       }
-    }
+    };
+    this.flag = {
+      milk: false,
+      wait: true
+    };
     this.array = {
       trait: []
     };
@@ -74,6 +84,9 @@ class womb {
   }
 
   init(){
+    this.var.milk.slip = createVector( 0, this.data.hive.const.a / this.var.milk.tempo );
+    this.var.milk.end = createVector( 0, this.data.hive.const.a  );
+
     this.init_traits();
     this.refill();
   }
@@ -81,35 +94,19 @@ class womb {
   refill(){
     let hive = this.data.hive;
 
-    while( !hive.flag.full ){
+    if( !hive.flag.full ){
       hive.flag.full = true;
+      this.flag.milk = true;
+      this.var.milk.vector = createVector();
 
-      for( let col = 0; col < hive.array.comb[0].length; col++ ){
+      for( let col = 0; col < hive.const.m; col++ ){
         let flag = this.col_fullness_check( col );
 
         if( !flag )
-          this.milk( col );
+          this.add_honey( col );
 
         hive.flag.full = hive.flag.full && flag;
       }
-    }
-  }
-
-  milk( col ){
-    let hive = this.data.hive;
-
-    //while( !this.comb_fullness_check( col ) ){
-    if( true ){
-      let count_new_milk = -1;
-
-      for( let row = 0; row < hive.array.comb.length; row++ )
-        if( !this.comb_fullness_check( row, col ) )
-          count_new_milk = row;
-
-      this.add_honey( col );
-
-      if( count_new_milk > 0 )
-        this.shift_down( col, count_new_milk );
     }
   }
 
@@ -126,14 +123,22 @@ class womb {
     this.var.current.honey++;
   }
 
-  shift_down( col, count_new_milk ){
+  shift_down(){
     let hive = this.data.hive;
 
-    for( let row = count_new_milk; row > 0; row-- ){
-      let bot = hive.array.comb[row][col];
-      let top = hive.array.comb[row - 1][col];
-      bot.set_honey( top.data.honey );
-      top.set_honey( null );
+    for( let col = 0; col < hive.const.m; col++ ){
+      let count_new_milk = -1;
+
+      for( let row = 0; row < hive.const.n; row++ )
+          if( !this.comb_fullness_check( row, col ) )
+            count_new_milk = row;
+
+      for( let row = count_new_milk; row > 0; row-- ){
+        let bot = hive.array.comb[row][col];
+        let top = hive.array.comb[row - 1][col];
+        bot.set_honey( top.data.honey );
+        top.set_honey( null );
+      }
     }
   }
 
