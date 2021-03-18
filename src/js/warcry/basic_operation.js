@@ -66,13 +66,19 @@ class basic_operation {
           drone.flag.exchange = true;
         }
         break;
+      case 'exchange_mid':
+        if( drone.flag.wait ){
+          drone.flag.exchange = false;
+          drone.flag.wait = true;
+        }
+        break;
       case 'exchange_end':
         if( drone.flag.wait ){
           let temp = drone.data.comb.data.honey.copy();
           drone.data.comb.data.honey = drone.data.tandem.data.honey.copy();
           drone.data.tandem.data.honey = temp;
-          drone.flag.exchange = false;
           drone.flag.wait = true;
+          drone.data.hive.flag.delivered = true;
         }
         break;
       case 'reset':
@@ -82,6 +88,10 @@ class basic_operation {
       case 'slide':
         if( drone.flag.wait )
           drone.flag.slide = true;
+        break;
+      case 'start_delivery':
+        break;
+      case 'end_delivery':
         break;
     }
   }

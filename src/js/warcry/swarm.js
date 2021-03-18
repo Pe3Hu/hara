@@ -3,7 +3,7 @@ class swarm {
   constructor (){
     this.const = {
       size: 2,
-      n: 10,
+      n: 5,
       m: 3,
       a: CELL_SIZE * 3
     };

@@ -338,9 +338,9 @@ class card {
           else
             fill( this.array.color[7].hue, this.array.color[7].saturation, this.array.color[7].lightness );
           text( txt, vec.x, vec.y + FONT_SIZE / 3 * 0.8 );
-          textSize( FONT_SIZE );
         }
 
+        textSize( FONT_SIZE  );
         casteVec = this.const.center.copy();
         caste = this.var.caste.name.charAt( 0 ).toUpperCase();
         fill( 0 );

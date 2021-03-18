@@ -54,7 +54,8 @@ class drone_v2 {
       },
       trait: {
         origin: null
-      }
+      },
+      previous_stage: -1
     };
     this.flag = {
       left: false,
@@ -69,7 +70,8 @@ class drone_v2 {
       last_animation: false,
       slide: false,
       stop: false,
-      enegry: false
+      enegry: false,
+      hand_brake: false
     };
     this.array = {
       vertex: [],
@@ -364,8 +366,11 @@ class drone_v2 {
         trait_match = true;
     }
 
-    if( trait_match )
-      this.detect_cargo_stage();
+    if( trait_match ){
+
+        this.detect_cargo_stage();
+        this.data.cargo.stage = -1;
+    }
     else{
       this.flag.error = true;
       console.log( 'cargo trait error' )
@@ -379,6 +384,7 @@ class drone_v2 {
     let departure = hive.convert_index( this.data.cargo.departure );
     let destination = hive.convert_index( this.data.cargo.destination );
     //console.log( this.data.comb.data.honey.const.index, this.data.cargo.honey )
+
     if( this.data.comb.data.honey.const.index != this.data.cargo.honey ){
       stage = 0;
 
@@ -392,12 +398,15 @@ class drone_v2 {
         stage = 3;
     }
 
+    if( hive.array.comb[destination.y][destination.x].data.honey != null )
+      if( hive.array.comb[destination.y][destination.x].data.honey.const.index == this.data.cargo.honey )
+        stage = 4;
 
-    if( hive.array.comb[destination.y][destination.x].data.honey.const.index == this.data.cargo.honey )
-      stage = 4;
+      if( stage < this.data.cargo.stage || ( stage == this.data.cargo.stage && stage == 3 ) )
+        this.flag.hand_brake = true;
 
-    if( stage >  this.data.cargo.stage )
-     this.data.cargo.stage = stage;
+      if( stage > this.data.cargo.stage )
+       this.data.cargo.stage = stage;
   }
 
   play_it_by_ear(){
@@ -405,7 +414,6 @@ class drone_v2 {
     let direction = null;
     let sign = null;
     this.detect_cargo_stage();
-
 
     switch( this.data.cargo.stage ) {
       case 0:
@@ -448,6 +456,9 @@ class drone_v2 {
     if( this.data.cargo.stage < 4 )
       this.turn_to( direction );
 
+    if( this.data.cargo.stage == 1 )
+      this.add_task( 'start_delivery' );
+
     switch( this.data.cargo.stage ) {
       case 0:
         this.add_task( 'swap' );
@@ -460,7 +471,7 @@ class drone_v2 {
         this.add_task( 'impact', -1 );
         this.add_task( 'swap' );
         this.add_task( 'impact', -2 );
-        this.add_task( 'exchange_end' );
+        this.add_task( 'exchange_mid' );
         this.add_task( 'impact', 2 );
         break;
     }
@@ -470,6 +481,9 @@ class drone_v2 {
 
     if( this.data.cargo.stage == 1 || this.data.cargo.stage == 3 )
       this.add_task( 'swap' );
+
+    if( this.data.cargo.stage != 0 )
+      this.add_task( 'exchange_end' );
 
     this.add_task( 'reset' );
   }
@@ -611,7 +625,7 @@ class drone_v2 {
   update(){
     let hive = this.data.hive;
 
-    if( hive.flag.full && this.flag.enegry && !this.flag.error){
+    if( this.flag.enegry && !this.flag.hand_brake && !this.flag.error ){
       if( this.data.cargo == null ){
         //console.log( 'find cargo' )
         hive.update_clusters();
@@ -630,7 +644,6 @@ class drone_v2 {
           this.var.cut_frame.counter = 0;
           this.flag.stop = false;
         }
-
 
       if( this.flag.reset )
         this.reset();
@@ -661,10 +674,10 @@ class drone_v2 {
       if( this.data.cargo.stage == 4 ){
         //hive.array.ripe
         //this.find_cargo();
-        hive.check_ripes();
-        this.data.cargo = null;
+        //hive.flag.check_ripes = true;
+        //this.data.cargo = null;
+        this.flag.hand_brake = true;
       }
-
 
       this.update_arc();
     }

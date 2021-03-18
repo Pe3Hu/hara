@@ -494,12 +494,14 @@ class square{
   click(){
     this.detectCard();
     this.detectGrid();
-  }  
+  }
 
   moved( offsets ){
   }
 
   draw(){
+
+    strokeWeight( 1 );
     for( let i = 0; i < this.array.cell.length; i++ )
       for( let j = 0; j < this.array.cell[i].length; j++ )
         this.array.cell[i][j].draw();

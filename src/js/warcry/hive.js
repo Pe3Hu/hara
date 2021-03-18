@@ -18,7 +18,9 @@ class hive {
       ripe: {
         left: false,
         right: false
-      }
+      },
+      check_ripes: false,
+      piping_hot: false
     };
     this.array = {
       neighbor: [],
@@ -179,9 +181,6 @@ class hive {
         this.array.ripe.push( rand_comb );
       }
     }
-
-    this.check_ripes();
-
     //console.log(  '!!!!!!!!!!!!!', this.array.ripe)
   }
 
@@ -325,8 +324,23 @@ class hive {
   }
 
   update_ripes(){
-    while( !this.flag.ripe.left || !this.flag.ripe.right )
-      this.define_ripe();
+    //
+    if( this.flag.full ){
+      while( !this.flag.ripe.left || !this.flag.ripe.right )
+        this.define_ripe();
+
+      if( this.flag.piping_hot ){
+        this.flag.piping_hot = false;
+        this.flag.check_ripes = true;
+        return;
+      }
+
+      if( this.flag.check_ripes )
+        this.check_ripes();
+
+      if( this.flag.full )
+        this.activate_drones();
+    }
   }
 
   update_honeys(){
@@ -346,9 +360,8 @@ class hive {
 
       if( count_new_milk > 0 )
         if( womb.flag.milk )
-          for( let row = 0; row < this.const.n; row++ )
-            for( let col = 0; col < this.array.comb[row].length; col++ )
-              this.array.comb[row][col].milk( womb.var.milk.vector );
+          for( let row = count_new_milk; row > -1; row-- )
+            this.array.comb[row][col].milk( womb.var.milk.vector );
       }
     }
   }
@@ -377,11 +390,30 @@ class hive {
 
     womb.flag.milk = false;
     womb.refill();
+
+    if( this.flag.full )
+      this.flag.check_ripes = true;
+
     if( this.flag.full )
       this.update_clusters();
   }
 
+  activate_drones(){
+    for( let drone of this.array.drone ){
+      let enegry = false;
+
+      if( this.flag.ripe.left && drone.var.col == 1 )
+        enegry = true;
+
+      if( this.flag.ripe.right && drone.var.col == this.const. m - 2 )
+        enegry = true;
+
+      drone.flag.enegry = enegry || drone.flag.enegry;
+    }
+  }
+
   update( offset ){
+    //console.log( this.flag.piping_hot  )
     this.update_honeys();
 
     if( this.flag.full )

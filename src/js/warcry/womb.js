@@ -36,7 +36,7 @@ class womb {
         {
           id: 1,
           name: 'green'
-        },
+        }/*,
         {
           id: 2,
           name: 'blue'
@@ -44,7 +44,7 @@ class womb {
         {
           id: 3,
           name: 'red'
-        }
+        }*/
       ],
       [
         {
@@ -54,7 +54,7 @@ class womb {
         {
           id: 1,
           name: 'horizon-0'
-        },
+        }/*,
         {
           id: 2,
           name: 'diag-1'
@@ -78,7 +78,7 @@ class womb {
         {
           id: 7,
           name: 'vertical-1'
-        }
+        }*/
       ]
     ];
   }
