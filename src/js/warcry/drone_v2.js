@@ -107,8 +107,9 @@ class drone_v2 {
 
     for( let ripe of hive.array.ripe ){
       let ripe_grid = hive.convert_index( ripe );
+      let ripe_x = Math.abs( this.var.col - ripe_grid.x );
 
-      if( !hive.check_corners( ripe_grid ) ){
+      if( !hive.check_corners( ripe_grid ) && ripe_x <= 1 ){
         let ripe_comb = hive.array.comb[ripe_grid.y][ripe_grid.x];
         let traits = ripe_comb.data.honey.array.trait;
         //console.log(traits[0].name, traits[1].name  )
@@ -121,8 +122,10 @@ class drone_v2 {
 
             for( let comb of cluster.array.comb ){
                let comb_index = hive.array.ripe.indexOf( comb );
+               let comb_grid = hive.convert_index( comb );
+               let comb_x = Math.abs( this.var.col - comb_grid.x );
 
-               if( comb_index == -1 )
+               if( comb_index == -1 && comb_x <= 1 )
                  combs.push( comb );
             }
 
